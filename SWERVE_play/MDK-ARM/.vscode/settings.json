@@ -54,5 +54,8 @@
         "data_pool.h": "c",
         "drive_exti.h": "c",
         "random": "cpp"
-    }
+    },
+    "clangd.arguments": [
+        "--compile-commands-dir=d:\\Users\\liaoy\\Desktop\\robocon2025\\2025RC_CODE\\SWERVE_play\\MDK-ARM\\out\\MOTOR_CPP\\MOTOR_CPP"
+    ]
 }

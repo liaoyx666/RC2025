@@ -1,0 +1,10 @@
+solution:
+  created-by: uv2csolution@1.6.0
+  created-for: CMSIS-Toolbox@2.7.0
+  compiler: AC6
+  target-types:
+    - type: MOTOR_CPP
+      device: STM32F407ZGTx
+      optimize: debug
+  projects:
+    - project: MOTOR_CPP.cproject.yml

@@ -1,0 +1,261 @@
+project:
+  packs:
+    - pack: ARM::CMSIS@^6.1.0
+    - pack: Keil::STM32F4xx_DFP@^3.0.0
+    - pack: ARM::CMSIS-NN@^4.0.0
+    - pack: ARM::CMSIS-DSP@^1.10.1
+  setups:
+    - setup: Options for MOTOR_CPP
+      processor:
+        fpu: sp
+      add-path:
+        - ../Core/Inc
+        - ../Drivers/STM32F4xx_HAL_Driver/Inc
+        - ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy
+        - ../Middlewares/Third_Party/FreeRTOS/Source/include
+        - ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F
+        - ../Drivers/CMSIS/Device/ST/STM32F4xx/Include
+        - ../Drivers/CMSIS/Include
+        - ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2
+        - ../GDUTRCLIB/BSP/Inc
+        - ../GDUTRCLIB/Components/Inc
+        - ../GDUTRCLIB/Module/Inc
+        - ../Task/Comm/Inc
+        - ../Task/User/Inc
+      debug: "on"
+      define:
+        - USE_HAL_DRIVER
+        - STM32F407xx
+        - USE_STDPERIPH_DRIVER
+      misc:
+        - C:
+            - -std=c99
+          C-CPP:
+            - -fno-rtti
+            - -funsigned-char
+            - -fshort-enums
+            - -fshort-wchar
+            - -ffunction-sections
+            - -w
+            - --c99
+          CPP:
+            - -xc++
+            - -std=c++11
+            - -fno-exceptions
+          ASM:
+            - -masm=auto
+          Link:
+            - --map
+            - --load_addr_map_info
+            - --xref
+            - --callgraph
+            - --symbols
+            - --info sizes
+            - --info totals
+            - --info unused
+            - --info veneers
+            - --strict
+            - --summary_stderr
+            - --info summarysizes
+  linker:
+    - script: MOTOR_CPP_MOTOR_CPP.sct
+  groups:
+    - group: Application/MDK-ARM
+      files:
+        - file: startup_stm32f407xx.s
+    - group: Application/User/Core
+      files:
+        - file: ../Core/Src/main.c
+        - file: ../Core/Src/gpio.c
+        - file: ../Core/Src/freertos.c
+        - file: ../Core/Src/can.c
+        - file: ../Core/Src/dma.c
+          misc:
+            - CPP:
+                - -xc++
+        - file: ../Core/Src/tim.c
+          misc:
+            - CPP:
+                - -xc++
+        - file: ../Core/Src/usart.c
+          misc:
+            - CPP:
+                - -xc++
+        - file: ../Core/Src/stm32f4xx_it.c
+        - file: ../Core/Src/stm32f4xx_hal_msp.c
+        - file: ../Core/Src/stm32f4xx_hal_timebase_tim.c
+    - group: Drivers/STM32F4xx_HAL_Driver
+      files:
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_can.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c
+        - file: ../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c
+          misc:
+            - CPP:
+                - -xc++
+    - group: Drivers/CMSIS
+      files:
+        - file: ../Core/Src/system_stm32f4xx.c
+    - group: Middlewares/FreeRTOS
+      files:
+        - file: ../Middlewares/Third_Party/FreeRTOS/Source/croutine.c
+        - file: ../Middlewares/Third_Party/FreeRTOS/Source/event_groups.c
+        - file: ../Middlewares/Third_Party/FreeRTOS/Source/list.c
+        - file: ../Middlewares/Third_Party/FreeRTOS/Source/queue.c
+        - file: ../Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c
+        - file: ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c
+        - file: ../Middlewares/Third_Party/FreeRTOS/Source/timers.c
+        - file: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c
+          misc:
+            - CPP:
+                - -xc++
+        - file: ../Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c
+        - file: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/port.c
+    - group: GDUTRCLIB/BSP
+      files:
+        - file: ../GDUTRCLIB/BSP/Src/drive_can.c
+        - file: ../GDUTRCLIB/BSP/Src/drive_iic.c
+        - file: ../GDUTRCLIB/BSP/Src/drive_tim.c
+        - file: ../GDUTRCLIB/BSP/Src/drive_uart.c
+        - file: ../GDUTRCLIB/BSP/Src/drive_exti.c
+    - group: GDUTRCLIB/Components
+      files:
+        - file: ../GDUTRCLIB/Components/Src/filter.cpp
+          misc:
+            - C:
+                - --cpp11
+              CPP:
+                - -xc++
+                - -fno-exceptions
+        - file: ../GDUTRCLIB/Components/Src/pid.cpp
+          misc:
+            - C:
+                - --cpp11
+              CPP:
+                - -xc++
+                - -fno-exceptions
+        - file: ../GDUTRCLIB/Components/Src/speed_plan.cpp
+          misc:
+            - C:
+                - --cpp11
+              CPP:
+                - -xc++
+                - -fno-exceptions
+        - file: ../GDUTRCLIB/Components/Src/tool.cpp
+          misc:
+            - C:
+                - --cpp11
+              CPP:
+                - -xc++
+                - -fno-exceptions
+        - file: ../GDUTRCLIB/Components/Inc/pid.h
+        - file: ../GDUTRCLIB/Components/Inc/motor.h
+        - file: ../GDUTRCLIB/Components/Inc/tool.h
+        - file: ../GDUTRCLIB/BSP/Inc/action.h
+        - file: ../GDUTRCLIB/BSP/Src/action.c
+        - file: ../GDUTRCLIB/Components/Inc/dribble_ball.h
+        - file: ../GDUTRCLIB/Components/Src/dribble_ball.cpp
+          misc:
+            - C:
+                - --cpp11
+              CPP:
+                - -xc++
+                - -fno-exceptions
+    - group: GDUTRCLIB/Module
+      files:
+        - file: ../GDUTRCLIB/Module/Src/air_joy.cpp
+          misc:
+            - C:
+                - --cpp11
+              CPP:
+                - -xc++
+                - -fno-exceptions
+        - file: ../GDUTRCLIB/Module/Src/omni_chassis.cpp
+          misc:
+            - C:
+                - --cpp11
+              CPP:
+                - -xc++
+                - -fno-exceptions
+        - file: ../GDUTRCLIB/Module/Src/chassis_swerve.cpp
+          misc:
+            - C:
+                - --cpp11
+              CPP:
+                - -xc++
+                - -fno-exceptions
+        - file: ../GDUTRCLIB/Module/Src/chassis_base.cpp
+          misc:
+            - C:
+                - --cpp11
+              CPP:
+                - -xc++
+                - -fno-exceptions
+        - file: ../GDUTRCLIB/Module/Src/launcher.cpp
+          misc:
+            - C:
+                - --cpp11
+              CPP:
+                - -xc++
+                - -fno-exceptions
+    - group: Task/Comm
+      files:
+        - file: ../Task/Comm/Src/data_pool.cpp
+          misc:
+            - C:
+                - --cpp11
+              CPP:
+                - -xc++
+                - -fno-exceptions
+        - file: ../Task/Comm/Src/service_config.cpp
+          misc:
+            - C:
+                - --cpp11
+              CPP:
+                - -xc++
+                - -fno-exceptions
+        - file: ../Task/Comm/Src/service_communication.cpp
+          misc:
+            - C:
+                - --cpp11
+              CPP:
+                - -xc++
+                - -fno-exceptions
+        - file: ../Task/Comm/Src/user_debug.cpp
+          misc:
+            - C:
+                - --cpp11
+              CPP:
+                - -xc++
+                - -fno-exceptions
+    - group: Task/User
+      files:
+        - file: ../Task/User/Src/chassis_task.cpp
+          misc:
+            - C:
+                - --cpp11
+              CPP:
+                - -xc++
+                - -fno-exceptions
+        - file: ../Task/User/Src/fsm_joy.cpp
+          misc:
+            - C:
+                - --cpp11
+              CPP:
+                - -xc++
+                - -fno-exceptions
+  components:
+    - component: ARM::CMSIS:CORE

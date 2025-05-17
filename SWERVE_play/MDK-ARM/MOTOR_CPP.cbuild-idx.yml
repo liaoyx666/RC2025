@@ -1,0 +1,27 @@
+build-idx:
+  generated-by: csolution version 2.9.0
+  csolution: MOTOR_CPP.csolution.yml
+  tmpdir: tmp
+  cprojects:
+    - cproject: MOTOR_CPP.cproject.yml
+  cbuilds:
+    - cbuild: MOTOR_CPP+MOTOR_CPP.cbuild.yml
+      project: MOTOR_CPP
+      configuration: +MOTOR_CPP
+      errors: true
+      messages:
+        errors:
+          - "required pack: ARM::CMSIS-DSP@^1.10.1 not installed"
+          - "required pack: ARM::CMSIS-NN@^4.0.0 not installed"
+          - "required pack: ARM::CMSIS@^6.1.0 not installed"
+          - "required pack: Keil::STM32F4xx_DFP@^3.0.0 not installed"
+          - "specified device 'STM32F407ZGTx' not found in the installed packs. Use:\n  cpackget add Vendor::PackName"
+          - processing context 'MOTOR_CPP+MOTOR_CPP' failed
+        info:
+          - MOTOR_CPP.cbuild-pack.yml - file skipped
+          - MOTOR_CPP+MOTOR_CPP.cbuild.yml - file is already up-to-date
+      packs-missing:
+        - pack: ARM::CMSIS@^6.1.0
+        - pack: Keil::STM32F4xx_DFP@^3.0.0
+        - pack: ARM::CMSIS-NN@^4.0.0
+        - pack: ARM::CMSIS-DSP@^1.10.1

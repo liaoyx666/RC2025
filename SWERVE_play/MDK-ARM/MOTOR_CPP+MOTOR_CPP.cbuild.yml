@@ -1,0 +1,69 @@
+build:
+  generated-by: csolution version 2.9.0
+  solution: MOTOR_CPP.csolution.yml
+  project: MOTOR_CPP.cproject.yml
+  context: MOTOR_CPP+MOTOR_CPP
+  compiler: AC6
+  optimize: debug
+  debug: on
+  misc:
+    ASM:
+      - -masm=auto
+    C:
+      - -std=c99
+      - -fno-rtti
+      - -funsigned-char
+      - -fshort-enums
+      - -fshort-wchar
+      - -ffunction-sections
+      - -w
+      - --c99
+    CPP:
+      - -xc++
+      - -std=c++11
+      - -fno-exceptions
+      - -fno-rtti
+      - -funsigned-char
+      - -fshort-enums
+      - -fshort-wchar
+      - -ffunction-sections
+      - -w
+      - --c99
+    Link:
+      - --map
+      - --load_addr_map_info
+      - --xref
+      - --callgraph
+      - --symbols
+      - --info sizes
+      - --info totals
+      - --info unused
+      - --info veneers
+      - --strict
+      - --summary_stderr
+      - --info summarysizes
+  define:
+    - USE_HAL_DRIVER
+    - STM32F407xx
+    - USE_STDPERIPH_DRIVER
+  add-path:
+    - ../Core/Inc
+    - ../Drivers/STM32F4xx_HAL_Driver/Inc
+    - ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy
+    - ../Middlewares/Third_Party/FreeRTOS/Source/include
+    - ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F
+    - ../Drivers/CMSIS/Device/ST/STM32F4xx/Include
+    - ../Drivers/CMSIS/Include
+    - ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2
+    - ../GDUTRCLIB/BSP/Inc
+    - ../GDUTRCLIB/Components/Inc
+    - ../GDUTRCLIB/Module/Inc
+    - ../Task/Comm/Inc
+    - ../Task/User/Inc
+  output-dirs:
+    intdir: tmp
+    outdir: out/MOTOR_CPP/MOTOR_CPP
+    rtedir: RTE
+  output:
+    - type: elf
+      file: MOTOR_CPP.axf
