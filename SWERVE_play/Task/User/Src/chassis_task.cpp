@@ -28,12 +28,12 @@ void Chassis_Task(void *pvParameters)
     for(;;)
     {  
 
-		Dribble_Ball(&ctrl);
+		
 
 		
         if(xQueueReceive(Chassia_Port, &ctrl, pdTRUE) == pdPASS)
         {
-			
+			Dribble_Ball(&ctrl);
 			
 	
 			
