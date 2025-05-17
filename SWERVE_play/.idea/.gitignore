@@ -7,6 +7,14 @@
 /dataSources/
 /dataSources.local.xml
 #
+
+/SWERVE_play/MDK-ARM/MDK-ARM/MOTOR_CPP/
+*.class
+*.exe
+*.dll
+*.so
+*.a
 *.o
-*.d
-*.crf
+*.obj
+*.pyc
+*.pyo
