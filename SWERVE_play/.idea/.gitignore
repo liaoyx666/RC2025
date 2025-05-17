@@ -8,7 +8,7 @@
 /dataSources.local.xml
 #
 
-/SWERVE_play/MDK-ARM/MDK-ARM/MOTOR_CPP/
+SWERVE_play/MDK-ARM/MOTOR_CPP/
 *.class
 *.exe
 *.dll
