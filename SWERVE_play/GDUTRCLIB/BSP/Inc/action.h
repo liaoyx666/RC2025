@@ -15,7 +15,7 @@ extern "C" {
 #define INSTALL_ERROR_X		0.0
 #define INSTALL_ERROR_Y		0.0
 
-// ?????????????
+
 typedef struct ROBOT_REAL_POS
 {
   float world_x;
