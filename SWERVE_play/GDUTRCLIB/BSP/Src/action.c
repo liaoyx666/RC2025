@@ -1,6 +1,6 @@
 #include "action.h"
 #include <math.h>
-
+//666
 ACTION_GL_POS ACTION_GL_POS_DATA = {0};
 
 
@@ -64,7 +64,7 @@ uint32_t Action_UART4_RxCallback(uint8_t *buf, uint16_t len)
 				
 				if (i > len - 26)
 				{
-					break_flag = 0;//跳出循环
+					break_flag = 0;//è·³å‡ºå¾ªçŽ¯
 				}
 				
 				for(j = 0; j < 24; j++)
@@ -98,7 +98,7 @@ uint32_t Action_UART4_RxCallback(uint8_t *buf, uint16_t len)
 				}
 				count = 0;
 				
-				break_flag = 0;//跳出循环
+				break_flag = 0;//è·³å‡ºå¾ªçŽ¯
 				
 				break;
 			}
@@ -129,8 +129,8 @@ void Update_Action_gl_position(float value[6])
 	ACTION_GL_POS_DATA.ANGLE_Z = value[0];
 	ACTION_GL_POS_DATA.ANGLE_X = value[1];
 	ACTION_GL_POS_DATA.ANGLE_Y = value[2];
-	ACTION_GL_POS_DATA.POS_X = value[3]; // ???�?x??
-	ACTION_GL_POS_DATA.POS_Y = value[4]; // ???�?y??
+	ACTION_GL_POS_DATA.POS_X = value[3]; // ???á?x??
+	ACTION_GL_POS_DATA.POS_Y = value[4]; // ???á?y??
 	ACTION_GL_POS_DATA.W_Z = value[5];
 
 	// ???????
@@ -141,7 +141,7 @@ void Update_Action_gl_position(float value[6])
 	ROBOT_REAL_POS_DATA.world_w = ACTION_GL_POS_DATA.ANGLE_Z;
 	//ROBOT_CHASSI.world_w = ROBOT_REAL_POS_DATA.world_w;
 
-	//??�???????????
+	//??ó???????????
 	ACTION_GL_POS_DATA.REAL_X += (ACTION_GL_POS_DATA.DELTA_POS_X);
 	ACTION_GL_POS_DATA.REAL_Y += (ACTION_GL_POS_DATA.DELTA_POS_Y);//?????????????????
 	
