@@ -1,6 +1,6 @@
 #include "action.h"
 #include <math.h>
-//666
+
 ACTION_GL_POS ACTION_GL_POS_DATA = {0};
 
 
@@ -64,7 +64,7 @@ uint32_t Action_UART4_RxCallback(uint8_t *buf, uint16_t len)
 				
 				if (i > len - 26)
 				{
-					break_flag = 0;//è·³å‡ºå¾ªçŽ¯
+					break_flag = 0;
 				}
 				
 				for(j = 0; j < 24; j++)
@@ -98,7 +98,7 @@ uint32_t Action_UART4_RxCallback(uint8_t *buf, uint16_t len)
 				}
 				count = 0;
 				
-				break_flag = 0;//è·³å‡ºå¾ªçŽ¯
+				break_flag = 0;
 				
 				break;
 			}
@@ -129,23 +129,23 @@ void Update_Action_gl_position(float value[6])
 	ACTION_GL_POS_DATA.ANGLE_Z = value[0];
 	ACTION_GL_POS_DATA.ANGLE_X = value[1];
 	ACTION_GL_POS_DATA.ANGLE_Y = value[2];
-	ACTION_GL_POS_DATA.POS_X = value[3]; // ???á?x??
-	ACTION_GL_POS_DATA.POS_Y = value[4]; // ???á?y??
+	ACTION_GL_POS_DATA.POS_X = value[3]; 
+	ACTION_GL_POS_DATA.POS_Y = value[4]; 
 	ACTION_GL_POS_DATA.W_Z = value[5];
 
-	// ???????
+	
 	ACTION_GL_POS_DATA.DELTA_POS_X = ACTION_GL_POS_DATA.POS_X - ACTION_GL_POS_DATA.LAST_POS_X;
 	ACTION_GL_POS_DATA.DELTA_POS_Y = ACTION_GL_POS_DATA.POS_Y - ACTION_GL_POS_DATA.LAST_POS_Y;
 
-	//t?????????
+	
 	ROBOT_REAL_POS_DATA.world_w = ACTION_GL_POS_DATA.ANGLE_Z;
 	//ROBOT_CHASSI.world_w = ROBOT_REAL_POS_DATA.world_w;
 
-	//??ó???????????
+
 	ACTION_GL_POS_DATA.REAL_X += (ACTION_GL_POS_DATA.DELTA_POS_X);
-	ACTION_GL_POS_DATA.REAL_Y += (ACTION_GL_POS_DATA.DELTA_POS_Y);//?????????????????
+	ACTION_GL_POS_DATA.REAL_Y += (ACTION_GL_POS_DATA.DELTA_POS_Y);
 	
-	//????????????
+
 	ROBOT_REAL_POS_DATA.world_x = ACTION_GL_POS_DATA.REAL_X + INSTALL_ERROR_X * sinf(ROBOT_REAL_POS_DATA.world_w * PI / 180.f);
 	//ROBOT_CHASSI.world_x = ROBOT_REAL_POS_DATA.world_x;
 	ROBOT_REAL_POS_DATA.world_y = ACTION_GL_POS_DATA.REAL_Y + INSTALL_ERROR_Y * cosf(ROBOT_REAL_POS_DATA.world_w * PI / 180.f);

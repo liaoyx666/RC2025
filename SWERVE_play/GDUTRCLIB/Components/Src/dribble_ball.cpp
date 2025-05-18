@@ -1,12 +1,12 @@
 #include "dribble_ball.h"
 
-#define DRIBBLE_TIME_1 30000
-#define DRIBBLE_TIME_2 100000
-#define DRIBBLE_TIME_3 500000
 
+//时间段
+#define DRIBBLE_TIME_1 20000//击球气缸伸长（开始）到夹球气缸伸长
+#define DRIBBLE_TIME_2 100000//夹球气缸伸长到击球气缸收缩
+#define DRIBBLE_TIME_3 400000//击球气缸收缩到夹球气缸收缩
 
-
-#define DRIBBLE_TIME_4 100000
+#define DRIBBLE_TIME_4 150000//夹球气缸收缩到结束（防止两次运球时间间隔过短）
 
 
 
@@ -14,8 +14,20 @@
 
 void Dribble_Ball(CONTROL_T *ctrl)
 {
-	static uint32_t start_time;
+	static uint32_t start_time;//开始击球1时间
 	static uint8_t flag = 0;
+	
+	
+	if (flag = 0)
+	{
+		//默认状态下击球和夹球气缸收缩
+		Hiting_Cylinder_State(CYLINDER_SHRINK);
+		Holding_Cylinder_State(CYLINDER_SHRINK);
+	}
+	
+	
+	
+	
 	
 	if (ctrl->cylinder_ctrl == CYLINDER_DRIBBLE)
 	{
@@ -52,8 +64,11 @@ void Dribble_Ball(CONTROL_T *ctrl)
 	}
 }
 
-
-
+//推球气缸控制
+void Push_Ball(enum CylinderState state)
+{
+	Pushing_Cylinder_State(state);
+}
 
 
 

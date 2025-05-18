@@ -16,7 +16,7 @@
 void Air_Joy_Task(void *pvParameters)
 {
 	static uint16_t last_SWD = 1000;//上一次SWD值
-	
+
     static CONTROL_T ctrl;
     for(;;)
     {
@@ -42,10 +42,10 @@ void Air_Joy_Task(void *pvParameters)
             if(air_joy.SWA>1950&&air_joy.SWA<2050)
             {                
                 ctrl.twist.linear.x = -(air_joy.LEFT_Y - 1500)/500.0 * 3;
-                ctrl.twist.linear.y = (air_joy.LEFT_X - 1500)/500.0 * 3;
+                ctrl.twist.linear.y = -(air_joy.LEFT_X - 1500)/500.0 * 3;
                 ctrl.twist.angular.z = (air_joy.RIGHT_X - 1500)/500.0 * 2;
                 ctrl.twist.angular.x = air_joy.RIGHT_Y;
-//////////////////////////////////////////////////////////////////////////////////
+				///////////////////////////////////////////////////////////////////
                 if(_tool_Abs(air_joy.SWB - 1500)<50)    //手动俯仰，俯仰时禁止底盘运动
                 {
                     ctrl.pitch_ctrl = PITCH_HAND;
@@ -57,23 +57,23 @@ void Air_Joy_Task(void *pvParameters)
                     ctrl.chassis_ctrl = CHASSIS_ON; 
                 }
 ////////////////////////////////////////////////////////////////////////////////////
-//                if(_tool_Abs(air_joy.SWC-1500)<50)  //开启摩擦轮
-//                {
-//                    ctrl.friction_ctrl = FRICTION_ON;
+                if(air_joy.SWC > 1450)  //开启摩擦轮
+                {
+                    ctrl.friction_ctrl = FRICTION_ON;
 
-//                    if(_tool_Abs(air_joy.SWD-2000)<50)
-//                    {
-//                        ctrl.shoot_ctrl = SHOOT_ON;     //启动推杆，射球
-//                    }
-//                    else
-//                    {
-//                        ctrl.shoot_ctrl = SHOOT_OFF;    //推杆复位
-//                    }
-//                }
-//                else
-//                {
-//                    ctrl.friction_ctrl = FRICTION_OFF;
-//                }
+                    if(_tool_Abs(air_joy.SWC-2000)<50)
+                    {
+                        ctrl.shoot_ctrl = SHOOT_ON;     //启动推杆，射球
+                    }
+                    else
+                    {
+                        ctrl.shoot_ctrl = SHOOT_OFF;    //推杆复位
+                    }
+                }
+                else
+                {
+                    ctrl.friction_ctrl = FRICTION_OFF;
+                }
 				
 				 if (_tool_Abs(last_SWD - air_joy.SWD) > 800)
 				 {
