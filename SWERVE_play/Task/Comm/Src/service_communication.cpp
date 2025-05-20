@@ -27,6 +27,12 @@ void CAN1_Send_Task(void *pvParameters)
         {
             do{
                 free_can_mailbox = HAL_CAN_GetTxMailboxesFreeLevel(&hcan1);
+				
+				if (free_can_mailbox == 0)
+				{
+					osDelay(1);
+				}
+				
             }while(free_can_mailbox == 0);
 #if USE_CAN1_STDID
             comm_can_transmit_stdid(&hcan1, CAN_TxMsg.id, CAN_TxMsg.data, CAN_TxMsg.len);
@@ -49,6 +55,12 @@ void CAN2_Send_Task(void *pvParameters)
         {
             do{
                 free_can_mailbox = HAL_CAN_GetTxMailboxesFreeLevel(&hcan2);
+				
+				if (free_can_mailbox == 0)
+				{
+					osDelay(1);
+				}
+				
             }while(free_can_mailbox == 0);
 #if USE_CAN2_STDID
             comm_can_transmit_stdid(&hcan2, CAN_TxMsg.id, CAN_TxMsg.data, CAN_TxMsg.len);

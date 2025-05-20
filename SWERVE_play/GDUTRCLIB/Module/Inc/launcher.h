@@ -32,6 +32,9 @@ public:
 
     void PitchControl(float pitch_angle);
     void ShootControl(bool shoot_ready, bool friction_ready, float shoot_speed);
+	//
+	void SpinControl(bool spin_state);
+	//
     bool Pid_Param_Init(int num, float Kp, float Ki, float Kd, float Integral_Max, float OUT_Max, float DeadZone)
     {
         switch (num)

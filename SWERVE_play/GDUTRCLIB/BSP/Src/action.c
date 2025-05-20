@@ -170,8 +170,8 @@ void Stract (char strDestination[],char strSource[] , int num)
 	  
 	  for (j = 0; j < num ; j++)
 	        {
-				       strDestination[i++] = strSource[j];  
-					}
+			   strDestination[i++] = strSource[j];  
+			}
 }
 
 //更新X坐标

@@ -30,8 +30,7 @@ void Chassis_Task(void *pvParameters)
         if(xQueueReceive(Chassia_Port, &ctrl, pdTRUE) == pdPASS)
         {
 			Dribble_Ball(&ctrl);//运球
-			
-//////////////////////////////////////////////////////////////////				
+			//////////////////////////////////////////////////////////////////				
             //底盘控制、电机控制    
             if(ctrl.chassis_ctrl == CHASSIS_ON)
             {
@@ -42,10 +41,9 @@ void Chassis_Task(void *pvParameters)
                 Robot_Twist_t twist = {0};
                 chassis.Control(twist);
             }
-/////////////////////////////////////////////////////////////
+			////////////////////////////////////////////////////////////
             if(ctrl.pitch_ctrl == PITCH_HAND)
             {
-                // float target_angle = 0;
                 if(ctrl.twist.linear.x>0.5f)
 				{
                     target_angle += 0.05f;
@@ -57,7 +55,7 @@ void Chassis_Task(void *pvParameters)
                 else 
 				{
 				}
-		
+				/////////////////////////////////////////
                 if(target_angle < 0)
 				{
                     target_angle = 0;
@@ -68,20 +66,19 @@ void Chassis_Task(void *pvParameters)
 				}
                 else
 				{
-				/*target_angle=0*/;
 				}
 				
                 launch.PitchControl(target_angle);
             }
             else if(ctrl.pitch_ctrl == PITCH_AUTO)//自动俯仰
             {
-				
+				launch.PitchControl(0);
 			}
             else
             {
                 launch.PitchControl(0);
             }
-///////////////////////////////////////////////////////////////////		
+			///////////////////////////////////////////////////////////////////		
             if(ctrl.friction_ctrl == FRICTION_ON)
             {
                 //if(ctrl.shoot_ctrl == SHOOT_OFF)
@@ -93,29 +90,38 @@ void Chassis_Task(void *pvParameters)
             {
                 launch.ShootControl(false,false,0);
             }
-////////////////////////////////////////////////////////////////////		
-			 if(ctrl.shoot_ctrl == SHOOT_ON)
-			 {
-				 Push_Ball(CYLINDER_SHRINK);
+			////////////////////////////////////////////////////////////////////		
+			if(ctrl.shoot_ctrl == SHOOT_ON)
+			{
+				Push_Ball(CYLINDER_SHRINK);
 				 
-				 //launch.PitchControl(pos_set);
-				 //Motor_SendMsgs(&hcan1,launch.LauncherMotor[0]);
+				//launch.PitchControl(pos_set);
+				//Motor_SendMsgs(&hcan1,launch.LauncherMotor[0]);
 		
 		
-				 //launch.ShootControl(shoot_ready,false,0);
-				 //Motor_SendMsgs(&hcan1,launch.LauncherMotor);
+				//launch.ShootControl(shoot_ready,false,0);
+				//Motor_SendMsgs(&hcan1,launch.LauncherMotor);
 			 }
 			 else
 			 {
 				Push_Ball(CYLINDER_STRETCH);
 			 }
-//////////////////////////////////////////////////////////////////////
-			chassis.Motor_Control();
-            launch.LaunchMotorCtrl();
+			 //////////////////////////////////////////////////////////////////////
+			 if (ctrl.spin_ctrl == SPIN_FORWARD)
+			 {
+				launch.SpinControl(true);
+			 }
+			 else
+			 {
+				launch.SpinControl(false);
+			 }
+			 ///////////////////////////////////////////////////////////////////////
+			 chassis.Motor_Control();
+             launch.LaunchMotorCtrl();
              //launch.FrictionMotor[2].Mode = SET_eRPM;
              //launch.FrictionMotor[2].Out=5000;
              //Motor_SendMsgs(&hcan2,launch.FrictionMotor[2]);
-        }	
+        }
 		
 
 		
@@ -186,9 +192,9 @@ void PidParamInit(void)
     chassis.Pid_Mode_Init(2, 0.1f, 0.0f, false, true);
 	chassis.Pid_Mode_Init(3, 0.1f, 0.0f, false, true);
 	 
-    launch.Pid_Param_Init(0,12.0f, 0.015f, 0.0f, 16384.0f, 16384.0f, 0);
+    launch.Pid_Param_Init(0,12.0f, 0.015f, 0.0f, 16384.0f, /*16384.0f*/6000.f, 0);
     launch.Pid_Mode_Init(0,0.1f, 0.0f, false, true);
 
-    launch.Pid_Param_Init(1,12.0f, 0.015f, 0.0f, 16384.0f, 16384.0f, 0);
+    launch.Pid_Param_Init(1,12.0f, 0.015f, 0.0f, 16384.0f, /*16384.0f*/6000.f, 0);
     launch.Pid_Mode_Init(1,0.1f, 0.0f, false, true);
 }

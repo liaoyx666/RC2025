@@ -18,7 +18,7 @@ void Dribble_Ball(CONTROL_T *ctrl)
 	static uint8_t flag = 0;
 	
 	
-	if (flag = 0)
+	if (flag == 0)
 	{
 		//默认状态下击球和夹球气缸收缩
 		Hiting_Cylinder_State(CYLINDER_SHRINK);
