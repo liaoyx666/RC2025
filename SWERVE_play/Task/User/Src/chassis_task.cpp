@@ -14,11 +14,11 @@
 
 
 Omni_Chassis chassis(0.152/2.f, 0.442f/2.f, 4, 1.f); //底盘直径0.442m，轮子半径0.152m，底盘加速度0.5m/s^2
-Launcher launch(400.f,-460.f);
-//float pos_set = 0;
+Launcher launch(400.f,460.f);
 bool shoot_ready = false;
 CONTROL_T ctrl;
 volatile float target_angle = 0;
+bool spin_state = false;
 
 
 void Chassis_Task(void *pvParameters)
@@ -27,10 +27,11 @@ void Chassis_Task(void *pvParameters)
 	
     for(;;)
     {
-        if(xQueueReceive(Chassia_Port, &ctrl, pdTRUE) == pdPASS)
+        if(xQueueReceive(Chassia_Port, &ctrl, 1) == pdPASS)
         {
-			Dribble_Ball(&ctrl);//运球
-			//////////////////////////////////////////////////////////////////				
+			//运球
+			Dribble_Ball(&ctrl);
+			///////////////////////////////////////////////////	
             //底盘控制、电机控制    
             if(ctrl.chassis_ctrl == CHASSIS_ON)
             {
@@ -41,86 +42,99 @@ void Chassis_Task(void *pvParameters)
                 Robot_Twist_t twist = {0};
                 chassis.Control(twist);
             }
-			////////////////////////////////////////////////////////////
-            if(ctrl.pitch_ctrl == PITCH_HAND)
-            {
-                if(ctrl.twist.linear.x>0.5f)
-				{
-                    target_angle += 0.05f;
-				}
-                else if(ctrl.twist.linear.x<-0.5f)
-				{
-                    target_angle -= 0.05f;
-				}
-                else 
-				{
-				}
-				/////////////////////////////////////////
-                if(target_angle < 0)
-				{
-                    target_angle = 0;
-				}
-                else if(target_angle > 400)
-				{
-                    target_angle = 400;
-				}
-                else
-				{
-				}
+			////////////////////////////////////////////////////
+			//俯仰
+			if (ctrl.spin_ctrl != SPIN_FORWARD)//不是装球状态
+			{
 				
-                launch.PitchControl(target_angle);
-            }
-            else if(ctrl.pitch_ctrl == PITCH_AUTO)//自动俯仰
-            {
-				launch.PitchControl(0);
+				if(ctrl.pitch_ctrl == PITCH_HAND)
+				{
+					if(ctrl.twist.linear.x>0.5f)
+					{
+						target_angle += 0.15f;
+					}
+					else if(ctrl.twist.linear.x<-0.5f)
+					{
+						target_angle -= 0.15f;
+					}
+					else 
+					{
+					}
+				}
+				else if(ctrl.pitch_ctrl == PITCH_AUTO)//自动俯仰
+				{
+					target_angle = 0;
+				}
+				else
+				{
+					target_angle = 0;
+				}
+	
 			}
-            else
-            {
-                launch.PitchControl(0);
-            }
-			///////////////////////////////////////////////////////////////////		
+			
+			
+			//限位
+			if(target_angle < 0)
+			{
+				target_angle = 0;
+			}
+			else if(target_angle > 400)
+			{
+				target_angle = 400;
+			}
+			else
+			{
+			}
+			
+			launch.PitchControl(target_angle);
+			/////////////////////////////////////////////////////
+			//摩擦带
             if(ctrl.friction_ctrl == FRICTION_ON)
             {
-                //if(ctrl.shoot_ctrl == SHOOT_OFF)
-                    launch.ShootControl(false,true,25000);
-               // else
-                   //launch.ShootControl(true,true,10000);
+                launch.ShootControl(true,25000);
             }
             else
             {
-                launch.ShootControl(false,false,0);
+                launch.ShootControl(false,0);
             }
-			////////////////////////////////////////////////////////////////////		
+			/////////////////////////////////////////////////////
+			//推球气缸
 			if(ctrl.shoot_ctrl == SHOOT_ON)
 			{
 				Push_Ball(CYLINDER_SHRINK);
-				 
-				//launch.PitchControl(pos_set);
-				//Motor_SendMsgs(&hcan1,launch.LauncherMotor[0]);
-		
-		
-				//launch.ShootControl(shoot_ready,false,0);
-				//Motor_SendMsgs(&hcan1,launch.LauncherMotor);
-			 }
-			 else
-			 {
+			}
+			else
+			{
 				Push_Ball(CYLINDER_STRETCH);
-			 }
-			 //////////////////////////////////////////////////////////////////////
-			 if (ctrl.spin_ctrl == SPIN_FORWARD)
-			 {
-				launch.SpinControl(true);
-			 }
-			 else
-			 {
-				launch.SpinControl(false);
-			 }
-			 ///////////////////////////////////////////////////////////////////////
-			 chassis.Motor_Control();
-             launch.LaunchMotorCtrl();
-             //launch.FrictionMotor[2].Mode = SET_eRPM;
-             //launch.FrictionMotor[2].Out=5000;
-             //Motor_SendMsgs(&hcan2,launch.FrictionMotor[2]);
+			}
+			/////////////////////////////////////////////////////
+			//旋转
+			if (ctrl.spin_ctrl == SPIN_FORWARD)
+			{
+				if (launch.LauncherMotor[0].get_angle() >= 390)
+				{
+					spin_state = true;
+				}
+				else
+				{
+					spin_state = false;
+				}
+				target_angle = 400;
+			}
+			else if (ctrl.spin_ctrl == SPIN_BACKWARD)
+			{
+				spin_state = false;
+			}
+			else
+			{
+				spin_state = false;
+			}
+			
+			launch.SpinControl(spin_state);
+			//////////////////////////////////////////////////////
+			//CAN发送
+			chassis.Motor_Control();
+            launch.LaunchMotorCtrl();
         }
 		
 

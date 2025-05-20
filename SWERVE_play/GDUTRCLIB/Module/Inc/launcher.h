@@ -31,7 +31,7 @@ public:
     VESC FrictionMotor[3] = {VESC(101), VESC(102), VESC(103)};
 
     void PitchControl(float pitch_angle);
-    void ShootControl(bool shoot_ready, bool friction_ready, float shoot_speed);
+    void ShootControl(bool friction_ready, float shoot_speed);
 	//
 	void SpinControl(bool spin_state);
 	//
@@ -69,7 +69,7 @@ public:
 private:
     float pitch_angle_max_ = 0.0f, push_angle_max_ = 0.0f;
     PID PidPitchSpd, PidPitchPos, PidPushSpd;
-    TrapePlanner PushPlanner = TrapePlanner(0.15,0.15,2000,100,1);
+    TrapePlanner PushPlanner = TrapePlanner(0.15,0.15,1500,100,1);
     bool machine_init_ = false;
     bool Reset();
     float pitch_angle_last_=0;
