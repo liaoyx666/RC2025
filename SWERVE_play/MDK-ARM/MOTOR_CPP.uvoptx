@@ -163,37 +163,27 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>spd_pid</ItemText>
+          <ItemText>ACTION_GL_POS_DATA</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>planner,0x0A</ItemText>
+          <ItemText>ctrl</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>reset,0x0A</ItemText>
+          <ItemText>c0</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>fault,0x0A</ItemText>
+          <ItemText>c1</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>test,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>5</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>pos_set,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>6</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>change_flag,0x0A</ItemText>
+          <ItemText>c2</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -277,7 +267,7 @@
 
   <Group>
     <GroupName>Application/User/Core</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

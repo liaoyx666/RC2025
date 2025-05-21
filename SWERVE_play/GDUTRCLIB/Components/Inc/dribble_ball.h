@@ -20,10 +20,10 @@ enum CylinderState//气缸状态
 };
 
 
-void Dribble_Ball(CONTROL_T *ctrl);
+void Dribble_Ball(enum CONTROL_E state);
 void Push_Ball(enum CylinderState state);
 
-
+void Shoot_Ball(enum CONTROL_E state);
 
 void Hiting_Cylinder_State(enum CylinderState state);
 void Holding_Cylinder_State(enum CylinderState state);

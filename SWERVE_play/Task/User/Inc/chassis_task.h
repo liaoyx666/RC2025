@@ -27,8 +27,9 @@ typedef enum CONTROL_E
 	CYLINDER_KEEP,
 	CYLINDER_RELEASE,
 	
-	SPIN_FORWARD,
-	SPIN_BACKWARD
+	SPIN_INSIDE,
+	SPIN_OUTSIDE,
+	
 	////////////
 }CONTROL_E;
 
@@ -42,6 +43,7 @@ typedef struct CONTROL_T
     CONTROL_E chassis_ctrl;
 	CONTROL_E cylinder_ctrl;
 	CONTROL_E spin_ctrl;
+	CONTROL_E mode_ctrl;
     uint8_t add_cnt=0;
 }CONTROL_T;
 

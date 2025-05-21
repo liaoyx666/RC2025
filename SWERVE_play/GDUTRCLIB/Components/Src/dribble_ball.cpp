@@ -12,31 +12,32 @@
 
 
 
-void Dribble_Ball(CONTROL_T *ctrl)
+void Dribble_Ball(enum CONTROL_E state)
 {
 	static uint32_t start_time;//开始击球1时间
 	static uint8_t flag = 0;
 	
 	
-	if (flag == 0)
+	if ((flag == 0) && (state == CYLINDER_KEEP))
 	{
 		//默认状态下击球和夹球气缸收缩
 		Hiting_Cylinder_State(CYLINDER_SHRINK);
 		Holding_Cylinder_State(CYLINDER_SHRINK);
 	}
 	
-	
-	
-	
-	
-	if (ctrl->cylinder_ctrl == CYLINDER_DRIBBLE)
+	if ((flag == 0) && (state == CYLINDER_RELEASE))
 	{
-		if (flag == 0)
-		{
-			Hiting_Cylinder_State(CYLINDER_STRETCH);//击球气缸击球
-			start_time = Get_SystemTimer();//获取开始运球时间戳
-			flag = 1;
-		}
+		Hiting_Cylinder_State(CYLINDER_SHRINK);
+		Holding_Cylinder_State(CYLINDER_STRETCH);
+	}
+	
+	
+	
+	if ((flag == 0) && (state == CYLINDER_DRIBBLE))
+	{
+		Hiting_Cylinder_State(CYLINDER_STRETCH);//击球气缸击球
+		start_time = Get_SystemTimer();//获取开始运球时间戳
+		flag = 1;
 	}
 	
 	
@@ -63,6 +64,70 @@ void Dribble_Ball(CONTROL_T *ctrl)
 		flag = 0;
 	}
 }
+
+
+
+
+
+#define SHOOT_TIME_1 400000
+#define SHOOT_TIME_2 100000
+
+void Shoot_Ball(enum CONTROL_E state)
+{
+	
+	static uint32_t start_time;//开始推球时间
+	static uint8_t flag = 0;
+	
+	
+	if ((flag == 0) && (state == SHOOT_OFF))
+	{
+		Pushing_Cylinder_State(CYLINDER_SHRINK);
+	}
+	
+	
+	
+	if (state == SHOOT_ON)
+	{
+		if (flag == 0)
+		{
+			Pushing_Cylinder_State(CYLINDER_STRETCH);
+			start_time = Get_SystemTimer();//获取开始运球时间戳
+			flag = 1;
+		}
+	}
+	
+	if ((flag == 1) && (Get_SystemTimer() - start_time >= SHOOT_TIME_1))
+	{
+		Pushing_Cylinder_State(CYLINDER_SHRINK);
+		flag = 2;
+	}
+	
+	if ((flag == 2) && (Get_SystemTimer() - start_time >= SHOOT_TIME_1 + SHOOT_TIME_2))
+	{
+		flag = 0;
+	}
+	
+	
+	
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //推球气缸控制
 void Push_Ball(enum CylinderState state)

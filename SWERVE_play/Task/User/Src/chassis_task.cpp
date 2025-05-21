@@ -21,16 +21,24 @@ volatile float target_angle = 0;
 bool spin_state = false;
 
 
+//uint8_t c0, c1, c2;
+
+
 void Chassis_Task(void *pvParameters)
 {
     // static CONTROL_T ctrl;
 	
     for(;;)
     {
+//		c0 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0);
+//		c1 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1);
+//		c2 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2);		
+		
         if(xQueueReceive(Chassia_Port, &ctrl, 1) == pdPASS)
         {
 			//运球
-			Dribble_Ball(&ctrl);
+			Dribble_Ball(ctrl.cylinder_ctrl);
+			Shoot_Ball(ctrl.shoot_ctrl);
 			///////////////////////////////////////////////////	
             //底盘控制、电机控制    
             if(ctrl.chassis_ctrl == CHASSIS_ON)
@@ -44,7 +52,7 @@ void Chassis_Task(void *pvParameters)
             }
 			////////////////////////////////////////////////////
 			//俯仰
-			if (ctrl.spin_ctrl != SPIN_FORWARD)//不是装球状态
+			if (ctrl.spin_ctrl != SPIN_INSIDE)//不是装球状态
 			{
 				
 				if(ctrl.pitch_ctrl == PITCH_HAND)
@@ -86,7 +94,7 @@ void Chassis_Task(void *pvParameters)
 			{
 			}
 			
-			launch.PitchControl(target_angle);
+			
 			/////////////////////////////////////////////////////
 			//摩擦带
             if(ctrl.friction_ctrl == FRICTION_ON)
@@ -98,20 +106,20 @@ void Chassis_Task(void *pvParameters)
                 launch.ShootControl(false,0);
             }
 			/////////////////////////////////////////////////////
-			//推球气缸
-			if(ctrl.shoot_ctrl == SHOOT_ON)
-			{
-				Push_Ball(CYLINDER_SHRINK);
-			}
-			else
-			{
-				Push_Ball(CYLINDER_STRETCH);
-			}
+//			//推球气缸
+//			if(ctrl.shoot_ctrl == SHOOT_ON)
+//			{
+//				Push_Ball(CYLINDER_SHRINK);
+//			}
+//			else
+//			{
+//				Push_Ball(CYLINDER_STRETCH);
+//			}
 			/////////////////////////////////////////////////////
 			//旋转
-			if (ctrl.spin_ctrl == SPIN_FORWARD)
+			if (ctrl.spin_ctrl == SPIN_INSIDE)
 			{
-				if (launch.LauncherMotor[0].get_angle() >= 390)
+				if (launch.LauncherMotor[0].get_angle() >= 340)
 				{
 					spin_state = true;
 				}
@@ -119,17 +127,25 @@ void Chassis_Task(void *pvParameters)
 				{
 					spin_state = false;
 				}
-				target_angle = 400;
+				target_angle = 350;
 			}
-			else if (ctrl.spin_ctrl == SPIN_BACKWARD)
+			else //(ctrl.spin_ctrl == SPIN_OUTSIDE)
 			{
 				spin_state = false;
 			}
-			else
+
+			
+			
+			if (launch.LauncherMotor[1].get_angle() > 400)
 			{
-				spin_state = false;
+				target_angle = 350;
 			}
 			
+			
+			
+			launch.PitchControl(target_angle);
+			
+
 			launch.SpinControl(spin_state);
 			//////////////////////////////////////////////////////
 			//CAN发送
