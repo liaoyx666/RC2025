@@ -5,7 +5,7 @@ float Get_Launch_RPM(float d)
 {
 	float Speed;
 	Speed = (g*d*d)/((2 * cos(a) * cos(a)) *(d * tan(a) + 76.72f - H - ((k * d * d * sin(a))/(2*cos(a)*cos(a)))));
-    float RPM = (sqrt(Speed) * 60 * 19) / (2 * pi * r);
+        float RPM = (sqrt(Speed) * 60 * 19) / (2 * pi * r);
 	return RPM;
     
 
