@@ -5,16 +5,14 @@ ROBOT_REAL_POS ROBOT_REAL_POS_DATA = {0};
 /*
   @使用方法：
   使用串口3的232通道进行通讯，
-  action数据存放在ACTION_GL_POS_DATA[]中，如果要调用请外部申明
-  在.h文件中需要填入安装误差
-  转换到车中心的坐标存放在ROBOT_REAL_POS_DATA[]中，如果要调用请外部申明
-  更新XY坐标时需要调用Update_X，Update_Y。并且在两个函数中间要delay10ms
+  position数据存放在ACTION_GL_POS_DATA[]中，如果要调用请外部申明
   
-  此文件用于action而非position
+  
+
 */
 
 
-
+//这里写的是串口4其实调用的是串口3
 uint32_t Action_UART4_RxCallback(uint8_t *buf, uint16_t len)
 {
 	uint8_t count = 0;
@@ -22,7 +20,7 @@ uint32_t Action_UART4_RxCallback(uint8_t *buf, uint16_t len)
 	uint8_t id = 0;
 	uint8_t length = 0;
 	uint8_t CRC_HIGH = 0;
-  uint8_t CRC_LOW = 0;
+        uint8_t CRC_LOW = 0;
 	union 
 	{
 		uint8_t data[12];
