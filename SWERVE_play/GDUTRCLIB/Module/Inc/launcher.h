@@ -40,7 +40,7 @@ public:
 	//
 	void SpinControl(bool spin_state);
 	
-	void PushControl(bool shoot_state);
+	void PushControl(bool push_state);
 	
 	//
     bool Pid_Param_Init(int num, float Kp, float Ki, float Kd, float Integral_Max, float OUT_Max, float DeadZone)

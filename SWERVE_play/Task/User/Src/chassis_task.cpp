@@ -14,7 +14,7 @@
 #include "shoot.h"
 
 Omni_Chassis chassis(0.152/2.f, 0.442f/2.f, 4, 1.f); //底盘直径0.442m，轮子半径0.152m，底盘加速度0.5m/s^2
-Launcher launch(400.f, 460.f, 300.f);
+Launcher launch(400.f, 460.f, 570.f);
 bool shoot_ready = false;
 CONTROL_T ctrl;
 volatile float target_angle = 0;
@@ -128,6 +128,11 @@ void Chassis_Task(void *pvParameters)
 				target_angle = 350;
 			}
 				
+			
+			launch.PushControl(1);
+			
+			
+			
 			launch.PitchControl(target_angle);//控制俯仰
 			launch.SpinControl(spin_state);//控制旋转
 			//////////////////////////////////////////////////////
