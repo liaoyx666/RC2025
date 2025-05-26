@@ -82,6 +82,13 @@ const osThreadAttr_t Air_Joy_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for Location */
+osThreadId_t LocationHandle;
+const osThreadAttr_t Location_attributes = {
+  .name = "Location",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -93,6 +100,7 @@ extern void Chassis_Task(void *argument);
 extern void CAN2_Send_Task(void *argument);
 extern void User_Debug_Task(void *argument);
 extern void Air_Joy_Task(void *argument);
+extern void Location_Task(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -137,6 +145,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of Air_Joy */
   Air_JoyHandle = osThreadNew(Air_Joy_Task, NULL, &Air_Joy_attributes);
+
+  /* creation of Location */
+  LocationHandle = osThreadNew(Location_Task, NULL, &Location_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
 

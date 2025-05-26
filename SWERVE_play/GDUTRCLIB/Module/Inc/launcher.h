@@ -15,25 +15,33 @@ extern "C" {
 class Launcher : public PidTimer
 {
 public:
-    Launcher(float pitch_angle_max, float push_angle_max)   //最大俯仰角度和推杆最大行程
+    Launcher(float pitch_angle_max, float spin_angle_max, float push_angle_max)   //最大俯仰角度和推杆最大行程
     {
         pitch_angle_max_ = pitch_angle_max;
-        push_angle_max_ = push_angle_max;
+        spin_angle_max_ = spin_angle_max;
+		push_angle_max_ = push_angle_max;//
+		
+		
 
         FrictionMotor[0].Mode = SET_eRPM;
         FrictionMotor[1].Mode = SET_eRPM;
         FrictionMotor[2].Mode = SET_eRPM;
         FrictionMotor[0].Out = 0;
+		FrictionMotor[1].Out = 0;
+		FrictionMotor[2].Out = 0;
     }
 
-    Motor_C620 LauncherMotor[2] = {Motor_C620(5), Motor_C620(6)};
+    Motor_C620 LauncherMotor[3] = {Motor_C620(5), Motor_C620(6), Motor_C620(7)};
     
     VESC FrictionMotor[3] = {VESC(101), VESC(102), VESC(103)};
 
     void PitchControl(float pitch_angle);
-    void ShootControl(bool friction_ready, float shoot_speed);
+    void FrictionControl(bool friction_ready, float shoot_speed);
 	//
 	void SpinControl(bool spin_state);
+	
+	void PushControl(bool shoot_state);
+	
 	//
     bool Pid_Param_Init(int num, float Kp, float Ki, float Kd, float Integral_Max, float OUT_Max, float DeadZone)
     {
@@ -44,7 +52,13 @@ public:
                 break;
             
             case 1:
+                PidSpinSpd.PID_Param_Init(Kp,Ki,Kd,Integral_Max,OUT_Max,DeadZone);
+				break;
+			
+			case 2:
                 PidPushSpd.PID_Param_Init(Kp,Ki,Kd,Integral_Max,OUT_Max,DeadZone);
+				break;
+			
             default:
                 break;
         }
@@ -59,7 +73,13 @@ public:
                 break;
             
             case 1:
+                PidSpinSpd.PID_Mode_Init(LowPass_error,LowPass_d_err,D_of_Current,Imcreatement_of_Out);
+				break;
+			
+			case 2:
                 PidPushSpd.PID_Mode_Init(LowPass_error,LowPass_d_err,D_of_Current,Imcreatement_of_Out);
+				break;
+			
             default:
                 break;
         }
@@ -67,9 +87,10 @@ public:
 
     void LaunchMotorCtrl();
 private:
-    float pitch_angle_max_ = 0.0f, push_angle_max_ = 0.0f;
-    PID PidPitchSpd, PidPitchPos, PidPushSpd;
-    TrapePlanner PushPlanner = TrapePlanner(0.15,0.15,1500,100,1);
+    float pitch_angle_max_ = 0.0f, spin_angle_max_ = 0.0f, push_angle_max_ = 0.0f;
+    PID PidPitchSpd, PidPitchPos, PidSpinSpd, PidPushSpd;
+    TrapePlanner SpinPlanner = TrapePlanner(0.15,0.15,1500,100,1);
+	TrapePlanner PushPlanner = TrapePlanner(0.15,0.15,1500,100,1);
     bool machine_init_ = false;
     bool Reset();
     float pitch_angle_last_=0;

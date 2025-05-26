@@ -29,11 +29,10 @@ void Air_Joy_Task(void *pvParameters)
             air_joy.RIGHT_X = 1500;
         if(air_joy.RIGHT_Y>1450&&air_joy.RIGHT_Y<1550)  
             air_joy.RIGHT_Y = 1500;
-		///////////////////////////////////////////////////////////////////////////////
+
         //遥控器启动判断
         if(air_joy.LEFT_X!=0||air_joy.LEFT_Y!=0||air_joy.RIGHT_X!=0||air_joy.RIGHT_Y!=0)
         {
-
             //底盘控制命令
             if(_tool_Abs(air_joy.SWB - 1000) > 450)
             {
@@ -41,27 +40,34 @@ void Air_Joy_Task(void *pvParameters)
                 ctrl.twist.linear.y = -(air_joy.LEFT_X - 1500)/500.0 * 3;
                 ctrl.twist.angular.z = (air_joy.RIGHT_X - 1500)/500.0 * 2;
                 ctrl.twist.angular.x = air_joy.RIGHT_Y;
-				///////////////////////////////////////////////////////////////////
-				if (_tool_Abs(air_joy.SWB - 1500) < 50)
+				/*******************************************************************************/
+				if (_tool_Abs(air_joy.SWB - 1500) < 50)//运球、装球模式
 				{
 					ctrl.chassis_ctrl = CHASSIS_ON;
 					ctrl.friction_ctrl = FRICTION_OFF;
-					
-					if (_tool_Abs(air_joy.SWC - 1000) < 50)
+					/////////////////////////////////////////////////////////////////////////////
+					if (_tool_Abs(air_joy.SWC - 1000) < 50)//运球
 					{
-						ctrl.spin_ctrl = SPIN_OUTSIDE;
+						float length = sqrtf(ctrl.twist.linear.x * ctrl.twist.linear.x + ctrl.twist.linear.y * ctrl.twist.linear.y);
+						if(length > 0.5f)
+						{
+							float limit = 0.5f / length;
+							ctrl.twist.linear.x *= limit;
+							ctrl.twist.linear.y *= limit;
+						}//限制底盘速度
+
+						ctrl.spin_ctrl = SPIN_OUTSIDE;//旋转到外侧
 						
 						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)//SWD按键值改变，运球一次
 						{
 							last_SWD = air_joy.SWD;//更新按键值
 							ctrl.cylinder_ctrl = CYLINDER_DRIBBLE;
 						}
-						
-						
 					}
-					else if (_tool_Abs(air_joy.SWC - 1500) < 50)
+					/////////////////////////////////////////////////////////////////////////////
+					else if (_tool_Abs(air_joy.SWC - 1500) < 50)//人工装球
 					{
-						ctrl.spin_ctrl = SPIN_OUTSIDE;
+						ctrl.spin_ctrl = SPIN_OUTSIDE;//旋转到外侧
 						
 						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)
 						{
@@ -69,21 +75,20 @@ void Air_Joy_Task(void *pvParameters)
 							static uint8_t flag = 0;
 							if (flag == 0)
 							{
-								ctrl.cylinder_ctrl = CYLINDER_RELEASE;
+								ctrl.cylinder_ctrl = CYLINDER_RELEASE;//张开夹爪（人工装球）
 								flag = 1;
 							}
 							else
 							{
-								ctrl.cylinder_ctrl = CYLINDER_KEEP;
+								ctrl.cylinder_ctrl = CYLINDER_KEEP;//关闭夹爪（保持球）
 								flag = 0;
 							}
 						}
-						
-						
 					}
-					else
+					////////////////////////////////////////////////////////////////////////////
+					else//放球到发射机构
 					{
-						ctrl.spin_ctrl = SPIN_INSIDE;
+						ctrl.spin_ctrl = SPIN_INSIDE;//旋转到内侧
 						
 						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)
 						{
@@ -91,22 +96,21 @@ void Air_Joy_Task(void *pvParameters)
 							static uint8_t flag = 0;
 							if (flag == 0)
 							{
-								ctrl.cylinder_ctrl = CYLINDER_RELEASE;
+								ctrl.cylinder_ctrl = CYLINDER_RELEASE;//张开夹爪（放球）
 								flag = 1;
 							}
 							else
 							{
-								ctrl.cylinder_ctrl = CYLINDER_KEEP;
+								ctrl.cylinder_ctrl = CYLINDER_KEEP;//关闭夹爪
 								flag = 0;
 							}
 						}
 					}
+					/////////////////////////////////////////////////////////////////////////////
 				}
-				///////////////////////////////////////////////////////////////
-				else if (_tool_Abs(air_joy.SWB - 2000) < 50)
+				/********************************************************************************/
+				else if (_tool_Abs(air_joy.SWB - 2000) < 50)//射球模式
 				{
-					
-					
 					if (_tool_Abs(air_joy.SWA - 2000) < 50)
 					{
 						ctrl.chassis_ctrl = CHASSIS_OFF;
@@ -118,78 +122,15 @@ void Air_Joy_Task(void *pvParameters)
 						ctrl.chassis_ctrl = CHASSIS_ON;
 					}
 					
-					if (_tool_Abs(last_SWD - air_joy.SWD) > 800)//SWD按键值改变，运球一次
+					if (_tool_Abs(last_SWD - air_joy.SWD) > 800)
 					{
 						last_SWD = air_joy.SWD;//更新按键值
 						ctrl.shoot_ctrl = SHOOT_ON;
-					}
-					
-					
+					}				
 				}
-				
-				
-				
-				
-				
-				
-				
-				
-				/*
-				
-				
-				
-				
-				///////////////////////////////////////////////////////////////////
-                if(_tool_Abs(air_joy.SWB - 1500)<50)    //手动俯仰，俯仰时禁止底盘运动
-                {
-                    ctrl.pitch_ctrl = PITCH_HAND;
-                    ctrl.chassis_ctrl = CHASSIS_OFF;
-                }
-                else    
-                {
-                    ctrl.pitch_ctrl = PITCH_AUTO;
-                    ctrl.chassis_ctrl = CHASSIS_ON; 
-                }
-				////////////////////////////////////////////////////////////////////
-				if(_tool_Abs(air_joy.SWB - 2000)<50)    //当B在最下面的时候会旋转装球，B在其他位置时保持在运球姿态
-                {
-                    ctrl.spin_ctrl = SPIN_INSIDE;
-                }
-                else    
-                {
-                    ctrl.spin_ctrl = SPIN_OUTSIDE;
-                }
-				/////////////////////////////////////////////////////////////////////
-                if(air_joy.SWC > 1450)  //开启摩擦轮
-                {
-                    ctrl.friction_ctrl = FRICTION_ON;
-
-                    if(_tool_Abs(air_joy.SWC-2000)<50)
-                    {
-                        ctrl.shoot_ctrl = SHOOT_ON;//启动推杆，射球
-                    }
-                    else
-                    {
-                        ctrl.shoot_ctrl = SHOOT_OFF;//推杆复位
-                    }
-                }
-                else
-                {
-                    ctrl.friction_ctrl = FRICTION_OFF;
-                }
-				//////////////////////////////////////////////////////////////////
-				 if (_tool_Abs(last_SWD - air_joy.SWD) > 800)//SWD按键值改变，运球一次
-				 {
-					last_SWD = air_joy.SWD;//更新按键值
-					ctrl.cylinder_ctrl = CYLINDER_DRIBBLE;
-				 }
-				 
-				 
-				 
-				 
-				 */
+				/*********************************************************************************/
             }
-			else
+			else//锁定
 			{
 				ctrl.twist.linear.x = 0;
 				ctrl.twist.linear.y = 0;
@@ -203,9 +144,8 @@ void Air_Joy_Task(void *pvParameters)
 				ctrl.cylinder_ctrl = CYLINDER_KEEP;
 				
 				last_SWD = air_joy.SWD;//更新按键值
-				
 			}
-			//////////////////////////////////////////////////////
+			
             xQueueSend(Chassia_Port, &ctrl, 0);
 			
 			ctrl.shoot_ctrl = SHOOT_OFF;
@@ -214,17 +154,20 @@ void Air_Joy_Task(void *pvParameters)
 			{
 				ctrl.cylinder_ctrl = CYLINDER_KEEP;
 			}
-			
-			//ctrl.cylinder_ctrl = CYLINDER_KEEP;
-			
-			
-			
-			
-			
         }
         else
         {
-            ctrl.twist = {0};
+			ctrl.twist.linear.x = 0;
+			ctrl.twist.linear.y = 0;
+			ctrl.twist.angular.z = 0;
+			ctrl.twist.angular.x = 0;
+			
+			ctrl.chassis_ctrl = CHASSIS_OFF;//底盘关闭
+			ctrl.friction_ctrl = FRICTION_OFF;//摩擦带关闭
+			ctrl.pitch_ctrl = PITCH_RESET;
+			ctrl.shoot_ctrl = SHOOT_OFF;
+			ctrl.cylinder_ctrl = CYLINDER_KEEP;
+            //ctrl.twist = {0};
         }
         osDelay(1);
     }

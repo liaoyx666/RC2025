@@ -8,12 +8,14 @@ bool Launcher::Reset()
     {
         LauncherMotor[0].encoder_offset = LauncherMotor[0].get_encoder();
         LauncherMotor[1].encoder_offset = LauncherMotor[1].get_encoder();
+		LauncherMotor[2].encoder_offset = LauncherMotor[2].get_encoder();
         machine_init_ = true;
     }
     else
     {
         LauncherMotor[0].Out = -30;
         LauncherMotor[1].Out = 20;
+		LauncherMotor[2].Out = 0;
         machine_init_ = false;
     }
 }
@@ -48,7 +50,7 @@ void Launcher::PitchControl(float pitch_angle)
     {
         Reset();
         PidPitchPos.PID_Mode_Init(0.1,0.1,true,false);
-        PidPitchPos.PID_Param_Init(10, 0, 0.2, 100, /*300*/700, 0.2);
+        PidPitchPos.PID_Param_Init(10, 0, 0.2, 100, /*300*/900, 0.2);
     }
     else
     {
@@ -67,24 +69,22 @@ void Launcher::PitchControl(float pitch_angle)
     }
 }
 
-void Launcher::ShootControl(bool friction_ready, float shoot_speed)
+void Launcher::FrictionControl(bool friction_ready, float shoot_speed)
 {
-	
   if(machine_init_)
 	{
         if(friction_ready)
         {
-            FrictionMotor[0].Out = -shoot_speed;
-            FrictionMotor[1].Out = shoot_speed;
-            FrictionMotor[2].Out = -shoot_speed*2.f/3.f;
+            FrictionMotor[0].Out = shoot_speed;
+            FrictionMotor[1].Out = -shoot_speed;
+            FrictionMotor[2].Out = -shoot_speed;
         }
         else
         {
             FrictionMotor[0].Out = 0;
             FrictionMotor[1].Out = 0;
             FrictionMotor[2].Out = 0;
-        }
-        
+        } 
     }
 }
 
@@ -92,17 +92,32 @@ void Launcher::SpinControl(bool spin_state)
 {
 	if(spin_state)
 	{
-		PidPushSpd.target = PushPlanner.Plan(0,460,LauncherMotor[1].get_angle());
-		PidPushSpd.current = LauncherMotor[1].get_speed();
-		LauncherMotor[1].Out = PidPushSpd.Adjust();
+		PidSpinSpd.target = SpinPlanner.Plan(0,spin_angle_max_,LauncherMotor[1].get_angle());
+		PidSpinSpd.current = LauncherMotor[1].get_speed();
+		LauncherMotor[1].Out = PidSpinSpd.Adjust();
 	}
 	else
 	{
-		PidPushSpd.target = PushPlanner.Plan(460,0,LauncherMotor[1].get_angle());
-		PidPushSpd.current = LauncherMotor[1].get_speed();
-		LauncherMotor[1].Out = PidPushSpd.Adjust();
+		PidSpinSpd.target = SpinPlanner.Plan(spin_angle_max_,0,LauncherMotor[1].get_angle());
+		PidSpinSpd.current = LauncherMotor[1].get_speed();
+		LauncherMotor[1].Out = PidSpinSpd.Adjust();
 	}
 }
 
+void Launcher::PushControl(bool push_state)
+{
+	if(push_state)
+	{
+		PidPushSpd.target = PushPlanner.Plan(0,push_angle_max_,LauncherMotor[2].get_angle());
+		PidPushSpd.current = LauncherMotor[2].get_speed();
+		LauncherMotor[2].Out = PidPushSpd.Adjust();
+	}
+	else
+	{
+		PidPushSpd.target = PushPlanner.Plan(push_angle_max_,0,LauncherMotor[2].get_angle());
+		PidPushSpd.current = LauncherMotor[2].get_speed();
+		LauncherMotor[2].Out = PidPushSpd.Adjust();
+	}
+}
 
 

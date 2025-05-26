@@ -11,34 +11,33 @@
 #include "chassis_task.h"
 #include "speed_plan.h"
 #include "dribble_ball.h"
-
+#include "shoot.h"
 
 Omni_Chassis chassis(0.152/2.f, 0.442f/2.f, 4, 1.f); //底盘直径0.442m，轮子半径0.152m，底盘加速度0.5m/s^2
-Launcher launch(400.f,460.f);
+Launcher launch(400.f, 460.f, 300.f);
 bool shoot_ready = false;
 CONTROL_T ctrl;
 volatile float target_angle = 0;
 bool spin_state = false;
+float shoot_speed = 0;
+float distance = 0;
 
-
-//uint8_t c0, c1, c2;
+uint8_t c0, c1, c2;
 
 
 void Chassis_Task(void *pvParameters)
 {
     // static CONTROL_T ctrl;
-	
     for(;;)
     {
-//		c0 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0);
-//		c1 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1);
-//		c2 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2);		
+		c0 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0);
+		c1 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1);
+		c2 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2);		
 		
         if(xQueueReceive(Chassia_Port, &ctrl, 1) == pdPASS)
         {
-			//运球
-			Dribble_Ball(ctrl.cylinder_ctrl);
-			Shoot_Ball(ctrl.shoot_ctrl);
+			Dribble_Ball(ctrl.cylinder_ctrl);//运球
+			Shoot_Ball(ctrl.shoot_ctrl);//推球
 			///////////////////////////////////////////////////	
             //底盘控制、电机控制    
             if(ctrl.chassis_ctrl == CHASSIS_ON)
@@ -54,30 +53,29 @@ void Chassis_Task(void *pvParameters)
 			//俯仰
 			if (ctrl.spin_ctrl != SPIN_INSIDE)//不是装球状态
 			{
-				
-				if(ctrl.pitch_ctrl == PITCH_HAND)
-				{
-					if(ctrl.twist.linear.x>0.5f)
-					{
-						target_angle += 0.15f;
-					}
-					else if(ctrl.twist.linear.x<-0.5f)
-					{
-						target_angle -= 0.15f;
-					}
-					else 
-					{
-					}
-				}
-				else if(ctrl.pitch_ctrl == PITCH_AUTO)//自动俯仰
-				{
-					target_angle = 0;
-				}
-				else
-				{
-					target_angle = 0;
-				}
-	
+//				if(ctrl.pitch_ctrl == PITCH_HAND)
+//				{
+//					if(ctrl.twist.linear.x>0.5f)
+//					{
+//						target_angle += 0.15f;
+//					}
+//					else if(ctrl.twist.linear.x<-0.5f)
+//					{
+//						target_angle -= 0.15f;
+//					}
+//					else 
+//					{
+//					}
+//				}
+//				else if(ctrl.pitch_ctrl == PITCH_AUTO)//自动俯仰
+//				{
+//					target_angle = 0;
+//				}
+//				else
+//				{
+//					target_angle = 0;
+//				}
+				target_angle = 0;
 			}
 			
 			
@@ -91,35 +89,26 @@ void Chassis_Task(void *pvParameters)
 				target_angle = 400;
 			}
 			else
-			{
-			}
-			
-			
+			{}
 			/////////////////////////////////////////////////////
 			//摩擦带
             if(ctrl.friction_ctrl == FRICTION_ON)
             {
-                launch.ShootControl(true,25000);
+				shoot_speed = GetShootSpeed(distance);//获得速度
+				
+                launch.FrictionControl(true,21000);
             }
             else
             {
-                launch.ShootControl(false,0);
+				shoot_speed = 0;
+				
+                launch.FrictionControl(false,0);
             }
-			/////////////////////////////////////////////////////
-//			//推球气缸
-//			if(ctrl.shoot_ctrl == SHOOT_ON)
-//			{
-//				Push_Ball(CYLINDER_SHRINK);
-//			}
-//			else
-//			{
-//				Push_Ball(CYLINDER_STRETCH);
-//			}
 			/////////////////////////////////////////////////////
 			//旋转
 			if (ctrl.spin_ctrl == SPIN_INSIDE)
 			{
-				if (launch.LauncherMotor[0].get_angle() >= 340)
+				if (launch.LauncherMotor[0].get_angle() >= 340)//防止机构干涉
 				{
 					spin_state = true;
 				}
@@ -129,82 +118,23 @@ void Chassis_Task(void *pvParameters)
 				}
 				target_angle = 350;
 			}
-			else //(ctrl.spin_ctrl == SPIN_OUTSIDE)
+			else
 			{
 				spin_state = false;
 			}
 
-			
-			
-			if (launch.LauncherMotor[1].get_angle() > 400)
+			if (launch.LauncherMotor[1].get_angle() > 400)//防止机构干涉
 			{
 				target_angle = 350;
 			}
-			
-			
-			
-			launch.PitchControl(target_angle);
-			
-
-			launch.SpinControl(spin_state);
+				
+			launch.PitchControl(target_angle);//控制俯仰
+			launch.SpinControl(spin_state);//控制旋转
 			//////////////////////////////////////////////////////
 			//CAN发送
 			chassis.Motor_Control();
             launch.LaunchMotorCtrl();
         }
-		
-
-		
-		
-		
-		
-		
-//		 launch.PitchControl(400);
-//		launch.LauncherMotor[0].Out = 500;
-//        launch.LauncherMotor[1].Out = 1000;
-
-//			Motor_SendMsgs(&hcan1, launch.LauncherMotor[0]);
-//			if (i < 2500)
-//			{
-//				launch.ShootControl(true,0,0 );
-//			
-//			
-//			
-//				Motor_SendMsgs(&hcan1, launch.LauncherMotor[1]);
-//			}
-////		osDelay(pdMS_TO_TICKS(5000));
-//		
-//			i++;
-//		if (i > 2500)
-//		{
-//			
-//		launch.ShootControl(false,0,0 );
-//		
-//		
-//		 Motor_SendMsgs(&hcan1, launch.LauncherMotor[1]);
-//		}
-//		if (i == 5000)
-//		{
-//			i = 0;
-//		}
-		
-		 
-//		 
-//		 osDelay(pdMS_TO_TICKS(5000));
-		//launch.FrictionMotor[2].Mode = SET_eRPM;
-        //launch.FrictionMotor[2].Out=5000;
-//		launch.ShootControl(false,true,5000);
-//        Motor_SendMsgs(&hcan2,launch.FrictionMotor[2]);
-
-//		ctrl.twist.linear.x = 0;
-//		ctrl.twist.linear.y = 0.2;
-//		ctrl.twist.angular.z = 0;
-//		
-//		chassis.Control(ctrl.twist);
-//		
-//		
-//		chassis.Motor_Control();
-		
         osDelay(1);
     }
 }
@@ -227,4 +157,8 @@ void PidParamInit(void)
 
     launch.Pid_Param_Init(1,12.0f, 0.015f, 0.0f, 16384.0f, /*16384.0f*/6000.f, 0);
     launch.Pid_Mode_Init(1,0.1f, 0.0f, false, true);
+	
+	
+	launch.Pid_Param_Init(2,12.0f, 0.015f, 0.0f, 16384.0f, /*16384.0f*/6000.f, 0);
+    launch.Pid_Mode_Init(2,0.1f, 0.0f, false, true);
 }
