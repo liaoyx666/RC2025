@@ -37,7 +37,9 @@ void Chassis_Task(void *pvParameters)
         if(xQueueReceive(Chassia_Port, &ctrl, 1) == pdPASS)
         {
 			Dribble_Ball(ctrl.cylinder_ctrl);//运球
-			Shoot_Ball(ctrl.shoot_ctrl);//推球
+			//Shoot_Ball(ctrl.shoot_ctrl);//推球
+			launch.PushBall(ctrl.shoot_ctrl);//推球
+			
 			///////////////////////////////////////////////////	
             //底盘控制、电机控制    
             if(ctrl.chassis_ctrl == CHASSIS_ON)

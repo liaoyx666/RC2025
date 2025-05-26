@@ -4,6 +4,15 @@
 #include "pid.h"
 #include "speed_plan.h"
 
+//#include "main.h"
+//#include "drive_tim.h"
+
+
+
+
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif 
@@ -41,6 +50,7 @@ public:
 	void SpinControl(bool spin_state);
 	
 	void PushControl(bool push_state);
+	void PushBall(enum CONTROL_E state);
 	
 	//
     bool Pid_Param_Init(int num, float Kp, float Ki, float Kd, float Integral_Max, float OUT_Max, float DeadZone)
