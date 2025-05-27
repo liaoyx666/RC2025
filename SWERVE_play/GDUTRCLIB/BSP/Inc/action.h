@@ -25,11 +25,11 @@ typedef struct ROBOT_REAL_POS
 typedef struct ACTION_GL_POS
 {
 	float ANGLE_Z;
-	float ANGLE_X;
-	float ANGLE_Y;
 	float POS_X;
 	float POS_Y;
-	float W_Z;
+	float Speed_X;
+	float Speed_Y;
+	
 
 	float LAST_POS_X;
 	float LAST_POS_Y;
@@ -46,12 +46,21 @@ typedef struct ACTION_GL_POS
 
 extern ROBOT_REAL_POS ROBOT_REAL_POS_DATA;
 
+
+
+
+
+
+
+void POS_Change(float X, float Y);
+
+
+
 uint32_t Action_UART3_RxCallback(uint8_t *buf, uint16_t len);
 
-void Update_Action_gl_position(float value[6]);
+void Update_Action_gl_position(float value[5]);
 	
-void Update_X(float New_X);
-void Update_Y(float New_Y);
+
 #ifdef __cplusplus
 }
 #endif
