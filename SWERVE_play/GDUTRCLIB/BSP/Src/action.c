@@ -5,13 +5,15 @@ ACTION_GL_POS ACTION_GL_POS_DATA = {0};
 ROBOT_REAL_POS ROBOT_REAL_POS_DATA = {0};
 /*
   @使用方法：
-  使用串口3的232通道进行通讯，
-  action数据存放在ACTION_GL_POS_DATA[]中，如果要调用请外部申明
+  使用串口3进行通讯，注意不是232！！！！
+  
+  action数据存放在ActVal[5]中，如果要调用请外部申明
+  从第一个数据到第五个数据分别是POS_X,POS_Y,YAW,SPEED_X,SPEED_Y
   在.h文件中需要填入安装误差
   转换到车中心的坐标存放在ROBOT_REAL_POS_DATA[]中，如果要调用请外部申明
-  更新XY坐标时需要调用Update_X，Update_Y。并且在两个函数中间要delay10ms
+  更新XY坐标时需要调用POS_UPDATE();直接输入两个浮点型数据即可。
   
-  此文件用于action而非position
+  此文件用于position！！！！！！！！！
 */
 
 union 
@@ -24,7 +26,7 @@ uint32_t Action_UART3_RxCallback(uint8_t *buf, uint16_t len)
 {
 	uint8_t count = 0;
 	uint8_t i = 0;
-	uint8_t CRC_check[2];
+	uint8_t CRC_check[2];//CRC校验位，此文件未启用
 	
 	
 	
@@ -63,6 +65,7 @@ uint32_t Action_UART3_RxCallback(uint8_t *buf, uint16_t len)
 			
 			
 			case 2:
+				//接收帧ID和数据长度
 			{
 				if (buf[i] == 0x01) 
 				{
@@ -94,6 +97,7 @@ uint32_t Action_UART3_RxCallback(uint8_t *buf, uint16_t len)
 			
 			
 			case 4:
+				//开始接收数据
 			{
 				uint8_t j;
 				
@@ -112,7 +116,7 @@ uint32_t Action_UART3_RxCallback(uint8_t *buf, uint16_t len)
 				break;
 			}
 			
-			
+			//接收CRC校验码
 			case 5:
 			{
 				uint8_t j;
@@ -210,7 +214,7 @@ void Update_Action_gl_position(float value[5])
 
 void POS_Change(float X, float Y)
 {
-	  //定义接收缓冲区
+	  //定义发送缓冲区
     uint8_t txBuffer[10];
 	//使用联合体以便将浮点型数据转换为字节并发送
     union
