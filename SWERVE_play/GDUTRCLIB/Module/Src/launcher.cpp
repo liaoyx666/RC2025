@@ -121,8 +121,8 @@ void Launcher::PushControl(bool push_state)
 }
 
 
-#define SHOOT_TIME_1 400000
-#define SHOOT_TIME_2 100000
+#define SHOOT_TIME_1 4000000
+#define SHOOT_TIME_2 4000000
 
 
 void Launcher::PushBall(enum CONTROL_E state)
@@ -143,17 +143,32 @@ void Launcher::PushBall(enum CONTROL_E state)
 	{
 		if (flag == 0)
 		{
-			PushControl(true);
-			start_time = Get_SystemTimer();//获取开始运球时间戳
+			start_time = Get_SystemTimer();
 			flag = 1;
 		}
 	}
 	
+	if (flag == 1)
+	{
+		PushControl(true);
+	}
+	
+	
+	
+	
+	
 	if ((flag == 1) && (Get_SystemTimer() - start_time >= SHOOT_TIME_1))
 	{
-		PushControl(false);
 		flag = 2;
 	}
+	
+	if (flag == 2)
+	{
+		PushControl(false);
+	}
+	
+	
+	
 	
 	if ((flag == 2) && (Get_SystemTimer() - start_time >= SHOOT_TIME_1 + SHOOT_TIME_2))
 	{

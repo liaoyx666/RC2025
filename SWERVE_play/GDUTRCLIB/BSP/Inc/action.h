@@ -15,36 +15,36 @@ extern "C" {
 #define INSTALL_ERROR_Y		0.0
 
 
-typedef struct ROBOT_REAL_POS
+typedef struct RealPos
 {
   float world_x;
   float world_y;     
-  float world_w;
-}ROBOT_REAL_POS;
+  float world_yaw;
+}RealPos;
 
-typedef struct ACTION_GL_POS
+typedef struct RawPos
 {
-	float ANGLE_Z;
-	float POS_X;
-	float POS_Y;
+	float angle_Z;
+	float Pos_X;
+	float Pos_Y;
 	float Speed_X;
 	float Speed_Y;
 	
 
-	float LAST_POS_X;
-	float LAST_POS_Y;
+	float LAST_Pos_X;
+	float LAST_Pos_Y;
 
-	float DELTA_POS_X;
-	float DELTA_POS_Y;
+	float DELTA_Pos_X;
+	float DELTA_Pos_Y;
 	
 	float REAL_X;
 	float REAL_Y;
-}ACTION_GL_POS;
+}RawPos;
 
 
 
 
-extern ROBOT_REAL_POS ROBOT_REAL_POS_DATA;
+extern RealPos RealPosData;
 
 
 
@@ -56,9 +56,9 @@ void POS_Change(float X, float Y);
 
 
 
-uint32_t Action_UART3_RxCallback(uint8_t *buf, uint16_t len);
+uint32_t Position_UART3_RxCallback(uint8_t *buf, uint16_t len);
 
-void Update_Action_gl_position(float value[5]);
+void Update_RawPosition(float value[5]);
 	
 
 #ifdef __cplusplus

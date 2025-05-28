@@ -100,20 +100,20 @@ void CAN1_RxCallBack(CAN_RxBuffer *RxBuffer)
         switch (RxBuffer->header.StdId)
         {   
             case 0x201:
-                chassis.WheelMotor[0].update(RxBuffer->data);
-                break;
-
+               chassis.WheelMotor[0].update(RxBuffer->data);
+               break;
+			
             case 0x202:
-                chassis.WheelMotor[1].update(RxBuffer->data);
-                break;
+               chassis.WheelMotor[1].update(RxBuffer->data);
+               break;
             
             case 0x203:
-                chassis.WheelMotor[2].update(RxBuffer->data);
-                break;
+               chassis.WheelMotor[2].update(RxBuffer->data);
+               break;
 			
 			case 0x204:
-                chassis.WheelMotor[3].update(RxBuffer->data);
-                break;
+               chassis.WheelMotor[3].update(RxBuffer->data);
+               break;
             
             case 0x205:
                 launch.LauncherMotor[0].update(RxBuffer->data);
