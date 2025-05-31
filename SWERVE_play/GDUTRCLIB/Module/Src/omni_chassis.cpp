@@ -10,6 +10,10 @@
  * 
  */
 #include "chassis_omni.h"
+#include <math.h>
+
+extern RealPos RealPosData;
+extern RawPos RawPosData;
 
 void Omni_Chassis::Control(Robot_Twist_t cmd_vel)
 {
@@ -75,3 +79,49 @@ bool Omni_Chassis::Pid_Mode_Init(int num, float LowPass_error, float LowPass_d_e
     PID_Wheel[num].PID_Mode_Init(LowPass_error, LowPass_d_err, D_of_Current, Imcreatement_of_Out);
     return true;
 }
+
+
+bool Omni_Chassis::Pid_Param_Init_Yaw(float Kp, float Ki, float Kd, float Integral_Max, float OUT_Max, float DeadZone)
+{
+	PID_Yaw.PID_Param_Init(Kp, Ki, Kd, OUT_Max, Integral_Max,DeadZone);
+    return true;
+}
+
+bool Omni_Chassis::Pid_Mode_Init_Yaw(float LowPass_error, float LowPass_d_err, bool D_of_Current, bool Imcreatement_of_Out)
+{
+	PID_Yaw.PID_Mode_Init(LowPass_error, LowPass_d_err, D_of_Current, Imcreatement_of_Out);
+    return true;
+}
+
+void Omni_Chassis::Yaw_Control(float target_yaw, Robot_Twist_t *twist)
+{
+	
+	if (target_yaw > -180.f && target_yaw <= 180.f)
+	{
+        float current_yaw = RawPosData.angle_Z;
+        
+        // 计算角度误差
+        float error = target_yaw - current_yaw;
+        
+        // 将误差归一化到-180度到180度之间
+        if (error > 180.0f)
+		{
+            error -= 360.0f;
+		}
+		
+		if (error < -180.0f)
+		{
+            error += 360.0f;
+        }
+        
+        PID_Yaw.current = current_yaw;
+        PID_Yaw.target = current_yaw + error;
+		twist->angular.z = PID_Yaw.Adjust();
+		printf_DMA("%f,%f,%f\r\n", RawPosData.angle_Z, target_yaw, twist->angular.z);
+	}
+}
+
+
+
+
+

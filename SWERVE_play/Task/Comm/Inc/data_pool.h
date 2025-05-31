@@ -10,6 +10,8 @@
 //ROS串口DMA接收缓数组存大小
 #define ACTION_UART_SIZE 35
 
+#define LaserPositionin_UART_SIZE 15
+
 //队列大小
 #define CAN1_TxPort_SIZE 8
 #define CAN2_TxPort_SIZE 8
@@ -18,6 +20,9 @@
 #define Send_ROS_Port_SIZE 4
 #define Chassia_Port_SIZE 4
 #define Broadcast_Port_SIZE 2
+#define LaserPositionin_Port_SIZE 1
+
+
 
 
 //can数据帧类型定义
@@ -43,9 +48,17 @@ extern xQueueHandle Recieve_ROS_Port;
 extern xQueueHandle Send_ROS_Port;
 extern xQueueHandle Chassia_Port;
 extern xQueueHandle Broadcast_Port;
+extern QueueHandle_t Receive_LaserModuleData_1_Port;        // 激光测距模块1串口DMA接收队列
+extern QueueHandle_t Receive_LaserModuleData_2_Port;        // 激光测距模块2串口DMA接收队列
 
-extern uint8_t Uart4_Rx_Buff[ACTION_UART_SIZE];
 
+	
+	
+	
+	
+extern uint8_t Uart3_Rx_Buff[ACTION_UART_SIZE];
+extern uint8_t Uart2_Rx_Buff[LaserPositionin_UART_SIZE];
+extern uint8_t Uart6_Rx_Buff[LaserPositionin_UART_SIZE];
 
 typedef enum CHASSIS_STATUS
 {

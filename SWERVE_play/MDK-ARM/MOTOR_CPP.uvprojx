@@ -1260,6 +1260,16 @@
                 </FileArmAds>
               </FileOption>
             </File>
+            <File>
+              <FileName>LaserPositioning.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GDUTRCLIB\BSP\Src\LaserPositioning.c</FilePath>
+            </File>
+            <File>
+              <FileName>LaserPositioning.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\GDUTRCLIB\BSP\Inc\LaserPositioning.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

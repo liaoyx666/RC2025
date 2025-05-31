@@ -1,6 +1,9 @@
 #include "launcher.h"
 #include "chassis_task.h"
 
+#define ABS(x)  ((x) >= 0 ? (x) : -(x))
+
+
 bool Launcher::Reset()
 {
     static int start_time=get_systemTick()/1000;
@@ -84,7 +87,7 @@ void Launcher::FrictionControl(bool friction_ready, float shoot_speed)
             FrictionMotor[0].Out = 0;
             FrictionMotor[1].Out = 0;
             FrictionMotor[2].Out = 0;
-        } 
+        }
     }
 }
 
@@ -108,74 +111,120 @@ void Launcher::PushControl(bool push_state)
 {
 	if(push_state)
 	{
-		PidPushSpd.target = PushPlanner.Plan(0,push_angle_max_,LauncherMotor[2].get_angle());
+		PidPushSpd.target = 6000;//PushPlanner.Plan(0,push_angle_max_,LauncherMotor[2].get_angle());
 		PidPushSpd.current = LauncherMotor[2].get_speed();
 		LauncherMotor[2].Out = PidPushSpd.Adjust();
+		//printf_DMA("%d,%d\r\n", LauncherMotor[2].get_speed(), 10000);
 	}
 	else
 	{
-		PidPushSpd.target = PushPlanner.Plan(push_angle_max_,0,LauncherMotor[2].get_angle());
+		PidPushSpd.target = -5000;//PushPlanner.Plan(push_angle_max_,0,LauncherMotor[2].get_angle());
 		PidPushSpd.current = LauncherMotor[2].get_speed();
 		LauncherMotor[2].Out = PidPushSpd.Adjust();
+		//printf_DMA("%d,%d\r\n", LauncherMotor[2].get_speed(), -10000);
 	}
 }
 
 
-#define SHOOT_TIME_1 4000000
-#define SHOOT_TIME_2 4000000
+#define PUSH_TIME_1 70000
+//#define SHOOT_TIME_2 4000000
 
 
 void Launcher::PushBall(enum CONTROL_E state)
 {
 	
-	static uint32_t start_time;//开始推球时间
+//	static uint32_t start_time;//开始推球时间
+//	static uint8_t flag = 0;
+//	
+//	
+//	if ((flag == 0) && (state == SHOOT_OFF))
+//	{
+//		PushControl(false);
+//	}
+//	
+//	
+//	
+//	if (state == SHOOT_ON)
+//	{
+//		if (flag == 0)
+//		{
+//			start_time = Get_SystemTimer();
+//			flag = 1;
+//		}
+//	}
+//	
+//	if (flag == 1)
+//	{
+//		PushControl(true);
+//	}
+//	
+//	
+//	
+//	
+//	
+//	if ((flag == 1) && (Get_SystemTimer() - start_time >= SHOOT_TIME_1))
+//	{
+//		flag = 2;
+//	}
+//	
+//	if (flag == 2)
+//	{
+//		PushControl(false);
+//	}
+//	
+//	
+//	
+//	
+//	if ((flag == 2) && (Get_SystemTimer() - start_time >= SHOOT_TIME_1 + SHOOT_TIME_2))
+//	{
+//		flag = 0;
+//	}
+	static uint32_t start_time;
 	static uint8_t flag = 0;
-	
-	
+	static uint8_t time_flag = 0;
+
 	if ((flag == 0) && (state == SHOOT_OFF))
 	{
-		PushControl(false);
+		LauncherMotor[2].Out = -10;
 	}
-	
-	
-	
+
 	if (state == SHOOT_ON)
 	{
-		if (flag == 0)
-		{
-			start_time = Get_SystemTimer();
-			flag = 1;
-		}
+		flag = 1;
 	}
-	
+
 	if (flag == 1)
 	{
 		PushControl(true);
+		
+		
+		if ((ABS(LauncherMotor[2].Out) >= 3000) && (time_flag == 0))
+		{
+			start_time = Get_SystemTimer();
+			time_flag = 1;
+		}
+		if (((Get_SystemTimer() - start_time) >=  PUSH_TIME_1) && (ABS(LauncherMotor[2].Out) >= 2700) && (time_flag == 1))
+		{
+			flag = 2;
+			time_flag = 0;
+		}
 	}
-	
-	
-	
-	
-	
-	if ((flag == 1) && (Get_SystemTimer() - start_time >= SHOOT_TIME_1))
-	{
-		flag = 2;
-	}
-	
+
 	if (flag == 2)
 	{
 		PushControl(false);
+		
+		if ((ABS(LauncherMotor[2].Out) >= 2300) && (time_flag == 0))
+		{
+			start_time = Get_SystemTimer();
+			time_flag = 1;
+		}
+		if (((Get_SystemTimer() - start_time) >=  PUSH_TIME_1) && (ABS(LauncherMotor[2].Out) >= 2700) && (time_flag == 1))
+		{
+			flag = 0;
+			time_flag = 0;
+		}
 	}
-	
-	
-	
-	
-	if ((flag == 2) && (Get_SystemTimer() - start_time >= SHOOT_TIME_1 + SHOOT_TIME_2))
-	{
-		flag = 0;
-	}
-
-
 }
 
 

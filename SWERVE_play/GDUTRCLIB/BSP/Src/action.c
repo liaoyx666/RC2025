@@ -1,8 +1,24 @@
 #include "action.h"
 #include <math.h>
 
+
 RawPos RawPosData = {0};
 RealPos RealPosData = {0};
+
+
+/*
+  @使用方法：
+  使用串口3进行通讯，注意不是232！！！！
+  
+  action数据存放在ActVal[5]中，如果要调用请外部申明
+  从第一个数据到第五个数据分别是POS_X,POS_Y,YAW,SPEED_X,SPEED_Y
+  在.h文件中需要填入安装误差
+  转换到车中心的坐标存放在ROBOT_REAL_POS_DATA[]中，如果要调用请外部申明
+  更新XY坐标时需要调用POS_UPDATE();直接输入两个浮点型数据即可。
+  
+  此文件用于position！！！！！！！！！
+*/
+
 
 union
 {
@@ -14,7 +30,7 @@ uint32_t Position_UART3_RxCallback(uint8_t *buf, uint16_t len)
 {
 	uint8_t count = 0;
 	uint8_t i = 0;
-	uint8_t CRC_check[2];
+	uint8_t CRC_check[2];//CRC校验位，此文件未启用
 	
 	
 	
@@ -52,7 +68,7 @@ uint32_t Position_UART3_RxCallback(uint8_t *buf, uint16_t len)
 			}
 			
 			
-			case 2:
+			case 2://接收帧ID和数据长度
 			{
 				if (buf[i] == 0x01) 
 				{
@@ -83,12 +99,12 @@ uint32_t Position_UART3_RxCallback(uint8_t *buf, uint16_t len)
 			
 			
 			
-			case 4:
+			case 4://开始接收数据
 			{
 				uint8_t j;
 				
 				
-				if (i > len - 28)
+				if (i > len - 24)
 				{
 					break_flag = 0;
 				}
@@ -102,7 +118,7 @@ uint32_t Position_UART3_RxCallback(uint8_t *buf, uint16_t len)
 				break;
 			}
 			
-			
+			//接收CRC校验码
 			case 5:
 			{
 				uint8_t j;
@@ -176,14 +192,15 @@ void Update_RawPosition(float value[5])
 
   //世界坐标
 	RealPosData.world_yaw = RawPosData.angle_Z;
-  
+    RealPosData.world_x =  RawPosData.Pos_X;
+	RealPosData.world_y =  RawPosData.Pos_Y;
 	//加入安装误差
 	RawPosData.REAL_X += (RawPosData.DELTA_Pos_X);
 	RawPosData.REAL_Y += (RawPosData.DELTA_Pos_Y);
 	
   //解算安装误差
-	RealPosData.world_x = RawPosData.REAL_X + INSTALL_ERROR_X * sinf(RealPosData.world_yaw * PI / 180.f);
-	RealPosData.world_y = RawPosData.REAL_Y + INSTALL_ERROR_Y * cosf(RealPosData.world_yaw * PI / 180.f);
+	//RealPosData.world_x = RawPosData.REAL_X + INSTALL_ERROR_X * sinf(RealPosData.world_yaw * PI / 180.f);
+	//RealPosData.world_y = RawPosData.REAL_Y + INSTALL_ERROR_Y * cosf(RealPosData.world_yaw * PI / 180.f);
 }
 
 
@@ -195,7 +212,7 @@ void Update_RawPosition(float value[5])
 
 void POS_Change(float X, float Y)
 {
-	  //定义接收缓冲区
+	  //定义发送缓冲区
     uint8_t txBuffer[10];
 	//使用联合体以便将浮点型数据转换为字节并发送
     union

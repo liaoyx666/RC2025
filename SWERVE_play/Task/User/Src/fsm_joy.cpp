@@ -12,6 +12,7 @@
 #include "fsm_joy.h"
 #include "drive_tim.h"
 #include "chassis_task.h"
+#include "drive_uart.h"
 
 void Air_Joy_Task(void *pvParameters)
 {
@@ -43,6 +44,7 @@ void Air_Joy_Task(void *pvParameters)
 				/*******************************************************************************/
 				if (_tool_Abs(air_joy.SWB - 1500) < 50)//运球、装球模式
 				{
+					ctrl.yaw_ctrl = YAW_HAND;
 					ctrl.chassis_ctrl = CHASSIS_ON;
 					ctrl.friction_ctrl = FRICTION_OFF;
 					/////////////////////////////////////////////////////////////////////////////
@@ -111,6 +113,28 @@ void Air_Joy_Task(void *pvParameters)
 				/********************************************************************************/
 				else if (_tool_Abs(air_joy.SWB - 2000) < 50)//射球模式
 				{
+					
+					
+					if (_tool_Abs(air_joy.SWC - 1500) < 50)
+					{
+						ctrl.yaw_ctrl = YAW_HAND;
+					}
+					else if (_tool_Abs(air_joy.SWC - 1000) < 50)
+					{
+						ctrl.yaw_ctrl = YAW_LOCK_DIRECTION;
+					}
+					else if (_tool_Abs(air_joy.SWC - 2000) < 50)
+					{
+						ctrl.yaw_ctrl = YAW_LOCK_BASKET;
+					}
+					else
+					{
+						ctrl.yaw_ctrl = YAW_HAND;
+					}
+					
+					
+					
+					
 					if (_tool_Abs(air_joy.SWA - 2000) < 50)
 					{
 						ctrl.chassis_ctrl = CHASSIS_OFF;
@@ -167,6 +191,7 @@ void Air_Joy_Task(void *pvParameters)
 			ctrl.pitch_ctrl = PITCH_RESET;
 			ctrl.shoot_ctrl = SHOOT_OFF;
 			ctrl.cylinder_ctrl = CYLINDER_KEEP;
+			ctrl.yaw_ctrl = YAW_HAND;
             //ctrl.twist = {0};
         }
         osDelay(1);

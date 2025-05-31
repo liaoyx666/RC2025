@@ -6,6 +6,7 @@
 
 #include "chassis_base.h"
 #include "motor.h"
+#include "action.h"
 
 extern "C" {
 #endif
@@ -38,10 +39,19 @@ public:
     bool Pid_Param_Init(int num, float Kp, float Ki, float Kd, float Integral_Max, float OUT_Max, float DeadZone);
     bool Pid_Mode_Init(int num, float LowPass_error, float LowPass_d_err, bool D_of_Current, bool Imcreatement_of_Out);
 
+	bool Pid_Param_Init_Yaw(float Kp, float Ki, float Kd, float Integral_Max, float OUT_Max, float DeadZone);
+    bool Pid_Mode_Init_Yaw(float LowPass_error, float LowPass_d_err, bool D_of_Current, bool Imcreatement_of_Out);
+	
+	void Yaw_Control(float target_yaw, Robot_Twist_t *twist);
+	
     void Control(Robot_Twist_t cmd_vel);
     void Motor_Control(void);
     Motor_C620 WheelMotor[4] = {Motor_C620(1),Motor_C620(2),Motor_C620(3),Motor_C620(4)};
 private:
+	PID PID_Yaw;
+
+
+
     PID PID_Wheel[4];
     Wheel_t wheel[4];
     int wheel_num = 0;

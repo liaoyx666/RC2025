@@ -157,7 +157,6 @@ static void Uart_Rx_Idle_Callback(usart_manager_t *manager)
 	HAL_UART_Receive_DMA(manager->uart_handle, manager->rx_buffer, manager->rx_buffer_size);
 }
 
-
 /**
  * @brief 校验位函数Crc8
  * @param 传入数组
@@ -181,4 +180,85 @@ unsigned char serial_get_crc8_value(unsigned char *tem_array, unsigned char len)
     }
     return crc;
 }
+
+
+
+
+
+//#include <stdio.h>
+//#include "stm32f4xx_hal.h"
+
+//#pragma import(__use_no_semihosting)
+
+//// 标准库需要的支持函数
+//struct __FILE {
+//	int handle;
+//};
+
+//FILE __stdout;
+
+//// 定义_sys_exit()以避免使用半主机模式
+//void _sys_exit(int x) {
+//	x = x;
+//}
+
+//void _ttywrch(int ch) {
+//	ch = ch;
+//}
+
+//// 重定义fputc函数
+//int fputc(int ch, FILE *f) {
+//	HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xFFFF); // 根据使用的UART重定向
+//	HAL_UART_Transmit_DMA(&huart1, (uint8_t *)ch, sizeof(ch));
+//	return ch;
+//}
+
+
+
+
+
+#include <stdarg.h>
+#include <string.h>
+
+#define SEND_BUF_SIZE 100
+uint8_t Sendbuf[SEND_BUF_SIZE];
+
+void printf_DMA(char *fmt, ...)
+{
+    memset(Sendbuf, 0, SEND_BUF_SIZE);  // 清空发送缓冲区
+    
+    va_list arg;
+    va_start(arg, fmt);
+    vsnprintf((char*)Sendbuf, SEND_BUF_SIZE, fmt, arg);  // 安全的格式化输出，防止缓冲区溢出
+    va_end(arg);
+    
+    uint8_t len = strlen((char*)Sendbuf);  // 计算实际字符串长度
+    if(len > 0)
+	{
+        HAL_UART_Transmit_DMA(&huart1, Sendbuf, len);  // 通过DMA发送字符串
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

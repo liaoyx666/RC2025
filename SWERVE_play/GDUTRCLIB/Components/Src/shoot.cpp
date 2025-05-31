@@ -1,41 +1,55 @@
 #include "shoot.h"
 #include <math.h>
 
-#define SAMPLE_NUM 10//采样点数
+
+#define PI 3.14159265358979f
 
 
-float cubic_spline[SAMPLE_NUM - 1][4] = {
-{110000.000000f, 131427.549636f, 0.000000f, -11427.549636f},
 
-{230000.000000f, 97144.900728f, -34282.648909f, 47137.748181f},
 
-{340000.000000f, 169992.847453f, 107130.595634f, -67123.443088f},
+#define SAMPLE_NUM_1 4//采样点数
 
-{550000.000000f, 182883.709459f, -94239.733629f, 61356.024171f},
+float cubic_spline_1[SAMPLE_NUM_1 - 1][4] = {
+{16331.000000f, 2835.827402f, 0.000000f, 4237.224978f},
 
-{700000.000000f, 178472.314712f, 89828.338883f, 21699.346405f},
+{17000.000000f, 3451.072469f, 2796.568486f, -911.857676f},
 
-{990000.000000f, 423227.031693f, 154926.378098f, -68153.409792f},
-
-{1500000.000000f, 528619.558515f, -49533.851276f, 20914.292761f},
-
-{2000000.000000f, 492294.734246f, 13209.027007f, -5503.761253f},
-
-{2500000.000000f, 502201.504501f, -3302.256752f, 1100.752251f},
+{19200.000000f, 5505.502189f, 1483.493432f, -988.995621f},
 
 };//三次样条插值法参数
 
-float sample_distance[SAMPLE_NUM] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};//采样点距离
+float sample_distance_1[SAMPLE_NUM_1] = {1.3, 1.52, 2.0, 2.5};//采样点距离
 
 
 
 
 
-float GetShootSpeed(float distance)
+
+#define SAMPLE_NUM_2 4//采样点数
+
+float cubic_spline_2[SAMPLE_NUM_2 - 1][4] = {
+{18450.000000f, 2589.333333f, 0.000000f, 2042.666667f},
+
+{20000.000000f, 4121.333333f, 3064.000000f, -5013.333333f},
+
+{22200.000000f, 3425.333333f, -4456.000000f, 2970.666667f},
+
+};//三次样条插值法参数
+
+float sample_distance_2[SAMPLE_NUM_2] = {2.0, 2.5, 3.0, 3.5};//采样点距离
+
+
+
+
+
+
+
+
+float CalcSpeed(float distance, float cubic_spline[][4], float *sample_distance, uint16_t num)
 {
-	uint8_t head = 0, tail = SAMPLE_NUM - 1, mid;
-	
-	if ((distance < sample_distance[0]) || (distance > sample_distance[SAMPLE_NUM - 1]))
+	uint8_t head = 0, tail = num - 1, mid;
+
+	if ((distance < sample_distance[0]) || (distance > sample_distance[num - 1]))
 	{
 		return 0;
 	}
@@ -61,4 +75,89 @@ float GetShootSpeed(float distance)
 		   cubic_spline[head][1] * dx + 
 		   cubic_spline[head][0];
 }
+
+
+float GetShootSpeed(float distance, bool large_pitch)
+{
+	if (large_pitch)
+	{
+		return CalcSpeed(distance, cubic_spline_1, sample_distance_1, SAMPLE_NUM_1);
+	}
+	else
+	{
+		return CalcSpeed(distance, cubic_spline_2, sample_distance_2, SAMPLE_NUM_2);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#define HOOP_X  3.294f; // 篮筐的X坐标（单位：米）
+#define HOOP_Y  0.26f; // 篮筐的Y坐标（单位：米）
+float GetHoopAngle(float robot_x, float robot_y, float *distance)
+{
+	float delta_x, delta_y, target_theta;
+	
+	delta_x = 3.294f - robot_x;
+	delta_y = 0.36f - robot_y;
+    target_theta = atan2f(delta_y, delta_x); // 朝向篮筐的方向（弧度）
+
+	target_theta = target_theta * 180.f / PI;
+	
+	
+	*distance = sqrtf(delta_x * delta_x + delta_y * delta_y);
+	
+	
+	
+	
+	if (target_theta <= -90.f)
+	{
+		target_theta += 270.f;
+	}
+	else
+	{
+		target_theta -= 90.f;
+	}
+	
+//	if (target_theta <= -90)
+//	{
+//		target_theta -= 90.f;
+//	}
+//	else
+//	{
+//		target_theta += 270.f;
+//	}
+	return target_theta;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

@@ -5,7 +5,7 @@
 #include "speed_plan.h"
 
 //#include "main.h"
-//#include "drive_tim.h"
+#include "drive_uart.h"
 
 
 
@@ -100,7 +100,7 @@ private:
     float pitch_angle_max_ = 0.0f, spin_angle_max_ = 0.0f, push_angle_max_ = 0.0f;
     PID PidPitchSpd, PidPitchPos, PidSpinSpd, PidPushSpd;
     TrapePlanner SpinPlanner = TrapePlanner(0.15,0.15,1500,100,1);
-	TrapePlanner PushPlanner = TrapePlanner(0.15,0.15,3000,100,1);
+	//TrapePlanner PushPlanner = TrapePlanner(0.15,0.15,3000,100,1);
     bool machine_init_ = false;
     bool Reset();
     float pitch_angle_last_=0;
