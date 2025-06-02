@@ -39,7 +39,8 @@ void System_Resource_Init(void)
     Uart_Init(&huart6, Uart6_Rx_Buff, LaserPositionin_UART_SIZE, LaserPositionin_UART6_RxCallback);     // 初始化激光测距模块所使用的串口
 	
 	LaserModuleGroup_Init();
-	
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
     App_Init();
 }
 

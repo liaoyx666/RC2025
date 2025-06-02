@@ -26,25 +26,21 @@ float distance = 0;
 float yaw_angle = 0;
 
 
-uint8_t c0, c1, c2;
+uint8_t a5, a3;
 
 void Chassis_Task(void *pvParameters)
 {
     // static CONTROL_T ctrl;
     for(;;)
     {
-		c0 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0);
-		c1 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1);
-		c2 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2);		
+		a3 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3);
+		a5 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5);
 	
         if(xQueueReceive(Chassia_Port, &ctrl, 1) == pdPASS)
-        {
-			
+        {	
 			yaw_angle = GetHoopAngle(RealPosData.world_x, RealPosData.world_y, &distance);
 			
-
 			Dribble_Ball(ctrl.cylinder_ctrl);//运球
-			//Shoot_Ball(ctrl.shoot_ctrl);//推球
 			launch.PushBall(ctrl.shoot_ctrl);//推球
 			
 			///////////////////////////////////////////////////	
@@ -73,7 +69,11 @@ void Chassis_Task(void *pvParameters)
 				ctrl.twist.linear.y = 0;
             }
 			
-
+			
+			
+			
+			
+			chassis.World_Coordinate(0, &ctrl.twist);
 			////////////////////////////////////////////////////
 			//俯仰
 //			if (ctrl.spin_ctrl != SPIN_INSIDE)//不是装球状态
@@ -126,7 +126,7 @@ void Chassis_Task(void *pvParameters)
 				{
 					spin_state = false;
 				}
-				target_angle = 400;
+				target_angle = 410;
 			}
 			else
 			{
@@ -135,7 +135,7 @@ void Chassis_Task(void *pvParameters)
 
 			if (launch.LauncherMotor[1].get_angle() > 330)//防止机构干涉
 			{
-				target_angle = 400;
+				target_angle = 410;
 			}
 			///////////////////////////////////////////////
 
@@ -173,9 +173,9 @@ void Chassis_Task(void *pvParameters)
 			{
 				target_angle = 0;
 			}
-			else if(target_angle > 400)
+			else if(target_angle > 450)
 			{
-				target_angle = 400;
+				target_angle = 450;
 			}
 			else
 			{}

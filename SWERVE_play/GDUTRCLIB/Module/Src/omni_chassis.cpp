@@ -95,7 +95,6 @@ bool Omni_Chassis::Pid_Mode_Init_Yaw(float LowPass_error, float LowPass_d_err, b
 
 void Omni_Chassis::Yaw_Control(float target_yaw, Robot_Twist_t *twist)
 {
-	
 	if (target_yaw > -180.f && target_yaw <= 180.f)
 	{
         float current_yaw = RawPosData.angle_Z;
@@ -117,11 +116,42 @@ void Omni_Chassis::Yaw_Control(float target_yaw, Robot_Twist_t *twist)
         PID_Yaw.current = current_yaw;
         PID_Yaw.target = current_yaw + error;
 		twist->angular.z = PID_Yaw.Adjust();
-		printf_DMA("%f,%f,%f\r\n", RawPosData.angle_Z, target_yaw, twist->angular.z);
+		//printf_DMA("%f,%f,%f\r\n", RawPosData.angle_Z, target_yaw, twist->angular.z);
 	}
 }
 
-
+void Omni_Chassis::World_Coordinate(float direction_yaw, Robot_Twist_t *twist)
+{
+	if (direction_yaw > -180.f && direction_yaw <= 180.f)
+	{
+		float current_yaw = RawPosData.angle_Z;
+		
+		float error = current_yaw - direction_yaw;
+		
+		// 将误差归一化到-180度到180度之间
+        if (error > 180.0f)
+		{
+            error -= 360.0f;
+		}
+		
+		if (error < -180.0f)
+		{
+            error += 360.0f;
+        }
+		
+		error = error * PI / 180.f;//转换弧度制
+		
+		float COS_error = cosf(error);
+		float SIN_error = sinf(error);
+		
+		// 保存原始值，避免计算干扰
+		float vx = twist->linear.x;
+		float vy = twist->linear.y;
+		
+		twist->linear.x  =  (vx * COS_error + vy * SIN_error);
+        twist->linear.y  = -(vx * SIN_error - vy * COS_error);
+	}
+}
 
 
 

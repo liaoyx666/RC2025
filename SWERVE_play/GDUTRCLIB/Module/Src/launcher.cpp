@@ -53,7 +53,7 @@ void Launcher::PitchControl(float pitch_angle)
     {
         Reset();
         PidPitchPos.PID_Mode_Init(0.1,0.1,true,false);
-        PidPitchPos.PID_Param_Init(10, 0, 0.2, 100, /*300*/900, 0.2);
+        PidPitchPos.PID_Param_Init(15, 0, 0.2, 100, /*300*/900, 0.2);
     }
     else
     {
@@ -93,17 +93,48 @@ void Launcher::FrictionControl(bool friction_ready, float shoot_speed)
 
 void Launcher::SpinControl(bool spin_state)
 {
-	if(spin_state)
-	{
-		PidSpinSpd.target = SpinPlanner.Plan(0,spin_angle_max_,LauncherMotor[1].get_angle());
-		PidSpinSpd.current = LauncherMotor[1].get_speed();
-		LauncherMotor[1].Out = PidSpinSpd.Adjust();
-	}
-	else
-	{
-		PidSpinSpd.target = SpinPlanner.Plan(spin_angle_max_,0,LauncherMotor[1].get_angle());
-		PidSpinSpd.current = LauncherMotor[1].get_speed();
-		LauncherMotor[1].Out = PidSpinSpd.Adjust();
+	if(!machine_init_)
+    {
+        Reset();
+        PidSpinPos.PID_Mode_Init(0.1,0.1,true,false);
+        PidSpinPos.PID_Param_Init(15, 0, 0.2, 100, /*300*/900, 0.1);
+    }
+    else
+    {
+		if(spin_state)
+		{
+			if (LauncherMotor[1].get_angle() < (spin_angle_max_ - 30))
+			{
+				PidSpinSpd.target = SpinPlanner.Plan(0,spin_angle_max_,LauncherMotor[1].get_angle());
+				PidSpinSpd.current = LauncherMotor[1].get_speed();
+				LauncherMotor[1].Out = PidSpinSpd.Adjust();
+			}
+			else
+			{
+				PidSpinPos.target = spin_angle_max_;
+				PidSpinPos.current = LauncherMotor[1].get_angle();
+				PidSpinSpd.target = PidSpinPos.Adjust();
+				PidSpinSpd.current = LauncherMotor[1].get_speed();
+				LauncherMotor[1].Out = PidSpinSpd.Adjust();
+			}
+		}
+		else
+		{
+			if (LauncherMotor[1].get_angle() > 30)
+			{
+				PidSpinSpd.target = SpinPlanner.Plan(spin_angle_max_,0,LauncherMotor[1].get_angle());
+				PidSpinSpd.current = LauncherMotor[1].get_speed();
+				LauncherMotor[1].Out = PidSpinSpd.Adjust();
+			}
+			else
+			{
+				PidSpinPos.target = 0;
+				PidSpinPos.current = LauncherMotor[1].get_angle();
+				PidSpinSpd.target = PidSpinPos.Adjust();
+				PidSpinSpd.current = LauncherMotor[1].get_speed();
+				LauncherMotor[1].Out = PidSpinSpd.Adjust();
+			}
+		}
 	}
 }
 
@@ -111,93 +142,37 @@ void Launcher::PushControl(bool push_state)
 {
 	if(push_state)
 	{
-		PidPushSpd.target = 6000;//PushPlanner.Plan(0,push_angle_max_,LauncherMotor[2].get_angle());
+		PidPushSpd.target = 6000;
 		PidPushSpd.current = LauncherMotor[2].get_speed();
 		LauncherMotor[2].Out = PidPushSpd.Adjust();
-		//printf_DMA("%d,%d\r\n", LauncherMotor[2].get_speed(), 10000);
 	}
 	else
 	{
-		PidPushSpd.target = -5000;//PushPlanner.Plan(push_angle_max_,0,LauncherMotor[2].get_angle());
+		PidPushSpd.target = -5000;
 		PidPushSpd.current = LauncherMotor[2].get_speed();
 		LauncherMotor[2].Out = PidPushSpd.Adjust();
-		//printf_DMA("%d,%d\r\n", LauncherMotor[2].get_speed(), -10000);
 	}
 }
 
-
 #define PUSH_TIME_1 70000
-//#define SHOOT_TIME_2 4000000
-
 
 void Launcher::PushBall(enum CONTROL_E state)
 {
-	
-//	static uint32_t start_time;//开始推球时间
-//	static uint8_t flag = 0;
-//	
-//	
-//	if ((flag == 0) && (state == SHOOT_OFF))
-//	{
-//		PushControl(false);
-//	}
-//	
-//	
-//	
-//	if (state == SHOOT_ON)
-//	{
-//		if (flag == 0)
-//		{
-//			start_time = Get_SystemTimer();
-//			flag = 1;
-//		}
-//	}
-//	
-//	if (flag == 1)
-//	{
-//		PushControl(true);
-//	}
-//	
-//	
-//	
-//	
-//	
-//	if ((flag == 1) && (Get_SystemTimer() - start_time >= SHOOT_TIME_1))
-//	{
-//		flag = 2;
-//	}
-//	
-//	if (flag == 2)
-//	{
-//		PushControl(false);
-//	}
-//	
-//	
-//	
-//	
-//	if ((flag == 2) && (Get_SystemTimer() - start_time >= SHOOT_TIME_1 + SHOOT_TIME_2))
-//	{
-//		flag = 0;
-//	}
 	static uint32_t start_time;
 	static uint8_t flag = 0;
 	static uint8_t time_flag = 0;
-
+	
 	if ((flag == 0) && (state == SHOOT_OFF))
 	{
 		LauncherMotor[2].Out = -10;
 	}
-
 	if (state == SHOOT_ON)
 	{
 		flag = 1;
 	}
-
 	if (flag == 1)
 	{
 		PushControl(true);
-		
-		
 		if ((ABS(LauncherMotor[2].Out) >= 3000) && (time_flag == 0))
 		{
 			start_time = Get_SystemTimer();
@@ -209,11 +184,9 @@ void Launcher::PushBall(enum CONTROL_E state)
 			time_flag = 0;
 		}
 	}
-
 	if (flag == 2)
 	{
 		PushControl(false);
-		
 		if ((ABS(LauncherMotor[2].Out) >= 2300) && (time_flag == 0))
 		{
 			start_time = Get_SystemTimer();

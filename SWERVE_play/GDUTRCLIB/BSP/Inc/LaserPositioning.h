@@ -138,7 +138,7 @@ typedef struct WorldXYCoordinates
 
 
 void LaserModuleGroup_Init(void);
-void LaserPositioning_Task(float* YawPointer, WorldXYCoordinatesTypedef* WorldXYCoordinatesPointer);
+void LaserPositioning(float YawPointer, WorldXYCoordinatesTypedef* WorldXYCoordinatesPointer);
 
 uint32_t LaserPositionin_UART2_RxCallback(uint8_t* Receive_data, uint16_t data_len);    // 激光测距模块1串口接收回调函数
 uint32_t LaserPositionin_UART6_RxCallback(uint8_t* Receive_data, uint16_t data_len);    // 激光测距模块2串口接收回调函数

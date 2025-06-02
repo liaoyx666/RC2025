@@ -43,6 +43,11 @@ public:
     bool Pid_Mode_Init_Yaw(float LowPass_error, float LowPass_d_err, bool D_of_Current, bool Imcreatement_of_Out);
 	
 	void Yaw_Control(float target_yaw, Robot_Twist_t *twist);
+	void World_Coordinate(float direction_angle, Robot_Twist_t *twist);
+	
+	
+	
+	
 	
     void Control(Robot_Twist_t cmd_vel);
     void Motor_Control(void);

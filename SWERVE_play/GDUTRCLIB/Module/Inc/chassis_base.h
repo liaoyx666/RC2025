@@ -5,7 +5,7 @@
 #include "drive_tim.h"
 
 typedef uint32_t (*SystemTick_Fun)(void);
-#define PI 3.1415926f
+#define PI 3.14159265358979f
 
 #ifdef __cplusplus
 

@@ -110,8 +110,8 @@
 #define LaserModule2ReadAddress			(LaserModule2Address | 0x80)	// 激光测距模块2读地址
 #define LaserModule2WriteAddress		LaserModule2Address 			// 激光测距模块2写地址
 
-int16_t FrontLaserDistanceOffset	= 304;			// 前激光安装距离偏移量，单位：mm
-int16_t RightLaserDistanceOffset	= 252;			// 右激光安装距离偏移量，单位：mm
+int16_t FrontLaserDistanceOffset	= 0;			// 前激光安装距离偏移量，单位：mm
+int16_t RightLaserDistanceOffset	= 0;			// 右激光安装距离偏移量，单位：mm
 float YawOffset					= 0.0f;			// 偏航角偏移量，单位：度
 //uint16_t FrontLaserAngleOffset_ActualDistance		= 0;		// 前激光安装角度偏移量_实际距离，单位：mm
 int16_t FrontLaserAngleOffset_OffsetDistance		= 0;		// 前激光安装角度偏移量_偏移距离，单位：mm
@@ -133,7 +133,7 @@ static void LaserPositioning_SendXYWorldCoordinates(const WorldXYCoordinatesType
 static uint8_t MyUART_Transmit_DMA(UART_HandleTypeDef* huart, const uint8_t* pData, uint16_t Size);
 
 
-void LaserPositioning_Task(float*YawPointer, WorldXYCoordinatesTypedef* WorldXYCoordinatesPointer)
+void LaserPositioning(float Yaw, WorldXYCoordinatesTypedef* WorldXYCoordinatesPointer)
 {
 	uint8_t LaserModuleGroupState = 0;	// 激光测距模块状态变量
 
@@ -144,9 +144,9 @@ void LaserPositioning_Task(float*YawPointer, WorldXYCoordinatesTypedef* WorldXYC
 
 	LaserModuleGroupState |= LaserModuleGroup_AnalysisModulesMeasurementResults(&LaserModuleDataGroup);			// 激光测距模块组读取测量结果
 
-	LaserPositioning_GetYaw(YawPointer);		// 获取偏航角，单位弧度
+	LaserPositioning_GetYaw(&Yaw);		// 获取偏航角，单位弧度
 	
-	LaserPositioning_XYWorldCoordinatesCalculate(WorldXYCoordinatesPointer, *YawPointer, LaserModuleDataGroup.LaserModule1.MeasurementData.Distance, LaserModuleDataGroup.LaserModule2.MeasurementData.Distance);
+	LaserPositioning_XYWorldCoordinatesCalculate(WorldXYCoordinatesPointer, Yaw, LaserModuleDataGroup.LaserModule1.MeasurementData.Distance, LaserModuleDataGroup.LaserModule2.MeasurementData.Distance);
 
 	LaserPositioning_SendXYWorldCoordinates(WorldXYCoordinatesPointer);	// 发送世界坐标系XY坐标数据
 }
@@ -175,14 +175,14 @@ void LaserModuleGroup_Init(void)
 	LaserModuleDataGroup.LaserModule2.MeasurementData.SignalQuality = 0;	// 激光测距模块2信号质量数据初始化
 	LaserModuleDataGroup.LaserModule2.MeasurementData.State = 0;	// 激光测距模块2状态数据初始化
 
-	//LaserModuleGroupState |= LaserModule_TurnOnTheLaserPointer(&LaserModuleDataGroup->LaserModule1);	// 打开激光测距模块1的激光器
-	//LaserModuleGroupState |= LaserModule_TurnOnTheLaserPointer(&LaserModuleDataGroup->LaserModule2);	// 打开激光测距模块2的激光器
+	//LaserModuleGroupState |= LaserModule_TurnOnTheLaserPointer(&LaserModuleDataGroup.LaserModule1);	// 打开激光测距模块1的激光器
+	//LaserModuleGroupState |= LaserModule_TurnOnTheLaserPointer(&LaserModuleDataGroup.LaserModule2);	// 打开激光测距模块2的激光器
 
 	//taskENTER_CRITICAL();
 
 	HAL_Delay(20);
 	LaserModuleGroupState |= LaserModule_StateContinuousAutomaticMeasurement(&LaserModuleDataGroup.LaserModule2);	// 激光测距模块2连续自动测量状态设置
-	HAL_Delay(20);
+	HAL_Delay(30);
 	LaserModuleGroupState |= LaserModule_StateContinuousAutomaticMeasurement(&LaserModuleDataGroup.LaserModule1);	// 激光测距模块1连续自动测量状态设置
 	HAL_Delay(20);
 
@@ -340,7 +340,7 @@ static uint8_t MyUART_Transmit_DMA(UART_HandleTypeDef* huart, const uint8_t* pDa
 {
 	HAL_StatusTypeDef UART_Status = HAL_OK;
 
-	UART_Status = HAL_UART_Transmit_DMA(huart, pData, Size);
+	UART_Status = HAL_UART_Transmit(huart, pData, Size,100);
 
 	if (UART_Status == HAL_OK)
 	{
@@ -359,20 +359,21 @@ static uint8_t MyUART_Transmit_DMA(UART_HandleTypeDef* huart, const uint8_t* pDa
  * @return		uint32_t 回调函数发送数据至队列状态，1 为发送成功，0 为发送失败
  * @note		杨键翌师兄传的代码，我不清楚return值为什么是uint32_t类型
  */
-uint32_t LaserPositionin_UART6_RxCallback(uint8_t* Receive_data, uint16_t data_len)
+uint32_t LaserPositionin_UART6_RxCallback(uint8_t* buff, uint16_t len)
 {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-	if (xQueueOverwriteFromISR(Receive_LaserModuleData_2_Port, Receive_data, &xHigherPriorityTaskWoken) == pdPASS)
-	{
-		// 触发上下文切换（若需要）
-		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-		return 1;   // 发送成功
-	}
-	else
-	{
-		return 0;   // 队列发送失败
-	}
+//	if (xQueueOverwriteFromISR(Receive_LaserModuleData_2_Port, Receive_data, &xHigherPriorityTaskWoken) == pdPASS)
+//	{
+//		// 触发上下文切换（若需要）
+//		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+//		return 1;   // 发送成功
+//	}
+//	else
+//	{
+//		return 0;   // 队列发送失败
+//	}
+	return 0;
 }
 
 /**
@@ -382,18 +383,19 @@ uint32_t LaserPositionin_UART6_RxCallback(uint8_t* Receive_data, uint16_t data_l
  * @return		uint32_t 回调函数发送数据至队列状态，1 为发送成功，0 为发送失败
  * @note		杨键翌师兄传的代码，我不清楚return值为什么是uint32_t类型
  */
-uint32_t LaserPositionin_UART2_RxCallback(uint8_t* Receive_data, uint16_t data_len)
+uint32_t LaserPositionin_UART2_RxCallback(uint8_t* buff, uint16_t len)
 {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-	if (xQueueOverwriteFromISR(Receive_LaserModuleData_1_Port, Receive_data, &xHigherPriorityTaskWoken) == pdPASS)
-	{
-		// 触发上下文切换（若需要）
-		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-		return 1;   // 发送成功
-	}
-	else
-	{
-		return 0;   // 队列发送失败
-	}
+//	if (xQueueOverwriteFromISR(Receive_LaserModuleData_1_Port, Receive_data, &xHigherPriorityTaskWoken) == pdPASS)
+//	{
+//		// 触发上下文切换（若需要）
+//		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+//		return 1;   // 发送成功
+//	}
+//	else
+//	{
+//		return 0;   // 队列发送失败
+//	}
+	return 0;
 }

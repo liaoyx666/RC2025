@@ -98,7 +98,7 @@ public:
     void LaunchMotorCtrl();
 private:
     float pitch_angle_max_ = 0.0f, spin_angle_max_ = 0.0f, push_angle_max_ = 0.0f;
-    PID PidPitchSpd, PidPitchPos, PidSpinSpd, PidPushSpd;
+    PID PidPitchSpd, PidPitchPos, PidSpinSpd, PidSpinPos, PidPushSpd;
     TrapePlanner SpinPlanner = TrapePlanner(0.15,0.15,1500,100,1);
 	//TrapePlanner PushPlanner = TrapePlanner(0.15,0.15,3000,100,1);
     bool machine_init_ = false;
