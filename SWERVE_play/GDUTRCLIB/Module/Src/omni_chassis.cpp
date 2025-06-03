@@ -11,9 +11,12 @@
  */
 #include "chassis_omni.h"
 #include <math.h>
+#include "drive_uart.h"
 
 extern RealPos RealPosData;
 extern RawPos RawPosData;
+
+
 
 void Omni_Chassis::Control(Robot_Twist_t cmd_vel)
 {
@@ -93,15 +96,18 @@ bool Omni_Chassis::Pid_Mode_Init_Yaw(float LowPass_error, float LowPass_d_err, b
     return true;
 }
 
+
+
 void Omni_Chassis::Yaw_Control(float target_yaw, Robot_Twist_t *twist)
 {
 	if (target_yaw > -180.f && target_yaw <= 180.f)
 	{
-        float current_yaw = RawPosData.angle_Z;
+        float current_yaw = RealPosData.world_yaw;
         
         // 计算角度误差
         float error = target_yaw - current_yaw;
         
+		
         // 将误差归一化到-180度到180度之间
         if (error > 180.0f)
 		{
@@ -120,13 +126,16 @@ void Omni_Chassis::Yaw_Control(float target_yaw, Robot_Twist_t *twist)
 	}
 }
 
+
+
 void Omni_Chassis::World_Coordinate(float direction_yaw, Robot_Twist_t *twist)
 {
 	if (direction_yaw > -180.f && direction_yaw <= 180.f)
 	{
-		float current_yaw = RawPosData.angle_Z;
+		float current_yaw = RealPosData.world_yaw;
 		
 		float error = current_yaw - direction_yaw;
+		
 		
 		// 将误差归一化到-180度到180度之间
         if (error > 180.0f)
@@ -152,6 +161,54 @@ void Omni_Chassis::World_Coordinate(float direction_yaw, Robot_Twist_t *twist)
         twist->linear.y  = -(vx * SIN_error - vy * COS_error);
 	}
 }
+float x, y;
+
+bool Omni_Chassis::Auto_Move(float target_yaw, Robot_Twist_t *twist, float start_pos_x, float start_pos_y, float end_pos_x, float end_pos_y)
+{
+	Yaw_Control(target_yaw, twist);
+	twist->linear.x = -XaxisPlanner.Plan(start_pos_x, end_pos_x, RealPosData.world_y);
+	twist->linear.y = YaxisPlanner.Plan(start_pos_y, end_pos_y, RealPosData.world_x);
+	
+
+	if ((fabsf(RealPosData.world_x - end_pos_y) < 0.2f) && (fabsf(RealPosData.world_y - end_pos_x) < 0.2f))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void Omni_Chassis::Auto_Dribble_Move(Robot_Twist_t *twist)
+{
+	static uint8_t flag = 0;
+	
+	
+	if (flag == 0)
+	{
+		if (Auto_Move(-45, twist, 0, 0, 2, 2))
+		{
+			flag = 1;
+		}
+	}
+	
+		
+	if (flag == 1)
+	{
+		if (Auto_Move(-90, twist, 2, 2, 2, 4))
+		{
+			flag = 2;
+		}
+	}
+}
+
+
+
+
+
+
+
 
 
 

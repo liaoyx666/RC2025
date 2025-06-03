@@ -39,7 +39,12 @@ void Chassis_Task(void *pvParameters)
 	
         if(xQueueReceive(Chassia_Port, &ctrl, 1) == pdPASS)
         {	
+			//chassis.Auto_Dribble_Move(&ctrl.twist);
+			
+			
+			
 			yaw_angle = GetHoopAngle(RealPosData.world_x, RealPosData.world_y, &distance);
+			distance -= 0.33;
 			
 			Dribble_Ball(ctrl.cylinder_ctrl);//运球
 			launch.PushBall(ctrl.shoot_ctrl);//推球
@@ -53,6 +58,9 @@ void Chassis_Task(void *pvParameters)
 				{
 					chassis.Yaw_Control(yaw_angle, &ctrl.twist);
 					//printf_DMA("%f\r\n", ctrl.twist.angular.z);
+					//chassis.Auto_Dribble_Move(&ctrl.twist);
+					
+					
 				}
 				else
 				{
@@ -71,7 +79,7 @@ void Chassis_Task(void *pvParameters)
             }
 			
 			
-			
+			//chassis.Yaw_Control(0, &ctrl.twist);
 			
 			
 			chassis.World_Coordinate(0, &ctrl.twist);
@@ -182,6 +190,8 @@ void Chassis_Task(void *pvParameters)
 			{}
 			
 			//target_angle = 60;
+			
+			//chassis.Auto_Dribble_Move(&ctrl.twist);
 			
 			chassis.Control(ctrl.twist);	
 			launch.PitchControl(target_angle);//控制俯仰

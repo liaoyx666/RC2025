@@ -23,6 +23,13 @@ float TrapePlanner::Plan(float pos_start, float pos_end, float real_angle)
                 vel_out = 0;
                 return vel_out;
             }
+			
+			if ((accel_range + decel_range) > 1)
+			{
+				vel_out = 0;
+                return vel_out;
+			}
+			
 
             if(accel_range ==0 && decel_range == 0)
             {

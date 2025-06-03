@@ -5,6 +5,7 @@
 #ifdef __cplusplus
 
 #include "chassis_base.h"
+#include "speed_plan.h"
 #include "motor.h"
 #include "action.h"
 
@@ -46,6 +47,11 @@ public:
 	void World_Coordinate(float direction_angle, Robot_Twist_t *twist);
 	
 	
+	bool Auto_Move(float target_yaw, Robot_Twist_t *twist, float start_pos_x, float start_pos_y, float end_pos_x, float end_pos_y);
+	void Auto_Dribble_Move(Robot_Twist_t *twist);
+	
+	
+	
 	
 	
 	
@@ -54,8 +60,8 @@ public:
     Motor_C620 WheelMotor[4] = {Motor_C620(1),Motor_C620(2),Motor_C620(3),Motor_C620(4)};
 private:
 	PID PID_Yaw;
-
-
+	TrapePlanner XaxisPlanner = TrapePlanner(0.1f, 0.05f, 1.f, 0.05f, 0.05f);
+	TrapePlanner YaxisPlanner = TrapePlanner(0.1f, 0.05f, 1.f, 0.05f, 0.05f);
 
     PID PID_Wheel[4];
     Wheel_t wheel[4];

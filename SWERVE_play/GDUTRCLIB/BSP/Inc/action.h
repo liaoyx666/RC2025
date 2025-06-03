@@ -11,15 +11,17 @@ extern "C" {
 #define PI 3.14159265358979f
 
 
-#define INSTALL_ERROR_X		0.0
-#define INSTALL_ERROR_Y		0.0
+#define INSTALL_ERROR_X		0.0f
+#define INSTALL_ERROR_Y		-0.33f
 
 
 typedef struct RealPos
 {
-  float world_x;
-  float world_y;     
-  float world_yaw;
+	float world_x;
+	float world_y;     
+	float world_yaw;
+	float speed_x;
+	float speed_y;
 }RealPos;
 
 typedef struct RawPos
