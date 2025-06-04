@@ -3,8 +3,8 @@
 
 //时间段
 #define DRIBBLE_TIME_1 20000//击球气缸伸长（开始）到夹球气缸伸长
-#define DRIBBLE_TIME_2 100000//夹球气缸伸长到击球气缸收缩
-#define DRIBBLE_TIME_3 400000//击球气缸收缩到夹球气缸收缩
+#define DRIBBLE_TIME_2 200000//夹球气缸伸长到击球气缸收缩
+#define DRIBBLE_TIME_3 300000//击球气缸收缩到夹球气缸收缩
 
 #define DRIBBLE_TIME_4 150000//夹球气缸收缩到结束（防止两次运球时间间隔过短）
 
@@ -146,12 +146,12 @@ void Dribble_Ball(enum CONTROL_E state)
 
 void Hiting_Cylinder_State(enum CylinderState state)
 {
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, (GPIO_PinState)state);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, (GPIO_PinState)(!state));
 }
 
 void Holding_Cylinder_State(enum CylinderState state)
 {
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, (GPIO_PinState)state);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, (GPIO_PinState)(!state));
 }
 
 

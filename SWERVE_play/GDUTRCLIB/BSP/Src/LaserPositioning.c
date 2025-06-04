@@ -102,11 +102,11 @@
 #define LaserModule_1_UartHandle &huart2		// 激光测距模块1串口句柄
 #define LaserModule_2_UartHandle &huart6		// 激光测距模块2串口句柄
 
-#define LaserModule1Address				0x10							// 激光测距模块1地址
+#define LaserModule1Address				0x00							// 激光测距模块1地址
 #define LaserModule1ReadAddress			(LaserModule1Address | 0x80)	// 激光测距模块1读地址
 #define LaserModule1WriteAddress		LaserModule1Address				// 激光测距模块1写地址
 
-#define LaserModule2Address				0x10							// 激光测距模块2地址
+#define LaserModule2Address				0x00							// 激光测距模块2地址
 #define LaserModule2ReadAddress			(LaserModule2Address | 0x80)	// 激光测距模块2读地址
 #define LaserModule2WriteAddress		LaserModule2Address 			// 激光测距模块2写地址
 

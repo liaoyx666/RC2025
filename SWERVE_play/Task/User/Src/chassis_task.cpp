@@ -113,7 +113,7 @@ void Chassis_Task(void *pvParameters)
 			//摩擦带
             if(ctrl.friction_ctrl == FRICTION_ON)
             {
-				shoot_speed = GetShootSpeed(distance, large_pitch);//获得速度
+				//shoot_speed = GetShootSpeed(distance, large_pitch);//获得速度
 				
                 launch.FrictionControl(true,shoot_speed);
             }
@@ -135,7 +135,7 @@ void Chassis_Task(void *pvParameters)
 				{
 					spin_state = false;
 				}
-				target_angle = 410;
+				target_angle = 405;
 			}
 			else
 			{
@@ -144,7 +144,7 @@ void Chassis_Task(void *pvParameters)
 
 			if (launch.LauncherMotor[1].get_angle() > 330)//防止机构干涉
 			{
-				target_angle = 410;
+				target_angle = 405;
 			}
 			///////////////////////////////////////////////
 
@@ -189,7 +189,7 @@ void Chassis_Task(void *pvParameters)
 			else
 			{}
 			
-			//target_angle = 60;
+			target_angle = 90;
 			
 			//chassis.Auto_Dribble_Move(&ctrl.twist);
 			
@@ -198,7 +198,7 @@ void Chassis_Task(void *pvParameters)
 			launch.SpinControl(spin_state);//控制旋转
 			//////////////////////////////////////////////////////
 			//CAN发送
-			chassis.Motor_Control();
+			//chassis.Motor_Control();
             launch.LaunchMotorCtrl();
         }
         osDelay(1);
