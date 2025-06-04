@@ -25,7 +25,7 @@ float shoot_speed = 0;
 float distance = 0;
 float yaw_angle = 0;
 
-//base
+//main
 
 uint8_t a5, a3;
 
@@ -77,11 +77,6 @@ void Chassis_Task(void *pvParameters)
 			chassis.World_Coordinate(0, &ctrl.twist);
 			////////////////////////////////////////////////////
 			//俯仰
-//			if (ctrl.spin_ctrl != SPIN_INSIDE)//不是装球状态
-//			{
-
-//				target_angle = 0;
-//			}
 			if ((pitch_level == 0) && (distance > 2.5f) && (distance <= 3.5f))
 			{
 				pitch_level = 1;
