@@ -17,7 +17,7 @@ Omni_Chassis chassis(0.152/2.f, 0.442f/2.f, 4, 2.f); //底盘直径0.442m，轮�
 Launcher launch(450.f, 455.f, 2045.f);
 bool shoot_ready = false;
 CONTROL_T ctrl;
-bool large_pitch = true;//大俯仰角
+uint8_t pitch_level = 0;//
 
 volatile float target_angle = 0;
 bool spin_state = false;
@@ -82,30 +82,51 @@ void Chassis_Task(void *pvParameters)
 
 //				target_angle = 0;
 //			}
-			if ((large_pitch == true) && (distance > 2.5f))
+			if ((pitch_level == 0) && (distance > 2.5f) && (distance <= 3.5f))
 			{
-				large_pitch = false;
+				pitch_level = 1;
 			}
 			
-			if ((large_pitch == false) && (distance < 2.0f))
+			if ((pitch_level == 1) && (distance <= 2.0f))
 			{
-				large_pitch = true;
+				pitch_level = 0;
 			}
 			
-			if (large_pitch == true)
+			if ((pitch_level == 1) && (distance > 3.5f))
+			{
+				pitch_level = 2;
+			}
+			
+			if ((pitch_level == 2) && (distance <= 3.0f) && (distance > 2.0f))
+			{
+				pitch_level = 1;
+			}
+			
+			
+			
+			
+			
+			
+			if (pitch_level == 0)
 			{
 				target_angle = 0;
 			}
-			if (large_pitch == false)
+			
+			if (pitch_level == 1)
 			{
 				target_angle = 60;
+			}
+			
+			if (pitch_level == 2)
+			{
+				target_angle = 90;
 			}
 			
 			/////////////////////////////////////////////////////
 			//摩擦带
             if(ctrl.friction_ctrl == FRICTION_ON)
             {
-				shoot_speed = GetShootSpeed(distance, large_pitch);//获得速度
+				shoot_speed = GetShootSpeed(distance, pitch_level);//获得速度
 				
                 launch.FrictionControl(true,shoot_speed);
             }
@@ -139,6 +160,9 @@ void Chassis_Task(void *pvParameters)
 				target_angle = 410;
 			}
 			///////////////////////////////////////////////
+
+			
+			//target_angle = 120;
 
 //			
 //			static int16_t i = 0, flag = 0;

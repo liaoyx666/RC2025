@@ -164,7 +164,7 @@
           <Type>0</Type>
           <LineNumber>400</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134232080</Address>
+          <Address>134232964</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -180,7 +180,7 @@
           <Type>0</Type>
           <LineNumber>376</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134232084</Address>
+          <Address>134232968</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -206,147 +206,132 @@
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>c0</ItemText>
+          <ItemText>SystemTimerCnt</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>c1</ItemText>
+          <ItemText>chassis</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>c2</ItemText>
+          <ItemText>shoot_speed</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>SystemTimerCnt</ItemText>
+          <ItemText>distance</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>chassis</ItemText>
+          <ItemText>launch,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>1</WinNumber>
-          <ItemText>shoot_speed</ItemText>
+          <ItemText>air_joy</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
           <WinNumber>1</WinNumber>
-          <ItemText>distance</ItemText>
+          <ItemText>posture</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
           <WinNumber>1</WinNumber>
-          <ItemText>launch,0x0A</ItemText>
+          <ItemText>\\MOTOR_CPP\../Task/User/Src/chassis_task.cpp\launch.LauncherMotor[2].RM_Common.Motor_Speed.Motor_Base.encoder</ItemText>
         </Ww>
         <Ww>
           <count>10</count>
           <WinNumber>1</WinNumber>
-          <ItemText>air_joy</ItemText>
+          <ItemText>posture</ItemText>
         </Ww>
         <Ww>
           <count>11</count>
           <WinNumber>1</WinNumber>
-          <ItemText>posture</ItemText>
+          <ItemText>yaw_angle</ItemText>
         </Ww>
         <Ww>
           <count>12</count>
           <WinNumber>1</WinNumber>
-          <ItemText>\\MOTOR_CPP\../Task/User/Src/chassis_task.cpp\launch.LauncherMotor[2].RM_Common.Motor_Speed.Motor_Base.encoder</ItemText>
+          <ItemText>LaserModuleDataGroup</ItemText>
         </Ww>
         <Ww>
           <count>13</count>
           <WinNumber>1</WinNumber>
-          <ItemText>p</ItemText>
+          <ItemText>RealPosData</ItemText>
         </Ww>
         <Ww>
           <count>14</count>
           <WinNumber>1</WinNumber>
-          <ItemText>i</ItemText>
+          <ItemText>target_angle</ItemText>
         </Ww>
         <Ww>
           <count>15</count>
           <WinNumber>1</WinNumber>
-          <ItemText>d</ItemText>
+          <ItemText>large_pitch</ItemText>
         </Ww>
         <Ww>
           <count>16</count>
           <WinNumber>1</WinNumber>
-          <ItemText>posture</ItemText>
+          <ItemText>a3</ItemText>
         </Ww>
         <Ww>
           <count>17</count>
           <WinNumber>1</WinNumber>
-          <ItemText>yaw_angle</ItemText>
+          <ItemText>a5</ItemText>
         </Ww>
         <Ww>
           <count>18</count>
           <WinNumber>1</WinNumber>
-          <ItemText>LaserModuleDataGroup</ItemText>
+          <ItemText>LaserModuleGroupState</ItemText>
         </Ww>
         <Ww>
           <count>19</count>
           <WinNumber>1</WinNumber>
-          <ItemText>RealPosData</ItemText>
+          <ItemText>LaserModuleDataGroup</ItemText>
         </Ww>
         <Ww>
           <count>20</count>
           <WinNumber>1</WinNumber>
-          <ItemText>target_angle</ItemText>
+          <ItemText>WorldXYCoordinates</ItemText>
         </Ww>
         <Ww>
           <count>21</count>
           <WinNumber>1</WinNumber>
-          <ItemText>large_pitch</ItemText>
+          <ItemText>LaserModuleDataGroup</ItemText>
         </Ww>
         <Ww>
           <count>22</count>
           <WinNumber>1</WinNumber>
-          <ItemText>a3</ItemText>
+          <ItemText>Uart2_Rx_Buff</ItemText>
         </Ww>
         <Ww>
           <count>23</count>
           <WinNumber>1</WinNumber>
-          <ItemText>a4</ItemText>
+          <ItemText>Uart6_Rx_Buff</ItemText>
         </Ww>
         <Ww>
           <count>24</count>
           <WinNumber>1</WinNumber>
-          <ItemText>a5</ItemText>
+          <ItemText>x</ItemText>
         </Ww>
         <Ww>
           <count>25</count>
           <WinNumber>1</WinNumber>
-          <ItemText>LaserModuleGroupState</ItemText>
+          <ItemText>y</ItemText>
         </Ww>
         <Ww>
           <count>26</count>
           <WinNumber>1</WinNumber>
-          <ItemText>LaserModuleDataGroup</ItemText>
+          <ItemText>pitch_level</ItemText>
         </Ww>
         <Ww>
           <count>27</count>
           <WinNumber>1</WinNumber>
-          <ItemText>WorldXYCoordinates</ItemText>
-        </Ww>
-        <Ww>
-          <count>28</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>LaserModuleDataGroup</ItemText>
-        </Ww>
-        <Ww>
-          <count>29</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Uart2_Rx_Buff</ItemText>
-        </Ww>
-        <Ww>
-          <count>30</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Uart6_Rx_Buff</ItemText>
+          <ItemText>RawPosData</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>

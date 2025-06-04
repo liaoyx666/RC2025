@@ -1,7 +1,6 @@
 #include "shoot.h"
 #include <math.h>
 
-
 #define PI 3.14159265358979f
 
 
@@ -10,11 +9,11 @@
 #define SAMPLE_NUM_1 4//采样点数
 
 float cubic_spline_1[SAMPLE_NUM_1 - 1][4] = {
-{16331.000000f, 2835.827402f, 0.000000f, 4237.224978f},
+{16300.000000f, 2782.680834f, 0.000000f, 5429.208905f},
 
-{17000.000000f, 3451.072469f, 2796.568486f, -911.857676f},
+{16970.000000f, 3571.001967f, 3583.277877f, -2890.518006f},
 
-{19200.000000f, 5505.502189f, 1483.493432f, -988.995621f},
+{19190.000000f, 5013.022684f, -579.068052f, 386.045368f},
 
 };//三次样条插值法参数
 
@@ -28,16 +27,31 @@ float sample_distance_1[SAMPLE_NUM_1] = {1.3, 1.52, 2.0, 2.5};//采样点距离
 #define SAMPLE_NUM_2 4//采样点数
 
 float cubic_spline_2[SAMPLE_NUM_2 - 1][4] = {
-{18450.000000f, 2589.333333f, 0.000000f, 2042.666667f},
+{18000.000000f, 2560.000000f, 0.000000f, 2160.000000f},
 
-{20000.000000f, 4121.333333f, 3064.000000f, -5013.333333f},
+{19550.000000f, 4180.000000f, 3240.000000f, -4000.000000f},
 
-{22200.000000f, 3425.333333f, -4456.000000f, 2970.666667f},
+{21950.000000f, 4420.000000f, -2760.000000f, 1840.000000f},
 
 };//三次样条插值法参数
 
 float sample_distance_2[SAMPLE_NUM_2] = {2.0, 2.5, 3.0, 3.5};//采样点距离
 
+
+
+
+#define SAMPLE_NUM_3 4//采样点数
+
+float cubic_spline_3[SAMPLE_NUM_3 - 1][4] = {
+{19810.000000f, 3227.866667f, 0.000000f, -591.466667f},
+
+{21350.000000f, 2784.266667f, -887.200000f, 1437.333333f},
+
+{22700.000000f, 2975.066667f, 1268.800000f, -845.866667f},
+
+};//三次样条插值法参数
+
+float sample_distance_3[SAMPLE_NUM_3] = {3.0, 3.5, 4.0, 4.5};//采样点距离
 
 
 
@@ -77,15 +91,22 @@ float CalcSpeed(float distance, float cubic_spline[][4], float *sample_distance,
 }
 
 
-float GetShootSpeed(float distance, bool large_pitch)
+float GetShootSpeed(float distance, uint8_t pitch_level)
 {
-	if (large_pitch)
+	switch(pitch_level)
 	{
-		return CalcSpeed(distance, cubic_spline_1, sample_distance_1, SAMPLE_NUM_1);
-	}
-	else
-	{
-		return CalcSpeed(distance, cubic_spline_2, sample_distance_2, SAMPLE_NUM_2);
+		case 0:
+			return CalcSpeed(distance, cubic_spline_1, sample_distance_1, SAMPLE_NUM_1);
+			break;
+		case 1:
+			return CalcSpeed(distance, cubic_spline_2, sample_distance_2, SAMPLE_NUM_2);
+			break;
+		case 2:
+			return CalcSpeed(distance, cubic_spline_3, sample_distance_3, SAMPLE_NUM_3);
+			break;
+		default:
+			return 0;
+			break;
 	}
 }
 
@@ -111,8 +132,8 @@ float GetHoopAngle(float robot_x, float robot_y, float *distance)
 {
 	float delta_x, delta_y, target_theta;
 	
-	delta_x = 3.294f - robot_x;
-	delta_y = 0.36f - robot_y;
+	delta_x = 3.076052f - robot_x;
+	delta_y = 0.38726f - robot_y;
     target_theta = atan2f(delta_y, delta_x); // 朝向篮筐的方向（弧度）
 
 	target_theta = target_theta * 180.f / PI;
