@@ -146,12 +146,12 @@ void Dribble_Ball(enum CONTROL_E state)
 
 void Hiting_Cylinder_State(enum CylinderState state)
 {
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, (GPIO_PinState)state);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, (GPIO_PinState)(!state));
 }
 
 void Holding_Cylinder_State(enum CylinderState state)
 {
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, (GPIO_PinState)state);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, (GPIO_PinState)(!state));
 }
 
 

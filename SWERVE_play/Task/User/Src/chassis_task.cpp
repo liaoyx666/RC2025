@@ -19,7 +19,8 @@ bool shoot_ready = false;
 CONTROL_T ctrl;
 uint8_t pitch_level = 0;//
 
-volatile float target_angle = 0;
+//volatile float pitch_angle = 0;
+float pitch_angle = 0;
 bool spin_state = false;
 float shoot_speed = 0;
 float distance = 0;
@@ -41,7 +42,11 @@ void Chassis_Task(void *pvParameters)
         {	
 			yaw_angle = GetHoopAngle(RealPosData.world_x, RealPosData.world_y, &distance);
 			
-			Dribble_Ball(ctrl.cylinder_ctrl);//运球
+			if (ctrl.mode_ctrl == MODE_DRIBBLE)
+			{
+				Dribble_Ball(ctrl.cylinder_ctrl);//运球
+			}
+			
 			launch.PushBall(ctrl.shoot_ctrl);//推球
 			
 			///////////////////////////////////////////////////	
@@ -104,17 +109,17 @@ void Chassis_Task(void *pvParameters)
 			
 			if (pitch_level == 0)
 			{
-				target_angle = 0;
+				pitch_angle = 0;
 			}
 			
 			if (pitch_level == 1)
 			{
-				target_angle = 60;
+				pitch_angle = 60;
 			}
 			
 			if (pitch_level == 2)
 			{
-				target_angle = 90;
+				pitch_angle = 90;
 			}
 			
 			/////////////////////////////////////////////////////
@@ -133,31 +138,32 @@ void Chassis_Task(void *pvParameters)
             }
 			/////////////////////////////////////////////////////
 			//旋转
-			if (ctrl.spin_ctrl == SPIN_INSIDE)
-			{
-				if (launch.LauncherMotor[0].get_angle() >= 180)//防止机构干涉
-				{
-					spin_state = true;
-				}
-				else
-				{
-					spin_state = false;
-				}
-				target_angle = 410;
-			}
-			else
-			{
-				spin_state = false;
-			}
+//			if (ctrl.spin_ctrl == SPIN_INSIDE)
+//			{
+//				if (launch.LauncherMotor[0].get_angle() >= 180)//防止机构干涉
+//				{
+//					spin_state = true;
+//				}
+//				else
+//				{
+//					spin_state = false;
+//				}
+//				pitch_angle = 410;
+//			}
+//			else
+//			{
+//				spin_state = false;
+//			}
 
-			if (launch.LauncherMotor[1].get_angle() > 330)//防止机构干涉
-			{
-				target_angle = 410;
-			}
+			
+			
+			
+
+			
 			///////////////////////////////////////////////
 
 			
-			//target_angle = 120;
+			//pitch_angle = 60;
 
 //			
 //			static int16_t i = 0, flag = 0;
@@ -188,22 +194,57 @@ void Chassis_Task(void *pvParameters)
 //			}
 			//launch.LauncherMotor[2].Out = 1000;
 			
-			//限位
-			if(target_angle < 0)
+			
+			if (ctrl.mode_ctrl == MODE_LOAD)
 			{
-				target_angle = 0;
+				launch.LoadBall(ctrl.load_ctrl, &pitch_angle, &spin_state);
 			}
-			else if(target_angle > 450)
+			
+			
+			
+			if (launch.LauncherMotor[1].get_angle() > 330)//防止机构干涉
 			{
-				target_angle = 450;
+				if (pitch_angle < 390)
+				{
+					pitch_angle = 390;
+				}
+			}
+			
+			
+			if (launch.LauncherMotor[0].get_angle() > 180)//防止机构干涉
+			{
+				//spin_state = true;
+			}
+			else
+			{
+				spin_state = false;
+			}
+
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			//限位
+			if(pitch_angle < 0)
+			{
+				pitch_angle = 0;
+			}
+			else if(pitch_angle > 450)
+			{
+				pitch_angle = 450;
 			}
 			else
 			{}
-			
-			//target_angle = 60;
-			
+				
+				
 			chassis.Control(ctrl.twist);	
-			launch.PitchControl(target_angle);//控制俯仰
+			launch.PitchControl(pitch_angle);//控制俯仰
 			launch.SpinControl(spin_state);//控制旋转
 			//////////////////////////////////////////////////////
 			//CAN发送

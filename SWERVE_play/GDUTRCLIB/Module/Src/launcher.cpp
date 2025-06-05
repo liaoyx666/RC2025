@@ -1,5 +1,7 @@
 #include "launcher.h"
 #include "chassis_task.h"
+#include "dribble_ball.h"
+#include "drive_tim.h"
 
 #define ABS(x)  ((x) >= 0 ? (x) : -(x))
 
@@ -203,10 +205,103 @@ void Launcher::PushBall(enum CONTROL_E state)
 
 
 
+#define LOAD_WAIT_TIME_1  4000000
+#define LOAD_WAIT_TIME_2  4000000
+#define LOAD_WAIT_TIME_3  100000
+#define LOAD_WAIT_TIME_4  900000
+#define LOAD_WAIT_TIME_5  600000
 
 
+void Launcher::LoadBall(enum CONTROL_E state, float *pitch_angle, bool *spin_state)
+{
+	static uint8_t flag = 0;
+	static bool spin = false;
+	static float pitch = 0;
+	static uint32_t start_time = 0;
+	static enum CylinderState cylinder = CYLINDER_SHRINK;
+	
 
+	
+	if (flag == 0)
+	{
+		spin = false;
+		
+		if (state == LOAD_ON)
+		{
+			start_time = Get_SystemTimer();
+			pitch = 420;
+			flag = 1;
+		}
+	}
+	else
+	{
+		Holding_Cylinder_State(cylinder);
+		*pitch_angle = pitch;
+	}
+	
+	
+	if (flag == 1)
+	{
+		if (LauncherMotor[0].get_angle() >= 180)
+		{
+			start_time = Get_SystemTimer();
+			spin = true;
+			flag = 2;
+		}
+		else if (Get_SystemTimer() - start_time > LOAD_WAIT_TIME_1)
+		{
+			flag = 0;
+		}
+	}
+	
+	if (flag == 2)
+	{
+		if (LauncherMotor[1].get_angle() >= 450)
+		{
+			start_time = Get_SystemTimer();
+			flag = 3;
+		}
+		if (Get_SystemTimer() - start_time > LOAD_WAIT_TIME_2)
+		{
+			flag = 0;
+		}
+	}
 
+	if (flag == 3)
+	{
+		if (Get_SystemTimer() - start_time >= LOAD_WAIT_TIME_3)
+		{
+			start_time = Get_SystemTimer();
+			pitch = 375;
+			cylinder = CYLINDER_STRETCH;
+			flag = 4;
+		}
+	}
+	
+	
+	if (flag == 4)
+	{
+		if (Get_SystemTimer() - start_time >= LOAD_WAIT_TIME_4)
+		{
+			start_time = Get_SystemTimer();
+			cylinder = CYLINDER_SHRINK;
+			flag = 5;
+		}
+	}
+	
+	
+	
+	if (flag == 5)
+	{
+		if (Get_SystemTimer() - start_time >= LOAD_WAIT_TIME_5)
+		{
+			spin = false;
+			flag = 0;
+		}
+	}
+	
+	*spin_state = spin;
+}
 
 
 

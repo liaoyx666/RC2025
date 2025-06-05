@@ -50,6 +50,9 @@ void Air_Joy_Task(void *pvParameters)
 					/////////////////////////////////////////////////////////////////////////////
 					if (_tool_Abs(air_joy.SWC - 1000) < 50)//运球
 					{
+						
+						ctrl.mode_ctrl = MODE_DRIBBLE;
+						
 						float length = sqrtf(ctrl.twist.linear.x * ctrl.twist.linear.x + ctrl.twist.linear.y * ctrl.twist.linear.y);
 						if(length > 0.5f)
 						{
@@ -69,6 +72,8 @@ void Air_Joy_Task(void *pvParameters)
 					/////////////////////////////////////////////////////////////////////////////
 					else if (_tool_Abs(air_joy.SWC - 1500) < 50)//人工装球
 					{
+						ctrl.mode_ctrl = MODE_DRIBBLE;
+						
 						ctrl.spin_ctrl = SPIN_OUTSIDE;//旋转到外侧
 						
 						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)
@@ -90,23 +95,34 @@ void Air_Joy_Task(void *pvParameters)
 					////////////////////////////////////////////////////////////////////////////
 					else//放球到发射机构
 					{
-						ctrl.spin_ctrl = SPIN_INSIDE;//旋转到内侧
+						ctrl.mode_ctrl = MODE_LOAD;
+//						ctrl.spin_ctrl = SPIN_INSIDE;//旋转到内侧
+//						
+//						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)
+//						{
+//							last_SWD = air_joy.SWD;
+//							static uint8_t flag = 0;
+//							if (flag == 0)
+//							{
+//								ctrl.cylinder_ctrl = CYLINDER_RELEASE;//张开夹爪（放球）
+//								flag = 1;
+//							}
+//							else
+//							{
+//								ctrl.cylinder_ctrl = CYLINDER_KEEP;//关闭夹爪
+//								flag = 0;
+//							}
+//						}
 						
-						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)
+						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)//
 						{
-							last_SWD = air_joy.SWD;
-							static uint8_t flag = 0;
-							if (flag == 0)
-							{
-								ctrl.cylinder_ctrl = CYLINDER_RELEASE;//张开夹爪（放球）
-								flag = 1;
-							}
-							else
-							{
-								ctrl.cylinder_ctrl = CYLINDER_KEEP;//关闭夹爪
-								flag = 0;
-							}
+							last_SWD = air_joy.SWD;//更新按键值
+							ctrl.load_ctrl = LOAD_ON;
 						}
+						
+						
+						
+						
 					}
 					/////////////////////////////////////////////////////////////////////////////
 				}
@@ -173,6 +189,7 @@ void Air_Joy_Task(void *pvParameters)
             xQueueSend(Chassia_Port, &ctrl, 0);
 			
 			ctrl.shoot_ctrl = SHOOT_OFF;
+			ctrl.load_ctrl = LOAD_OFF;
 			
 			if (_tool_Abs(air_joy.SWC - 1000) < 50)
 			{
