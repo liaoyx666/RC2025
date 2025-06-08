@@ -32,9 +32,14 @@ typedef enum CONTROL_E
 	
 	YAW_HAND,
 	YAW_LOCK_BASKET,
-	YAW_LOCK_DIRECTION
+	YAW_LOCK_DIRECTION,
 	
+	PATH_FORWARD,
+	PATH_BACKWARD,
+	PATH_OFF,
 	
+	MOVE_HAND,
+	MOVE_AUTO
 	
 	////////////
 }CONTROL_E;
@@ -51,6 +56,8 @@ typedef struct CONTROL_T
 	CONTROL_E spin_ctrl;
 	CONTROL_E mode_ctrl;
 	CONTROL_E yaw_ctrl;
+	CONTROL_E path_ctrl;
+	CONTROL_E move_ctrl;
     uint8_t add_cnt=0;
 }CONTROL_T;
 

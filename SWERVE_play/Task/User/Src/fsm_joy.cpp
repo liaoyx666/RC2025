@@ -17,7 +17,7 @@
 void Air_Joy_Task(void *pvParameters)
 {
 	static uint16_t last_SWD = 1000;//上一次SWD按键值
-
+	static uint16_t last_SWA = 1000;
     static CONTROL_T ctrl;
     for(;;)
     {
@@ -42,14 +42,55 @@ void Air_Joy_Task(void *pvParameters)
                 ctrl.twist.angular.z = (air_joy.RIGHT_X - 1500)/500.0 * 2;
                 ctrl.twist.angular.x = air_joy.RIGHT_Y;
 				/*******************************************************************************/
-				if (_tool_Abs(air_joy.SWB - 1500) < 50)//运球、装球模式
+				if ((_tool_Abs(air_joy.SWB - 1500) < 50) || (_tool_Abs(air_joy.SWB - 2000) < 50))//运球、装球模式
 				{
+					ctrl.path_ctrl = PATH_OFF;
+					
+					
+					
+					
+					
 					ctrl.yaw_ctrl = YAW_HAND;
 					ctrl.chassis_ctrl = CHASSIS_ON;
 					ctrl.friction_ctrl = FRICTION_OFF;
 					/////////////////////////////////////////////////////////////////////////////
 					if (_tool_Abs(air_joy.SWC - 1000) < 50)//运球
 					{
+						ctrl.move_ctrl = MOVE_AUTO;
+						
+						
+						if (_tool_Abs(air_joy.SWB - 1500) < 50)
+						{
+							if (_tool_Abs(last_SWA - air_joy.SWA) > 800)//
+							{
+								last_SWA = air_joy.SWA;//更新按键值
+								ctrl.path_ctrl = PATH_FORWARD;
+							}
+						}
+						else
+						{
+							if (_tool_Abs(last_SWA - air_joy.SWA) > 800)//
+							{
+								last_SWA = air_joy.SWA;//更新按键值
+								ctrl.path_ctrl = PATH_BACKWARD;
+							}
+						}
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
 						float length = sqrtf(ctrl.twist.linear.x * ctrl.twist.linear.x + ctrl.twist.linear.y * ctrl.twist.linear.y);
 						if(length > 0.5f)
 						{
@@ -69,6 +110,7 @@ void Air_Joy_Task(void *pvParameters)
 					/////////////////////////////////////////////////////////////////////////////
 					else if (_tool_Abs(air_joy.SWC - 1500) < 50)//人工装球
 					{
+						ctrl.move_ctrl = MOVE_HAND;
 						ctrl.spin_ctrl = SPIN_OUTSIDE;//旋转到外侧
 						
 						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)
@@ -87,71 +129,80 @@ void Air_Joy_Task(void *pvParameters)
 							}
 						}
 					}
-					////////////////////////////////////////////////////////////////////////////
-					else//放球到发射机构
+					else
 					{
-						ctrl.spin_ctrl = SPIN_INSIDE;//旋转到内侧
-						
-						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)
-						{
-							last_SWD = air_joy.SWD;
-							static uint8_t flag = 0;
-							if (flag == 0)
-							{
-								ctrl.cylinder_ctrl = CYLINDER_RELEASE;//张开夹爪（放球）
-								flag = 1;
-							}
-							else
-							{
-								ctrl.cylinder_ctrl = CYLINDER_KEEP;//关闭夹爪
-								flag = 0;
-							}
-						}
+						ctrl.move_ctrl = MOVE_HAND;
+					
+					
+					
+					
+					
 					}
+					////////////////////////////////////////////////////////////////////////////
+//					else//放球到发射机构
+//					{
+//						ctrl.spin_ctrl = SPIN_INSIDE;//旋转到内侧
+//						
+//						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)
+//						{
+//							last_SWD = air_joy.SWD;
+//							static uint8_t flag = 0;
+//							if (flag == 0)
+//							{
+//								ctrl.cylinder_ctrl = CYLINDER_RELEASE;//张开夹爪（放球）
+//								flag = 1;
+//							}
+//							else
+//							{
+//								ctrl.cylinder_ctrl = CYLINDER_KEEP;//关闭夹爪
+//								flag = 0;
+//							}
+//						}
+//					}
 					/////////////////////////////////////////////////////////////////////////////
 				}
 				/********************************************************************************/
-				else if (_tool_Abs(air_joy.SWB - 2000) < 50)//射球模式
-				{
-					
-					
-					if (_tool_Abs(air_joy.SWC - 1500) < 50)
-					{
-						ctrl.yaw_ctrl = YAW_HAND;
-					}
-					else if (_tool_Abs(air_joy.SWC - 1000) < 50)
-					{
-						ctrl.yaw_ctrl = YAW_LOCK_DIRECTION;
-					}
-					else if (_tool_Abs(air_joy.SWC - 2000) < 50)
-					{
-						ctrl.yaw_ctrl = YAW_LOCK_BASKET;
-					}
-					else
-					{
-						ctrl.yaw_ctrl = YAW_HAND;
-					}
-					
-					
-					
-					
-					if (_tool_Abs(air_joy.SWA - 2000) < 50)
-					{
-						ctrl.chassis_ctrl = CHASSIS_OFF;
-						ctrl.friction_ctrl = FRICTION_ON;
-					}
-					else
-					{
-						ctrl.friction_ctrl = FRICTION_OFF;
-						ctrl.chassis_ctrl = CHASSIS_ON;
-					}
-					
-					if (_tool_Abs(last_SWD - air_joy.SWD) > 800)
-					{
-						last_SWD = air_joy.SWD;//更新按键值
-						ctrl.shoot_ctrl = SHOOT_ON;
-					}				
-				}
+//				else if (_tool_Abs(air_joy.SWB - 2000) < 50)//射球模式
+//				{
+//					
+//					
+//					if (_tool_Abs(air_joy.SWC - 1500) < 50)
+//					{
+//						ctrl.yaw_ctrl = YAW_HAND;
+//					}
+//					else if (_tool_Abs(air_joy.SWC - 1000) < 50)
+//					{
+//						ctrl.yaw_ctrl = YAW_LOCK_DIRECTION;
+//					}
+//					else if (_tool_Abs(air_joy.SWC - 2000) < 50)
+//					{
+//						ctrl.yaw_ctrl = YAW_LOCK_BASKET;
+//					}
+//					else
+//					{
+//						ctrl.yaw_ctrl = YAW_HAND;
+//					}
+//					
+//					
+//					
+//					
+//					if (_tool_Abs(air_joy.SWA - 2000) < 50)
+//					{
+//						ctrl.chassis_ctrl = CHASSIS_OFF;
+//						ctrl.friction_ctrl = FRICTION_ON;
+//					}
+//					else
+//					{
+//						ctrl.friction_ctrl = FRICTION_OFF;
+//						ctrl.chassis_ctrl = CHASSIS_ON;
+//					}
+//					
+//					if (_tool_Abs(last_SWD - air_joy.SWD) > 800)
+//					{
+//						last_SWD = air_joy.SWD;//更新按键值
+//						ctrl.shoot_ctrl = SHOOT_ON;
+//					}				
+//				}
 				/*********************************************************************************/
             }
 			else//锁定
@@ -167,12 +218,16 @@ void Air_Joy_Task(void *pvParameters)
                 ctrl.shoot_ctrl = SHOOT_OFF;
 				ctrl.cylinder_ctrl = CYLINDER_KEEP;
 				
+				
+				
+				last_SWA = air_joy.SWA;
 				last_SWD = air_joy.SWD;//更新按键值
 			}
 			
-            xQueueSend(Chassia_Port, &ctrl, 0);
+            xQueueSend(Chassia_Port, &ctrl, 0);/////////////////////////////////////////////////////
 			
 			ctrl.shoot_ctrl = SHOOT_OFF;
+			ctrl.path_ctrl = PATH_OFF;
 			
 			if (_tool_Abs(air_joy.SWC - 1000) < 50)
 			{

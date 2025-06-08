@@ -4,9 +4,9 @@
 
 
 #ifdef __cplusplus
-
-#endif
 extern "C" {
+#endif
+
 	
 	
 float GetShootSpeed(float distance, bool large_pitch);

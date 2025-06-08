@@ -12,9 +12,13 @@
 #include "speed_plan.h"
 #include "dribble_ball.h"
 #include "shoot.h"
+#include "path_tracing.h"
 
 Omni_Chassis chassis(0.152/2.f, 0.442f/2.f, 4, 2.f); //底盘直径0.442m，轮子半径0.152m，底盘加速度0.5m/s^2
 Launcher launch(450.f, 455.f, 2045.f);
+
+Path_Tracing path_tracing;
+
 bool shoot_ready = false;
 CONTROL_T ctrl;
 bool large_pitch = true;//大俯仰角
@@ -43,20 +47,36 @@ void Chassis_Task(void *pvParameters)
 			
 			
 			
-			yaw_angle = GetHoopAngle(RealPosData.world_x, RealPosData.world_y, &distance);
-			distance -= 0.33;
+			//yaw_angle = GetHoopAngle(RealPosData.world_x, RealPosData.world_y, &distance);
+			//distance -= 0.33;
 			
 			Dribble_Ball(ctrl.cylinder_ctrl);//运球
-			launch.PushBall(ctrl.shoot_ctrl);//推球
+			//launch.PushBall(ctrl.shoot_ctrl);//推球
 			
 			///////////////////////////////////////////////////	
-            //底盘控制、电机控制    
+            //底盘控制、电机控制 
+			
+			
+			//chassis.Yaw_Control(0, &ctrl.twist);
+			
+			if (ctrl.move_ctrl == MOVE_AUTO)
+			{
+				path_tracing.PathTracing(ctrl.path_ctrl, PointVector(RealPosData.world_x, RealPosData.world_y), &ctrl.twist.linear.x, &ctrl.twist.linear.y);
+			}
+			
+			
+			chassis.World_Coordinate(0, &ctrl.twist);
+
+
+
+
+			
             if(ctrl.chassis_ctrl == CHASSIS_ON)
             {
 				/////////////////////////////////////////
 				if (ctrl.yaw_ctrl == YAW_LOCK_DIRECTION)
 				{
-					chassis.Yaw_Control(yaw_angle, &ctrl.twist);
+					//chassis.Yaw_Control(0, &ctrl.twist);
 					//printf_DMA("%f\r\n", ctrl.twist.angular.z);
 					//chassis.Auto_Dribble_Move(&ctrl.twist);
 					
@@ -79,10 +99,7 @@ void Chassis_Task(void *pvParameters)
             }
 			
 			
-			//chassis.Yaw_Control(0, &ctrl.twist);
 			
-			
-			chassis.World_Coordinate(0, &ctrl.twist);
 			////////////////////////////////////////////////////
 			//俯仰
 //			if (ctrl.spin_ctrl != SPIN_INSIDE)//不是装球状态
@@ -189,7 +206,8 @@ void Chassis_Task(void *pvParameters)
 			else
 			{}
 			
-			target_angle = 90;
+			target_angle = 0;
+			//target_angle = 90;
 			
 			//chassis.Auto_Dribble_Move(&ctrl.twist);
 			
@@ -198,7 +216,7 @@ void Chassis_Task(void *pvParameters)
 			launch.SpinControl(spin_state);//控制旋转
 			//////////////////////////////////////////////////////
 			//CAN发送
-			//chassis.Motor_Control();
+			chassis.Motor_Control();
             launch.LaunchMotorCtrl();
         }
         osDelay(1);
@@ -230,8 +248,13 @@ void PidParamInit(void)
 	launch.Pid_Param_Init(2,2.4f, 0.015f, 0.0f, 16384.0f, /*16384.0f*/5000.f, 0);
     launch.Pid_Mode_Init(2,0.1f, 0.0f, false, true);
 	
+	path_tracing.Pid_Mode_Init_Path(2, 0, 0, true, false);
+	path_tracing.Pid_Param_Init_Path(2, 1.7f, 0.0f, 0.02f, 2.5f, 2.5f, 0.25f);
 	
+	path_tracing.Pid_Mode_Init_Path(1, 0, 0, true, false);//normal
+	path_tracing.Pid_Param_Init_Path(1, 1.7f, 0.0f, 0.02f, 2.5f, 2.5f, 0.01f);
+
 	
-	chassis.Pid_Param_Init_Yaw(0.13f, 0.0f, 0.0f, 2.0f, 2.5f, 0.0f);
+	chassis.Pid_Param_Init_Yaw(0.13f, 0.0f, 0.0f, 2.0f, 2.5f, 5.0f);
 	chassis.Pid_Mode_Init_Yaw(0, 0, false, true);
 }
