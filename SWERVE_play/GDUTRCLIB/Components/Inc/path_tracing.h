@@ -13,9 +13,9 @@ struct PointVector
 	PointVector(float x = 0, float y = 0) : x(x), y(y) {}
 };
 
-#define ACCEL   5.5f
+#define ACCEL   6.f
 #define DECEL   2.5f
-#define MAX_VEL 3.2f
+#define MAX_VEL 3.5f
 
 class Path
 {
@@ -63,7 +63,7 @@ class Path
 		void CalcSpeedPlan(void);
 		
 	private:
-		const float arrive_deadzone = 0.3f, approach_deadzone = 0.3f;
+		const float arrive_deadzone = 0.2f, approach_deadzone = 0.3f;
 		PointVector start_point, end_point;
 		PointVector direction_vector;
 		float angle;
@@ -114,11 +114,8 @@ class Path_Tracing
 		
 		PID PID_Normal;
 		PID PID_Tangential;
-		TrapePlanner PathPlanner = TrapePlanner(0.10f, 0.40f, 2.f, 0.6f, 0.1f);
-//		TrapePlanner PathPlanner_1 = TrapePlanner(0.10f, 0.40f, 2.f, 0.05f, 0.2f);
-//		TrapePlanner PathPlanner_2 = TrapePlanner(0.10f, 0.40f, 2.f, 0.05f, 0.2f);
-//		TrapePlanner PathPlanner_3 = TrapePlanner(0.10f, 0.40f, 2.f, 0.05f, 0.2f);
-//		TrapePlanner PathPlanner_4 = TrapePlanner(0.10f, 0.40f, 2.f, 0.05f, 0.2f);
+		TrapePlanner PathPlanner = TrapePlanner(0.10f, 0.40f, 2.f, 0.5f, 0.0f);
+
 };
 	
 

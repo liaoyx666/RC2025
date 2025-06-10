@@ -207,9 +207,6 @@ void Chassis_Task(void *pvParameters)
 			{}
 			
 			target_angle = 0;
-			//target_angle = 90;
-			
-			//chassis.Auto_Dribble_Move(&ctrl.twist);
 			
 			chassis.Control(ctrl.twist);	
 			launch.PitchControl(target_angle);//控制俯仰
@@ -248,11 +245,11 @@ void PidParamInit(void)
 	launch.Pid_Param_Init(2,2.4f, 0.015f, 0.0f, 16384.0f, /*16384.0f*/5000.f, 0);
     launch.Pid_Mode_Init(2,0.1f, 0.0f, false, true);
 	
-	path_tracing.Pid_Mode_Init_Path(2, 0, 0, true, false);
-	path_tracing.Pid_Param_Init_Path(2, 1.7f, 0.0f, 0.02f, 2.5f, 2.5f, 0.25f);
+	path_tracing.Pid_Mode_Init_Path(2, 0, 0, false, false);
+	path_tracing.Pid_Param_Init_Path(2, 2.5f, 0.0f, 0.0f, 2.f, 2.f, 0.0f);
 	
-	path_tracing.Pid_Mode_Init_Path(1, 0, 0, true, false);//normal
-	path_tracing.Pid_Param_Init_Path(1, 1.7f, 0.0f, 0.02f, 2.5f, 2.5f, 0.01f);
+	path_tracing.Pid_Mode_Init_Path(1, 0, 0, false, false);//normal
+	path_tracing.Pid_Param_Init_Path(1, 2.5f, 0.0f, 0.0f, 2.f, 2.f, 0.0f);
 
 	
 	chassis.Pid_Param_Init_Yaw(0.13f, 0.0f, 0.0f, 2.0f, 2.5f, 5.0f);

@@ -162,7 +162,7 @@ void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, f
 	if (state == PATH_FORWARD)//向前
 	{
 		diraction = true;
-		if ((path[current_section].IsArriveEnd(currentPoint)))
+		if ((path[current_section].IsApproachEnd(currentPoint)))
 		{
 			flag = 0;//未到达起点，使用pid
 			current_section++;
@@ -171,7 +171,7 @@ void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, f
 	else if (state == PATH_BACKWARD)//向后
 	{
 		diraction = false;
-		if ((path[current_section].IsArriveStart(currentPoint)))
+		if ((path[current_section].IsApproachStart(currentPoint)))
 		{
 			flag = 0;
 			current_section--;
@@ -203,7 +203,6 @@ void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, f
 	{
 		if (flag == 0)//未到达起点
 		{
-			//current = distance;
 			target = 0;
 		}
 		else
@@ -211,19 +210,16 @@ void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, f
 			start = 0;
 			end = path[current_section].max_distance;
 			
-			//current = distance;
 			target = path[current_section].max_distance;
 		}
-		
-		
-		
-		
-		if (path[current_section].IsArriveStart(currentPoint))
+
+
+		if (path[current_section].IsApproachStart(currentPoint))
 		{
 			flag = 1;//到达起点，启用速度规划
 		}
 		
-		if ((path[current_section].IsApproachEnd(currentPoint)) && (flag == 1))
+		if (((path[current_section].IsArriveEnd(currentPoint))) || (PathPlanner.GetArrivedFlag()))
 		{
 			flag = 2;//接近终点，使用pid
 		}
@@ -231,17 +227,13 @@ void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, f
 		
 		if (path[current_section].IsArriveEnd(currentPoint))
 		{
-			flag = 3;//到达终点，使用pid
+			flag = 3;//到达终点
 		}
-		
-	
-		
 	}
 	else
 	{
 		if (flag == 0)//未到达起点
 		{
-			//current = distance;
 			target = path[current_section].max_distance;
 		}
 		else
@@ -249,20 +241,16 @@ void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, f
 			start = path[current_section].max_distance;
 			end = 0;
 			
-			//current = distance;
 			target = 0;
 		}
-		
-		
-		
-		
-		
-		if (path[current_section].IsArriveEnd(currentPoint))
+
+
+		if (path[current_section].IsApproachEnd(currentPoint))
 		{
 			flag = 1;//到达起点，启用速度规划
 		}
 		
-		if ((path[current_section].IsApproachStart(currentPoint)) && (flag == 1))
+		if (((path[current_section].IsArriveStart(currentPoint))) || (PathPlanner.GetArrivedFlag()))
 		{
 			flag = 2;//接近终点，使用pid
 		}
@@ -270,11 +258,20 @@ void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, f
 		
 		if (path[current_section].IsArriveStart(currentPoint))
 		{
-			flag = 3;//到达终点，使用pid
+			flag = 3;//到达终点
 		}
-		
 	}
 	//////////////////////////////////////////////////////////////
+	
+	
+		
+	
+	//法向pid计算法向速度，保持小车在直线上
+	PID_Normal.current = error;
+	PID_Normal.target = 0;
+	normal_speed = PID_Normal.Adjust();
+	
+	
 	
 	
 	
@@ -284,22 +281,28 @@ void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, f
 	if (flag == 1)
 	{
 		path[current_section].GetSpeedPlan(&PathPlanner);
-		
 		tangential_speed = PathPlanner.Plan(start, end, distance);
 	}
-
-	if ((flag == 2) || (flag == 0) || (flag == 3))
+	else if ((flag == 2) || (flag == 0))
 	{
 		PID_Tangential.current = distance;
 		PID_Tangential.target = target;
 		tangential_speed = PID_Tangential.Adjust();
 	}
+	else if (flag == 3)
+	{
+		tangential_speed = 0;
+		normal_speed = 0;
+	}
+	
+
 	
 	
-	//法向pid计算法向速度，保持小车在直线上
-	PID_Normal.current = error;
-	PID_Normal.target = 0;
-	normal_speed = PID_Normal.Adjust();
+	
+	
+	
+	
+	
 	
 	
 	
@@ -346,6 +349,6 @@ void Path::CalcSpeedPlan(void)
 
 void Path::GetSpeedPlan(TrapePlanner *planner)
 {
-	*planner = TrapePlanner(accel_range, decel_range, max_v, 0.7, 0.1);
+	*planner = TrapePlanner(accel_range, decel_range, max_v, 0.8, 0.0);
 }
 	
