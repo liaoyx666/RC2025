@@ -95,29 +95,29 @@ bool Omni_Chassis::Pid_Mode_Init_Yaw(float LowPass_error, float LowPass_d_err, b
 
 void Omni_Chassis::Yaw_Control(float target_yaw, Robot_Twist_t *twist)
 {
-	if (target_yaw > -180.f && target_yaw <= 180.f)
+//	if (target_yaw > -180.f && target_yaw <= 180.f)
+//	{
+	float current_yaw = RawPosData.angle_Z;
+	
+	// 计算角度误差
+	float error = target_yaw - current_yaw;
+	
+	// 将误差归一化到-180度到180度之间
+	while (error > 180.0f)
 	{
-        float current_yaw = RawPosData.angle_Z;
-        
-        // 计算角度误差
-        float error = target_yaw - current_yaw;
-        
-        // 将误差归一化到-180度到180度之间
-        if (error > 180.0f)
-		{
-            error -= 360.0f;
-		}
-		
-		if (error < -180.0f)
-		{
-            error += 360.0f;
-        }
-        
-        PID_Yaw.current = current_yaw;
-        PID_Yaw.target = current_yaw + error;
-		twist->angular.z = PID_Yaw.Adjust();
-		//printf_DMA("%f,%f,%f\r\n", RawPosData.angle_Z, target_yaw, twist->angular.z);
+		error -= 360.0f;
 	}
+	
+	while (error < -180.0f)
+	{
+		error += 360.0f;
+	}
+	
+	PID_Yaw.current = current_yaw;
+	PID_Yaw.target = current_yaw + error;
+	twist->angular.z = PID_Yaw.Adjust();
+	//printf_DMA("%f,%f,%f\r\n", RawPosData.angle_Z, target_yaw, twist->angular.z);
+//	}
 }
 
 void Omni_Chassis::World_Coordinate(float direction_yaw, Robot_Twist_t *twist)

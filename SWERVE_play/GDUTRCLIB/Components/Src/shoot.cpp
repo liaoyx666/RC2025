@@ -9,15 +9,15 @@
 #define SAMPLE_NUM_1 4//采样点数
 
 float cubic_spline_1[SAMPLE_NUM_1 - 1][4] = {
-{16210.000000f, 2670.046993f, 0.000000f, 5878.067391f},
+{15715.000000f, 3625.000000f, 0.000000f, 5000.000000f},
 
-{16860.000000f, 3523.542378f, 3879.524478f, -3211.288168f},
+{16480.000000f, 4225.000000f, 3000.000000f, -2180.000000f},
 
-{19090.000000f, 5028.243495f, -744.730484f, 496.486990f},
+{19070.000000f, 5590.000000f, -270.000000f, 180.000000f},
 
 };//三次样条插值法参数
 
-float sample_distance_1[SAMPLE_NUM_1] = {1.3, 1.52, 2.0, 2.5};//采样点距离
+float sample_distance_1[SAMPLE_NUM_1] = {1.3, 1.5, 2.0, 2.5};//采样点距离
 
 
 
@@ -27,31 +27,29 @@ float sample_distance_1[SAMPLE_NUM_1] = {1.3, 1.52, 2.0, 2.5};//采样点距离
 #define SAMPLE_NUM_2 4//采样点数
 
 float cubic_spline_2[SAMPLE_NUM_2 - 1][4] = {
-{17790.000000f, 2826.000000f, 0.000000f, 1576.000000f},
+{17815.000000f, 3052.146893f, 0.000000f, 551.412429f},
 
-{19400.000000f, 4008.000000f, 2364.000000f, -3080.000000f},
+{19410.000000f, 3465.706215f, 827.118644f, 4642.937853f},
 
-{21610.000000f, 4062.000000f, -2256.000000f, 1504.000000f},
+{21930.000000f, 7775.028249f, 7791.525424f, -8657.250471f},
 
 };//三次样条插值法参数
 
-float sample_distance_2[SAMPLE_NUM_2] = {2.0, 2.5, 3.0, 3.5};//采样点距离
+float sample_distance_2[SAMPLE_NUM_2] = {2.0, 2.5, 3.0, 3.3};//采样点距离
 
 
 
 
-#define SAMPLE_NUM_3 4//采样点数
+#define SAMPLE_NUM_3 3//采样点数
 
 float cubic_spline_3[SAMPLE_NUM_3 - 1][4] = {
-{19930.000000f, 2837.089552f, 0.000000f, -308.358209f},
+{20080.000000f, 3014.820574f, 0.000000f, 4900.717703f},
 
-{21310.000000f, 2605.820896f, -462.537313f, 1221.791045f},
-
-{22650.000000f, 3059.626866f, 1370.149254f, -1141.791045f},
+{22200.000000f, 6690.358852f, 7351.076555f, -6448.312768f},
 
 };//三次样条插值法参数
 
-float sample_distance_3[SAMPLE_NUM_3] = {3.0, 3.5, 4.0, 4.5};//采样点距离
+float sample_distance_3[SAMPLE_NUM_3] = {3.0, 3.5, 3.88};//采样点距离
 
 
 
@@ -132,8 +130,8 @@ float GetHoopAngle(float robot_x, float robot_y, float *distance)
 {
 	float delta_x, delta_y, target_theta;
 	
-	delta_x = 3.076052f - robot_x;
-	delta_y = 0.38726f - robot_y;
+	delta_x = 3.074919f - robot_x;
+	delta_y = 0.35137f - robot_y;
     target_theta = atan2f(delta_y, delta_x); // 朝向篮筐的方向（弧度）
 
 	target_theta = target_theta * 180.f / PI;
@@ -153,14 +151,6 @@ float GetHoopAngle(float robot_x, float robot_y, float *distance)
 		target_theta -= 90.f;
 	}
 	
-//	if (target_theta <= -90)
-//	{
-//		target_theta -= 90.f;
-//	}
-//	else
-//	{
-//		target_theta += 270.f;
-//	}
 	return target_theta;
 }
 

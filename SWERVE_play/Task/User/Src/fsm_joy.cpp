@@ -53,13 +53,13 @@ void Air_Joy_Task(void *pvParameters)
 						
 						ctrl.mode_ctrl = MODE_DRIBBLE;
 						
-						float length = sqrtf(ctrl.twist.linear.x * ctrl.twist.linear.x + ctrl.twist.linear.y * ctrl.twist.linear.y);
-						if(length > 0.5f)
-						{
-							float limit = 0.5f / length;
-							ctrl.twist.linear.x *= limit;
-							ctrl.twist.linear.y *= limit;
-						}//限制底盘速度
+//						float length = sqrtf(ctrl.twist.linear.x * ctrl.twist.linear.x + ctrl.twist.linear.y * ctrl.twist.linear.y);
+//						if(length > 0.5f)
+//						{
+//							float limit = 0.5f / length;
+//							ctrl.twist.linear.x *= limit;
+//							ctrl.twist.linear.y *= limit;
+//						}//限制底盘速度
 
 						ctrl.spin_ctrl = SPIN_OUTSIDE;//旋转到外侧
 						
@@ -72,6 +72,9 @@ void Air_Joy_Task(void *pvParameters)
 					/////////////////////////////////////////////////////////////////////////////
 					else if (_tool_Abs(air_joy.SWC - 1500) < 50)//人工装球
 					{
+						ctrl.chassis_ctrl = CHASSIS_OFF;//
+						
+						
 						ctrl.mode_ctrl = MODE_DRIBBLE;
 						
 						ctrl.spin_ctrl = SPIN_OUTSIDE;//旋转到外侧
@@ -153,7 +156,7 @@ void Air_Joy_Task(void *pvParameters)
 					
 					if (_tool_Abs(air_joy.SWA - 2000) < 50)
 					{
-						ctrl.chassis_ctrl = CHASSIS_OFF;
+						ctrl.chassis_ctrl = CHASSIS_ON;
 						ctrl.friction_ctrl = FRICTION_ON;
 					}
 					else

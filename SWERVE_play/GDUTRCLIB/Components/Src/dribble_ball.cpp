@@ -9,9 +9,6 @@
 #define DRIBBLE_TIME_4 150000//夹球气缸收缩到结束（防止两次运球时间间隔过短）
 
 
-
-
-
 void Dribble_Ball(enum CONTROL_E state)
 {
 	static uint32_t start_time;//开始击球1时间
@@ -66,9 +63,6 @@ void Dribble_Ball(enum CONTROL_E state)
 }
 
 
-
-
-
 //#define SHOOT_TIME_1 400000
 //#define SHOOT_TIME_2 100000
 
@@ -114,34 +108,11 @@ void Dribble_Ball(enum CONTROL_E state)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ////推球气缸控制
 //void Push_Ball(enum CylinderState state)
 //{
 //	Pushing_Cylinder_State(state);
 //}
-
-
-
-
-
-
-
-
 
 
 void Hiting_Cylinder_State(enum CylinderState state)
@@ -159,8 +130,4 @@ void Holding_Cylinder_State(enum CylinderState state)
 //{
 //	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, (GPIO_PinState)state);
 //}
-
-
-
-
 
