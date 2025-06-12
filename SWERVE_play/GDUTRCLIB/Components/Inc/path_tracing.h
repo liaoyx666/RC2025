@@ -13,7 +13,7 @@ struct PointVector
 	PointVector(float x = 0, float y = 0) : x(x), y(y) {}
 };
 
-#define ACCEL   6.f
+#define ACCEL   7.f
 #define DECEL   2.5f
 #define MAX_VEL 3.5f
 
@@ -37,11 +37,7 @@ class Path
 			
 			max_distance = sqrtf(direction_vector.x * direction_vector.x + direction_vector.y * direction_vector.y);
 			
-			
-			
 			CalcSpeedPlan();
-			
-			
 		}
 		
 		void GetErrorAndDistance(PointVector currentPoint, float *error, float *distance);
@@ -67,31 +63,19 @@ class Path
 		PointVector start_point, end_point;
 		PointVector direction_vector;
 		float angle;
-		
-	
-	
-		
-	
 };
 
-	
 
 
 #define SECTION_NUM  8
 
-
-
-
-	
 class Path_Tracing
 {
 	public:
 		bool Pid_Param_Init_Path(uint8_t num, float Kp, float Ki, float Kd, float Integral_Max, float OUT_Max, float DeadZone);
 		bool Pid_Mode_Init_Path(uint8_t num, float LowPass_error, float LowPass_d_err, bool D_of_Current, bool Imcreatement_of_Out);
 		
-	
 		void PathTracing(enum CONTROL_E state, PointVector currentPoint, float *speed_x, float *speed_y);
-
 	
 	protected:
 		
@@ -107,22 +91,9 @@ class Path_Tracing
 			Path(2.46, -0.33,     0, -0.33),
 		};
 		
-		//const float accel = 1.f, decel = 1.f, max_vel = 2.5f;
-		
-		
-		
-		
 		PID PID_Normal;
 		PID PID_Tangential;
 		TrapePlanner PathPlanner = TrapePlanner(0.10f, 0.40f, 2.f, 0.5f, 0.0f);
-
 };
-	
-
 
 #endif
-
-
-
-
-

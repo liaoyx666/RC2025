@@ -28,11 +28,7 @@ void Path::GetErrorAndDistance(PointVector currentPoint, float *error, float *di
 			*distance * *distance
 		)
     );
-    
-	
-	
-	
-	
+
     // 判断点在路径的左侧还是右侧，为误差赋予符号
     float crossProduct = vectorFromStart.x * direction_vector.y - 
                          vectorFromStart.y * direction_vector.x;
@@ -45,7 +41,7 @@ void Path::GetErrorAndDistance(PointVector currentPoint, float *error, float *di
 
 bool Path::IsArriveEnd(PointVector currentPoint)
 {
-	if ((fabsf(currentPoint.x - end_point.x) <= arrive_deadzone) && (fabsf(currentPoint.y - end_point.y) <= arrive_deadzone))
+	if ((((currentPoint.x - end_point.x) * (currentPoint.x - end_point.x)) + ((currentPoint.y - end_point.y) * (currentPoint.y - end_point.y))) <= (arrive_deadzone * arrive_deadzone))
 	{
 		return true;
 	}
@@ -57,7 +53,7 @@ bool Path::IsArriveEnd(PointVector currentPoint)
 	
 bool Path::IsArriveStart(PointVector currentPoint)
 {
-	if ((fabsf(currentPoint.x - start_point.x) <= arrive_deadzone) && (fabsf(currentPoint.y - start_point.y) <= arrive_deadzone))
+	if ((((currentPoint.x - start_point.x) * (currentPoint.x - start_point.x)) + ((currentPoint.y - start_point.y) * (currentPoint.y - start_point.y))) <= (arrive_deadzone * arrive_deadzone))
 	{
 		return true;
 	}
@@ -69,7 +65,7 @@ bool Path::IsArriveStart(PointVector currentPoint)
 	
 bool Path::IsApproachEnd(PointVector currentPoint)
 {
-	if ((fabsf(currentPoint.x - end_point.x) <= approach_deadzone) && (fabsf(currentPoint.y - end_point.y) <= approach_deadzone))
+	if ((((currentPoint.x - end_point.x) * (currentPoint.x - end_point.x)) + ((currentPoint.y - end_point.y) * (currentPoint.y - end_point.y))) <= (approach_deadzone * approach_deadzone))
 	{
 		return true;
 	}
@@ -81,7 +77,7 @@ bool Path::IsApproachEnd(PointVector currentPoint)
 	
 bool Path::IsApproachStart(PointVector currentPoint)
 {
-	if ((fabsf(currentPoint.x - start_point.x) <= approach_deadzone) && (fabsf(currentPoint.y - start_point.y) <= approach_deadzone))
+	if ((((currentPoint.x - start_point.x) * (currentPoint.x - start_point.x)) + ((currentPoint.y - start_point.y) * (currentPoint.y - start_point.y))) <= (approach_deadzone * approach_deadzone))
 	{
 		return true;
 	}
@@ -90,9 +86,6 @@ bool Path::IsApproachStart(PointVector currentPoint)
 		return false;
 	}
 }
-
-
-
 
 bool Path_Tracing::Pid_Param_Init_Path(uint8_t num, float Kp, float Ki, float Kd, float Integral_Max, float OUT_Max, float DeadZone)
 {
@@ -132,18 +125,9 @@ bool Path_Tracing::Pid_Mode_Init_Path(uint8_t num, float LowPass_error, float Lo
     return true;
 }
 
-
-
-float a, b;
-
-float lx, ly;
-
-
-
-
 void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, float *speed_x, float *speed_y)
 {
-	static uint8_t current_section = 0;//当前路段
+	static int8_t current_section = 0;//当前路段
 	static bool diraction = true;//方向
 	static uint8_t flag = 0;//状态
 	
@@ -177,7 +161,7 @@ void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, f
 			current_section--;
 		}
 	}
-	///////////////////////////////////////////////////////////////////////////
+	
 	
 	//限位
 	if (current_section < 0)
@@ -188,15 +172,11 @@ void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, f
 	{
 		current_section = SECTION_NUM - 1;
 	}
-	
+	///////////////////////////////////////////////////////////////////////////
 	
 	
 	//获取法向误差和路程
 	path[current_section].GetErrorAndDistance(currentPoint, &error, &distance);
-	
-	a = error;
-	b = distance;
-	
 	////////////////////////////////////////////////////////////////////////////
 	//速度规划,PID方向
 	if (diraction == true)
@@ -219,7 +199,7 @@ void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, f
 			flag = 1;//到达起点，启用速度规划
 		}
 		
-		if (((path[current_section].IsArriveEnd(currentPoint))) || (PathPlanner.GetArrivedFlag()))
+		if ((flag == 1) && (tangential_speed <= 0.01f))
 		{
 			flag = 2;//接近终点，使用pid
 		}
@@ -228,6 +208,10 @@ void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, f
 		if (path[current_section].IsArriveEnd(currentPoint))
 		{
 			flag = 3;//到达终点
+		}
+		else
+		{
+			flag = 2;
 		}
 	}
 	else
@@ -250,7 +234,7 @@ void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, f
 			flag = 1;//到达起点，启用速度规划
 		}
 		
-		if (((path[current_section].IsArriveStart(currentPoint))) || (PathPlanner.GetArrivedFlag()))
+		if ((flag == 1) && (tangential_speed <= 0.01f))
 		{
 			flag = 2;//接近终点，使用pid
 		}
@@ -260,23 +244,18 @@ void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, f
 		{
 			flag = 3;//到达终点
 		}
+		else
+		{
+			flag = 2;
+		}
 	}
 	//////////////////////////////////////////////////////////////
-	
-	
-		
 	
 	//法向pid计算法向速度，保持小车在直线上
 	PID_Normal.current = error;
 	PID_Normal.target = 0;
 	normal_speed = PID_Normal.Adjust();
 	
-	
-	
-	
-	
-	
-
 	//切向速度计算
 	if (flag == 1)
 	{
@@ -294,31 +273,12 @@ void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, f
 		tangential_speed = 0;
 		normal_speed = 0;
 	}
-	
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	// 速度分解，从路径坐标系转换到全局坐标系
 	*speed_y = (tangential_speed * path[current_section].COS_angle + normal_speed * path[current_section].SIN_angle);
 	*speed_x = -(tangential_speed * path[current_section].SIN_angle - normal_speed * path[current_section].COS_angle);
-		
-	lx = tangential_speed;
-	ly = normal_speed; 
-	
-	
 }
-
-
-
 
 void Path::CalcSpeedPlan(void)
 {
@@ -344,11 +304,8 @@ void Path::CalcSpeedPlan(void)
 
 }
 
-
-
-
 void Path::GetSpeedPlan(TrapePlanner *planner)
 {
-	*planner = TrapePlanner(accel_range, decel_range, max_v, 0.8, 0.0);
+	*planner = TrapePlanner(accel_range, decel_range, max_v, 1.f, 0.0);
 }
 	
