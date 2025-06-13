@@ -32,6 +32,10 @@ class Path
 			
 			angle = atan2f(direction_vector.y, direction_vector.x);//x轴方向为0度
 			
+			
+			
+			
+			
 			SIN_angle = sinf(angle);
 			COS_angle = cosf(angle);
 			
@@ -63,6 +67,7 @@ class Path
 		PointVector start_point, end_point;
 		PointVector direction_vector;
 		float angle;
+		float yaw_angle;
 };
 
 
