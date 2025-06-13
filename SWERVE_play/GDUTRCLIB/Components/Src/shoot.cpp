@@ -124,14 +124,17 @@ float GetShootSpeed(float distance, uint8_t pitch_level)
 
 
 
-#define HOOP_X  3.294f; // 篮筐的X坐标（单位：米）
-#define HOOP_Y  0.26f; // 篮筐的Y坐标（单位：米）
+#define HOOP_X  3.156007f // 篮筐的X坐标（单位：米）
+#define HOOP_Y  0.32287669f // 篮筐的Y坐标（单位：米）
+
+
+
 float GetHoopAngle(float robot_x, float robot_y, float *distance)
 {
 	float delta_x, delta_y, target_theta;
 	
-	delta_x = 3.074919f - robot_x;
-	delta_y = 0.35137f - robot_y;
+	delta_x = HOOP_X - robot_x;
+	delta_y = HOOP_Y - robot_y;
     target_theta = atan2f(delta_y, delta_x); // 朝向篮筐的方向（弧度）
 
 	target_theta = target_theta * 180.f / PI;
