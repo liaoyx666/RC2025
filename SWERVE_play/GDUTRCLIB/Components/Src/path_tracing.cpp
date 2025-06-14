@@ -125,7 +125,11 @@ bool Path_Tracing::Pid_Mode_Init_Path(uint8_t num, float LowPass_error, float Lo
     return true;
 }
 
-void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, float *speed_x, float *speed_y)
+
+float aa, bb;
+
+
+void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, float *speed_x, float *speed_y, float *target_yaw)
 {
 	static int8_t current_section = 0;//当前路段
 	static bool diraction = true;//方向
@@ -173,8 +177,21 @@ void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, f
 		current_section = SECTION_NUM - 1;
 	}
 	///////////////////////////////////////////////////////////////////////////
-	
-	
+	if (diraction == true)
+	{
+		*target_yaw = path[current_section].yaw_angle;
+	}
+	else
+	{
+		if (path[current_section].yaw_angle >= 0)
+		{	
+			*target_yaw = path[current_section].yaw_angle - 180.f;
+		}
+		else
+		{
+			*target_yaw = path[current_section].yaw_angle + 180.f;
+		}
+	}
 	//获取法向误差和路程
 	path[current_section].GetErrorAndDistance(currentPoint, &error, &distance);
 	////////////////////////////////////////////////////////////////////////////
@@ -272,13 +289,22 @@ void Path_Tracing::PathTracing(enum CONTROL_E state, PointVector currentPoint, f
 	{
 		tangential_speed = 0;
 		normal_speed = 0;
+		*target_yaw = 360;
 	}
 
 	
 	// 速度分解，从路径坐标系转换到全局坐标系
 	*speed_y = (tangential_speed * path[current_section].COS_angle + normal_speed * path[current_section].SIN_angle);
 	*speed_x = -(tangential_speed * path[current_section].SIN_angle - normal_speed * path[current_section].COS_angle);
+	
+	
+	aa = *speed_y;
+	bb = *speed_x;
+	
 }
+
+
+float vv;
 
 void Path::CalcSpeedPlan(void)
 {
@@ -306,6 +332,7 @@ void Path::CalcSpeedPlan(void)
 
 void Path::GetSpeedPlan(TrapePlanner *planner)
 {
-	*planner = TrapePlanner(accel_range, decel_range, max_v, 1.f, 0.0);
+	vv = max_v;
+	*planner = TrapePlanner(accel_range, decel_range, max_v, 1.5f, 0.0);
 }
 	

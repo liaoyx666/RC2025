@@ -14,7 +14,7 @@
 #include "shoot.h"
 #include "path_tracing.h"
 
-Omni_Chassis chassis(0.152/2.f, 0.442f/2.f, 4, 2.3f); //底盘直径0.442m，轮子半径0.152m，底盘加速度0.5m/s^2
+Omni_Chassis chassis(0.152/2.f, 0.442f/2.f, 4, 2.5f); //底盘直径0.442m，轮子半径0.152m，底盘加速度0.5m/s^2
 Launcher launch(450.f, 455.f, 2045.f);
 
 Path_Tracing path_tracing;
@@ -61,7 +61,15 @@ void Chassis_Task(void *pvParameters)
 			
 			if (ctrl.move_ctrl == MOVE_AUTO)
 			{
-				path_tracing.PathTracing(ctrl.path_ctrl, PointVector(RealPosData.world_x, RealPosData.world_y), &ctrl.twist.linear.x, &ctrl.twist.linear.y);
+				path_tracing.PathTracing(ctrl.path_ctrl, PointVector(RealPosData.world_x, RealPosData.world_y), &ctrl.twist.linear.x, &ctrl.twist.linear.y, &yaw_angle);
+				if (yaw_angle != 360)
+				{
+					//chassis.Yaw_Control(yaw_angle, &ctrl.twist);
+				}
+				else
+				{
+					ctrl.twist.angular.z = 0;
+				}
 			}
 			
 			
@@ -246,12 +254,12 @@ void PidParamInit(void)
     launch.Pid_Mode_Init(2,0.1f, 0.0f, false, true);
 	
 	path_tracing.Pid_Mode_Init_Path(2, 0, 0, false, false);
-	path_tracing.Pid_Param_Init_Path(2, 2.5f, 0.0f, 0.0f, 2.f, 2.f, 0.0f);
+	path_tracing.Pid_Param_Init_Path(2, 2.5f, 0.0f, 0.0f, 3.2f, 3.2f, 0.0f);
 	
 	path_tracing.Pid_Mode_Init_Path(1, 0, 0, false, false);//normal
 	path_tracing.Pid_Param_Init_Path(1, 2.5f, 0.0f, 0.0f, 2.f, 2.f, 0.0f);
 
 	
-	chassis.Pid_Param_Init_Yaw(0.13f, 0.0f, 0.0f, 2.0f, 2.5f, 5.0f);
+	chassis.Pid_Param_Init_Yaw(0.13f, 0.0f, 0.0f, 2.0f, 2.5f, 30.0f);
 	chassis.Pid_Mode_Init_Yaw(0, 0, false, true);
 }

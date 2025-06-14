@@ -13,8 +13,8 @@ struct PointVector
 	PointVector(float x = 0, float y = 0) : x(x), y(y) {}
 };
 
-#define ACCEL   7.f
-#define DECEL   2.5f
+#define ACCEL   1.5f
+#define DECEL   1.5f
 #define MAX_VEL 3.5f
 
 class Path
@@ -32,8 +32,17 @@ class Path
 			
 			angle = atan2f(direction_vector.y, direction_vector.x);//x轴方向为0度
 			
+			yaw_angle = angle * 180.f / 3.14159265358979;;
 			
-			
+	
+			if (yaw_angle <= -90.f)
+			{
+				yaw_angle += 270.f;
+			}
+			else
+			{
+				yaw_angle -= 90.f;
+			}
 			
 			
 			SIN_angle = sinf(angle);
@@ -53,6 +62,8 @@ class Path
 		
 		float max_v, accel_range, decel_range;
 		
+		float yaw_angle;
+		
 		float SIN_angle;
 		float COS_angle;
 		float max_distance;
@@ -67,7 +78,7 @@ class Path
 		PointVector start_point, end_point;
 		PointVector direction_vector;
 		float angle;
-		float yaw_angle;
+		
 };
 
 
@@ -80,7 +91,7 @@ class Path_Tracing
 		bool Pid_Param_Init_Path(uint8_t num, float Kp, float Ki, float Kd, float Integral_Max, float OUT_Max, float DeadZone);
 		bool Pid_Mode_Init_Path(uint8_t num, float LowPass_error, float LowPass_d_err, bool D_of_Current, bool Imcreatement_of_Out);
 		
-		void PathTracing(enum CONTROL_E state, PointVector currentPoint, float *speed_x, float *speed_y);
+		void PathTracing(enum CONTROL_E state, PointVector currentPoint, float *speed_x, float *speed_y, float *target_yaw);
 	
 	protected:
 		
@@ -98,7 +109,7 @@ class Path_Tracing
 		
 		PID PID_Normal;
 		PID PID_Tangential;
-		TrapePlanner PathPlanner = TrapePlanner(0.10f, 0.40f, 2.f, 0.5f, 0.0f);
+		TrapePlanner PathPlanner = TrapePlanner(0.50f, 0.50f, 3.f, 0.5f, 0.0f);
 };
 
 #endif
