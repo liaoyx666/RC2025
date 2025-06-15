@@ -77,7 +77,8 @@ void Chassis_Task(void *pvParameters)
             }
 			
 
-			chassis.World_Coordinate(0, &ctrl.twist);//世界坐标
+			//chassis.World_Coordinate(0, &ctrl.twist);//世界坐标
+			chassis.World_Coordinate(-90, &ctrl.twist);//世界坐标
 			////////////////////////////////////////////////////
 			//俯仰
 			if ((pitch_level == 0) && (distance > 2.5f) && (distance <= 3.3f))
@@ -100,6 +101,21 @@ void Chassis_Task(void *pvParameters)
 				pitch_level = 1;
 			}
 			
+			
+			if (distance < 2.0)
+			{
+				pitch_level = 0;
+			}
+			
+			if ((distance > 2.5) && (distance < 3.0))
+			{
+				pitch_level = 1;
+			}
+			
+			if (distance > 3.3)
+			{
+				pitch_level = 2;
+			}
 			
 			
 			
