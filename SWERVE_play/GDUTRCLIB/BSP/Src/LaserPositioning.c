@@ -120,7 +120,7 @@ int16_t RightLaserAngleOffset_OffsetDistance		= 0;		// 右激光安装角度偏移量_偏移
 
 
 static uint8_t LaserPositionin_Rx_Buff[LaserPositionin_UART_SIZE];
-static LaserModuleDataGroupTypedef LaserModuleDataGroup;		// 激光测距模块数据组变量
+LaserModuleDataGroupTypedef LaserModuleDataGroup;		// 激光测距模块数据组变量
 
 
 static uint8_t LaserModule_TurnOnTheLaserPointer(LaserModuleDataTypedef* LaserModuleData);

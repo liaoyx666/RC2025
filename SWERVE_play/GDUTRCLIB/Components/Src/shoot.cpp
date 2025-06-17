@@ -122,8 +122,8 @@ float GetShootSpeed(float distance, uint8_t pitch_level)
 
 
 
-#define HOOP_X  10.662835f // 篮筐的X坐标（单位：米）
-#define HOOP_Y  3.2596715f // 篮筐的Y坐标（单位：米）
+#define HOOP_X  10.6302147f // 篮筐的X坐标（单位：米）
+#define HOOP_Y  3.1866715f // 篮筐的Y坐标（单位：米）
 
 
 

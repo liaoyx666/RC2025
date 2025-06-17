@@ -144,6 +144,9 @@ uint32_t LaserPositionin_UART2_RxCallback(uint8_t* Receive_data, uint16_t data_l
 uint32_t LaserPositionin_UART6_RxCallback(uint8_t* Receive_data, uint16_t data_len);    // 激光测距模块2串口接收回调函数
 
 
+
+extern LaserModuleDataGroupTypedef LaserModuleDataGroup;
+
 #ifdef __cplusplus
 }
 #endif
