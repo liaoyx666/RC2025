@@ -1,21 +1,23 @@
 #include "location_task.h"
 #include "LaserPositioning.h"
 
-WorldXYCoordinatesTypedef WorldXYCoordinates;
+#include "reposition.h"
 
-float X, Y;
+
+float X, Y, XX, YY;
+
 
 void Location_Task(void *pvParameters)
 {
+	static RePosition position(0);
 	for (;;)
 	{
 		
 		
-		LaserPositioning(3.14159265f / 2.f * 3.f, &WorldXYCoordinates);
-		X = LaserModuleDataGroup.LaserModule1.MeasurementData.Distance / 1000.f;
-		Y = LaserModuleDataGroup.LaserModule2.MeasurementData.Distance / 1000.f;
-		
-		
+		LaserPositioning(NULL, NULL);
+		position.GetLaserData(&X, &Y);
+		position.CaliLaserData(PointVector(X, Y), &XX, &YY, sinf(RealPosData.world_yaw * 3.14159265f / 180.f), cosf(RealPosData.world_yaw * 3.14159265f / 180.f));
+	
 		
 		
 		

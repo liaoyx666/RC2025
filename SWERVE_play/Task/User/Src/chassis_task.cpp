@@ -12,6 +12,7 @@
 #include "speed_plan.h"
 #include "dribble_ball.h"
 #include "shoot.h"
+#include "reposition.h"
 
 Omni_Chassis chassis(0.152/2.f, 0.442f/2.f, 4, 2.f); //底盘直径0.442m，轮子半径0.152m，底盘加速度0.5m/s^2
 Launcher launch(450.f, 455.f, 2045.f);
@@ -19,12 +20,16 @@ bool shoot_ready = false;
 CONTROL_T ctrl;
 uint8_t pitch_level = 0;
 
+RePosition reposition(0);
+
 float pitch_angle = 0;
 bool spin_state = false;
 float shoot_speed = 0;
 float distance = 0;
 float yaw_angle = 0;
 
+
+float xxx, yyy;
 //main
 
 uint8_t a5, a3;
@@ -58,7 +63,10 @@ void Chassis_Task(void *pvParameters)
 				}
 				else if (ctrl.yaw_ctrl == YAW_LOCK_BASKET)//锁框
 				{
-					yaw_angle = GetHoopAngle(RealPosData.world_x, RealPosData.world_y, &distance) + 0.5f;
+					yaw_angle = GetHoopAngle(RealPosData.world_x, RealPosData.world_y, &distance);
+					
+					distance -= 0.40;
+					
 					if (distance >= 1.3f && distance <= 3.88)
 					{
 						chassis.Yaw_Control(yaw_angle, &ctrl.twist);
@@ -76,9 +84,10 @@ void Chassis_Task(void *pvParameters)
 				ctrl.twist.linear.y = 0;
             }
 			
-
-			//chassis.World_Coordinate(0, &ctrl.twist);//世界坐标
-			chassis.World_Coordinate(-90, &ctrl.twist);//世界坐标
+			reposition.GetLaserData(&xxx, &yyy);
+			reposition.LaserRePosition(&ctrl);
+			chassis.World_Coordinate(0, &ctrl.twist);//世界坐标
+			//chassis.World_Coordinate(-90, &ctrl.twist);//世界坐标
 			////////////////////////////////////////////////////
 			//俯仰
 			if ((pitch_level == 0) && (distance > 2.5f) && (distance <= 3.3f))
@@ -232,6 +241,6 @@ void PidParamInit(void)
 	
 	
 	
-	chassis.Pid_Param_Init_Yaw(0.13f, 0.0f, 0.0f, 2.0f, 2.5f, 0.0f);
+	chassis.Pid_Param_Init_Yaw(0.12f, 0.0f, 0.0f, 3.f, 3.f, 0.0f);
 	chassis.Pid_Mode_Init_Yaw(0, 0, false, true);
 }

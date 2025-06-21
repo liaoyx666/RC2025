@@ -38,7 +38,10 @@ typedef enum CONTROL_E
 	LOAD_OFF,
 	
 	MODE_DRIBBLE,
-	MODE_LOAD
+	MODE_LOAD,
+	
+	REPOSITION_OFF,
+	REPOSITION_ON
 	
 	////////////
 }CONTROL_E;
@@ -56,6 +59,7 @@ typedef struct CONTROL_T
 	CONTROL_E mode_ctrl;
 	CONTROL_E yaw_ctrl;
 	CONTROL_E load_ctrl;
+	CONTROL_E reposition_ctrl;
 	
     uint8_t add_cnt=0;
 }CONTROL_T;

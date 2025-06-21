@@ -7,14 +7,6 @@
 
 
 #ifdef __cplusplus
-
-
-
-
-
-#endif
-
-#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -38,6 +30,15 @@ extern "C" {
 	
 	
 void Location_Task(void *pvParameters);
+
+
+
+
+
+
+
+
+
 
 #ifdef __cplusplus
 }

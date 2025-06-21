@@ -144,11 +144,11 @@ void LaserPositioning(float Yaw, WorldXYCoordinatesTypedef* WorldXYCoordinatesPo
 
 	LaserModuleGroupState |= LaserModuleGroup_AnalysisModulesMeasurementResults(&LaserModuleDataGroup);			// 激光测距模块组读取测量结果
 
-	LaserPositioning_GetYaw(&Yaw);		// 获取偏航角，单位弧度
+	//LaserPositioning_GetYaw(&Yaw);		// 获取偏航角，单位弧度
 	
-	LaserPositioning_XYWorldCoordinatesCalculate(WorldXYCoordinatesPointer, Yaw, LaserModuleDataGroup.LaserModule1.MeasurementData.Distance, LaserModuleDataGroup.LaserModule2.MeasurementData.Distance);
+	//LaserPositioning_XYWorldCoordinatesCalculate(WorldXYCoordinatesPointer, Yaw, LaserModuleDataGroup.LaserModule1.MeasurementData.Distance, LaserModuleDataGroup.LaserModule2.MeasurementData.Distance);
 
-	LaserPositioning_SendXYWorldCoordinates(WorldXYCoordinatesPointer);	// 发送世界坐标系XY坐标数据
+	//LaserPositioning_SendXYWorldCoordinates(WorldXYCoordinatesPointer);	// 发送世界坐标系XY坐标数据
 }
 
 void LaserModuleGroup_Init(void)

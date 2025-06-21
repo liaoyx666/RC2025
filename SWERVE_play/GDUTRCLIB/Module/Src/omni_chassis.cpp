@@ -13,7 +13,7 @@
 #include <math.h>
 
 extern RealPos RealPosData;
-extern RawPos RawPosData;
+
 
 void Omni_Chassis::Control(Robot_Twist_t cmd_vel)
 {
@@ -97,7 +97,7 @@ void Omni_Chassis::Yaw_Control(float target_yaw, Robot_Twist_t *twist)
 {
 //	if (target_yaw > -180.f && target_yaw <= 180.f)
 //	{
-	float current_yaw = RawPosData.angle_Z;
+	float current_yaw = RealPosData.world_yaw;
 	
 	// 计算角度误差
 	float error = target_yaw - current_yaw;
@@ -124,7 +124,7 @@ void Omni_Chassis::World_Coordinate(float direction_yaw, Robot_Twist_t *twist)
 {
 	if (direction_yaw > -180.f && direction_yaw <= 180.f)
 	{
-		float current_yaw = RawPosData.angle_Z;
+		float current_yaw = RealPosData.world_yaw;
 		
 		float error = current_yaw - direction_yaw;
 		

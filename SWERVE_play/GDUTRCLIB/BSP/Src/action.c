@@ -6,6 +6,21 @@ RawPos RawPosData = {0};
 RealPos RealPosData = {0};
 
 
+float GetYawError(float target, float current)
+{
+	float error = target - current;
+	// 将误差归一化到-180度到180度之间
+	while (error > 180.0f)
+	{
+		error -= 360.0f;
+	}
+	
+	while (error < -180.0f)
+	{
+		error += 360.0f;
+	}
+	return error;
+}
 /*
   @使用方法：
   使用串口3进行通讯，注意不是232！！！！
@@ -18,6 +33,8 @@ RealPos RealPosData = {0};
   
   此文件用于position！！！！！！！！！
 */
+
+
 
 
 union
@@ -175,10 +192,6 @@ uint32_t Position_UART3_RxCallback(uint8_t *buf, uint16_t len)
 
 void Update_RawPosition(float value[5])
 {
-//	//赋值
-//	RawPosData.LAST_Pos_X = RawPosData.Pos_X;
-//	RawPosData.LAST_Pos_Y = RawPosData.Pos_Y;
-
 	//处理数据
 	RawPosData.Pos_X = value[0] / 1000.f; 
 	RawPosData.Pos_Y = value[1] / 1000.f; 
@@ -186,21 +199,25 @@ void Update_RawPosition(float value[5])
 	RawPosData.Speed_X = value[3];
 	RawPosData.Speed_Y = value[4];
 
-//   //差分运算
-//	RawPosData.DELTA_Pos_X = RawPosData.Pos_X - RawPosData.LAST_Pos_X;
-//	RawPosData.DELTA_Pos_Y = RawPosData.Pos_Y - RawPosData.LAST_Pos_Y;
 
-  //世界坐标
-	RealPosData.world_yaw = RawPosData.angle_Z;
-    RealPosData.world_x =  RawPosData.Pos_X;
-	RealPosData.world_y =  RawPosData.Pos_Y;
-	//加入安装误差
-	RawPosData.REAL_X += (RawPosData.DELTA_Pos_X);
-	RawPosData.REAL_Y += (RawPosData.DELTA_Pos_Y);
+  
+	RealPosData.world_yaw = GetYawError(RawPosData.angle_Z - RawPosData.yaw_offset, 0);
+	RealPosData.raw_yaw = RawPosData.angle_Z;
+
 	
-  //解算安装误差
-	//RealPosData.world_x = RawPosData.REAL_X + INSTALL_ERROR_X * sinf(RealPosData.world_yaw * PI / 180.f);
-	//RealPosData.world_y = RawPosData.REAL_Y + INSTALL_ERROR_Y * cosf(RealPosData.world_yaw * PI / 180.f);
+	if ((RawPosData.x_offset != 0) || (RawPosData.y_offset != 0))
+	{
+		RealPosData.world_x =   RawPosData.Pos_X * RawPosData.cos_yaw_offset + RawPosData.Pos_Y * RawPosData.sin_yaw_offset;
+		RealPosData.world_y =  -RawPosData.Pos_X * RawPosData.sin_yaw_offset + RawPosData.Pos_Y * RawPosData.cos_yaw_offset;
+		
+		RealPosData.world_x -= RawPosData.x_offset;
+		RealPosData.world_y -= RawPosData.y_offset;
+	}
+	else
+	{
+		RealPosData.world_x = RawPosData.Pos_X;
+		RealPosData.world_y = RawPosData.Pos_Y;
+	}
 }
 
 

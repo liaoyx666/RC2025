@@ -17,28 +17,39 @@ extern "C" {
 
 typedef struct RealPos
 {
-  float world_x;
-  float world_y;     
-  float world_yaw;
+	float world_x;
+	float world_y;     
+	float world_yaw;
+	float raw_yaw;
 }RealPos;
 
 typedef struct RawPos
 {
 	float angle_Z;
+	
 	float Pos_X;
 	float Pos_Y;
+	
 	float Speed_X;
 	float Speed_Y;
 	
 
-	float LAST_Pos_X;
-	float LAST_Pos_Y;
+//	float LAST_Pos_X;
+//	float LAST_Pos_Y;
 
-	float DELTA_Pos_X;
-	float DELTA_Pos_Y;
+//	float DELTA_Pos_X;
+//	float DELTA_Pos_Y;
 	
-	float REAL_X;
-	float REAL_Y;
+//	float REAL_X;
+//	float REAL_Y;
+	float yaw_offset;
+	
+	float sin_yaw_offset;
+	float cos_yaw_offset;
+	
+	float x_offset;
+	float y_offset;
+	
 }RawPos;
 
 
