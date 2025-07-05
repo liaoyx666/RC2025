@@ -1337,9 +1337,9 @@
           <GroupName>GDUTRCLIB/Module</GroupName>
           <Files>
             <File>
-              <FileName>air_joy.cpp</FileName>
+              <FileName>omni_chassis.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\GDUTRCLIB\Module\Src\air_joy.cpp</FilePath>
+              <FilePath>..\GDUTRCLIB\Module\Src\omni_chassis.cpp</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1393,9 +1393,9 @@
               </FileOption>
             </File>
             <File>
-              <FileName>omni_chassis.cpp</FileName>
+              <FileName>air_joy.cpp</FileName>
               <FileType>8</FileType>
-              <FilePath>..\GDUTRCLIB\Module\Src\omni_chassis.cpp</FilePath>
+              <FilePath>..\GDUTRCLIB\Module\Src\air_joy.cpp</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>

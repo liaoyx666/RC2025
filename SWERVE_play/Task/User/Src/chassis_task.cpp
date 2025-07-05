@@ -3,8 +3,8 @@
  * @author Yang JianYi
  * @brief 舵轮底盘应用文件，包括底盘配置的初始化以及控制接口的调用
  * @version 0.1
- * @date 2024-05-16
  * 
+ * @date 2024-05-16
  * @copyright Copyright (c) 2024
  * 
  */
@@ -29,7 +29,7 @@ float distance = 0;
 float yaw_angle = 0;
 
 
-float xxx, yyy;
+
 //main
 
 uint8_t a5, a3;
@@ -84,7 +84,6 @@ void Chassis_Task(void *pvParameters)
 				ctrl.twist.linear.y = 0;
             }
 			
-			reposition.GetLaserData(&xxx, &yyy);
 			reposition.LaserRePosition(&ctrl);
 			chassis.World_Coordinate(0, &ctrl.twist);//世界坐标
 			//chassis.World_Coordinate(-90, &ctrl.twist);//世界坐标
@@ -241,6 +240,6 @@ void PidParamInit(void)
 	
 	
 	
-	chassis.Pid_Param_Init_Yaw(0.12f, 0.0f, 0.0f, 3.f, 3.f, 0.0f);
+	chassis.Pid_Param_Init_Yaw(0.13f, 0.0f, 0.0f, 3.f, 3.f, 0.0f);
 	chassis.Pid_Mode_Init_Yaw(0, 0, false, true);
 }

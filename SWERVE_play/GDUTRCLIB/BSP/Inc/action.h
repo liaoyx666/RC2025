@@ -17,6 +17,8 @@ extern "C" {
 
 typedef struct RealPos
 {
+	float raw_x;
+	float raw_y;
 	float world_x;
 	float world_y;     
 	float world_yaw;
@@ -44,8 +46,8 @@ typedef struct RawPos
 //	float REAL_Y;
 	float yaw_offset;
 	
-	float sin_yaw_offset;
-	float cos_yaw_offset;
+	double sin_yaw_offset;
+	double cos_yaw_offset;
 	
 	float x_offset;
 	float y_offset;

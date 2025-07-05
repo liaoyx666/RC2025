@@ -2,7 +2,7 @@
 #include <math.h>
 
 
-RawPos RawPosData = {0};
+RawPos RawPosData = {0, .sin_yaw_offset = 0, .cos_yaw_offset = 1};
 RealPos RealPosData = {0};
 
 
@@ -199,16 +199,17 @@ void Update_RawPosition(float value[5])
 	RawPosData.Speed_X = value[3];
 	RawPosData.Speed_Y = value[4];
 
-
+	RealPosData.raw_x = RawPosData.Pos_X;
+	RealPosData.raw_y = RawPosData.Pos_Y;
   
 	RealPosData.world_yaw = GetYawError(RawPosData.angle_Z - RawPosData.yaw_offset, 0);
 	RealPosData.raw_yaw = RawPosData.angle_Z;
 
 	
-	if ((RawPosData.x_offset != 0) || (RawPosData.y_offset != 0))
+	if ((RawPosData.x_offset != 0) || (RawPosData.y_offset != 0) || (RawPosData.yaw_offset != 0))
 	{
-		RealPosData.world_x =   RawPosData.Pos_X * RawPosData.cos_yaw_offset + RawPosData.Pos_Y * RawPosData.sin_yaw_offset;
-		RealPosData.world_y =  -RawPosData.Pos_X * RawPosData.sin_yaw_offset + RawPosData.Pos_Y * RawPosData.cos_yaw_offset;
+		RealPosData.world_x =   RawPosData.Pos_X * (float)RawPosData.cos_yaw_offset + RawPosData.Pos_Y * (float)RawPosData.sin_yaw_offset;
+		RealPosData.world_y =  -RawPosData.Pos_X * (float)RawPosData.sin_yaw_offset + RawPosData.Pos_Y * (float)RawPosData.cos_yaw_offset;
 		
 		RealPosData.world_x -= RawPosData.x_offset;
 		RealPosData.world_y -= RawPosData.y_offset;

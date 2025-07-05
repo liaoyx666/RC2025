@@ -4,7 +4,8 @@
 #include "reposition.h"
 
 
-float X, Y, XX, YY;
+float X, Y;
+double XX, YY;
 
 
 void Location_Task(void *pvParameters)
@@ -12,7 +13,6 @@ void Location_Task(void *pvParameters)
 	static RePosition position(0);
 	for (;;)
 	{
-		
 		
 		LaserPositioning(NULL, NULL);
 		position.GetLaserData(&X, &Y);

@@ -8,32 +8,27 @@
 
 #ifdef __cplusplus
 
-
 typedef struct PointVector
 {
-	PointVector(float x, float y) : x(x), y(y) {};
-	float x;
-	float y;
+	PointVector(double x, double y) : x(x), y(y) {};
+	double x;
+	double y;
 }PointVector;
 
 
 typedef struct SamplePoint
 {
 	SamplePoint() 
-        : laser_point(0.f, 0.f)
-        , position_point(0.f, 0.f)  // 这里给 position_point 初始值，你按实际需求改
-		, offset_vector(0.f, 0.f)
-        , yaw_error(0.f)  // 初始化 yaw_error
+        : laser_point(0, 0)
+        , position_point(0, 0)
+		, offset_vector(0, 0)
+        , yaw_error(0)  // 初始化 yaw_error
     {}
 	PointVector laser_point;
 	PointVector position_point;
 	PointVector offset_vector;
-	float yaw_error;//采样时yaw与target_yaw的误差
+	double yaw_error;//采样时yaw与target_yaw的误差
 };
-
-
-
-
 
 
 class RePosition
@@ -43,13 +38,10 @@ public:
         axis_error(0),
         cos_axis_error(1),
         sin_axis_error(0)
-    {
-        
-    }
+    {}
 	void LaserRePosition(CONTROL_T *ctrl);
 	void GetLaserData(float* x, float* y);
-	void CaliLaserData(PointVector in_point, float *out_x, float *out_y, float sin_yaw_error, float cos_yaw_error);
-		
+	void CaliLaserData(PointVector in_point, double *out_x, double *out_y, double sin_error, double cos_error);
 protected:
 		
 		
@@ -59,45 +51,17 @@ private:
 	
 	uint8_t GetPoint(SamplePoint *point, CONTROL_T *ctrl);
 	bool CalcCalibrationData(void);
-	bool CalaOffset(void);
-	void CaliPositionData(PointVector in_point, float *out_x, float *out_y, float sin_yaw_error, float cos_yaw_error);
-	bool ApplyCaliData(void);
-
-
-
+	bool CalcOffset(void);
+	void CaliPositionData(PointVector in_point, double *out_x, double *out_y, double sin_error, double cos_error);
+	bool ApplyCaliYawData(void);
+	bool ApplyCaliOffsetData(void);
 
 	float target_yaw;
+	double axis_error;
+	double cos_axis_error, sin_axis_error;
 
-	float axis_error;
-	float cos_axis_error, sin_axis_error;
-
-	SamplePoint last_point, current_point;
+	SamplePoint last_point, current_point, stable_point;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
