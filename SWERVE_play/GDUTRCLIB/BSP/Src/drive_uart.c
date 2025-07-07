@@ -26,6 +26,7 @@ usart_manager_t usart1_manager = {.call_back_fun = NULL};
 usart_manager_t usart2_manager = {.call_back_fun = NULL};
 usart_manager_t usart3_manager = {.call_back_fun = NULL};
 usart_manager_t usart6_manager = {.call_back_fun = NULL}; 
+usart_manager_t usart5_manager = {.call_back_fun = NULL}; 
 usart_manager_t usart4_manager = {.call_back_fun = NULL}; 
 
 static void Uart_Rx_Idle_Callback(usart_manager_t *manager);
@@ -41,7 +42,6 @@ void Uart_Init(UART_HandleTypeDef *huart, uint8_t *Rxbuffer, uint16_t len, usart
         usart1_manager.uart_handle = huart;
         usart1_manager.rx_buffer = Rxbuffer;
         usart1_manager.rx_buffer_size = len;
-        // usart1_manager.call_back_fun = call_back_fun;
         Usart_Rx_Callback_Register(&usart1_manager, call_back_fun);
         __HAL_UART_CLEAR_IDLEFLAG(huart);
 		__HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
@@ -52,7 +52,6 @@ void Uart_Init(UART_HandleTypeDef *huart, uint8_t *Rxbuffer, uint16_t len, usart
         usart2_manager.uart_handle = huart;
         usart2_manager.rx_buffer = Rxbuffer;
         usart2_manager.rx_buffer_size = len;
-        // usart2_manager.call_back_fun = call_back_fun;
         Usart_Rx_Callback_Register(&usart2_manager, call_back_fun);
         __HAL_UART_CLEAR_IDLEFLAG(huart);
 		__HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
@@ -63,7 +62,6 @@ void Uart_Init(UART_HandleTypeDef *huart, uint8_t *Rxbuffer, uint16_t len, usart
         usart3_manager.uart_handle = huart;
         usart3_manager.rx_buffer = Rxbuffer;
         usart3_manager.rx_buffer_size = len;
-        // usart3_manager.call_back_fun = call_back_fun;
         Usart_Rx_Callback_Register(&usart3_manager, call_back_fun);
         __HAL_UART_CLEAR_IDLEFLAG(huart);
 		__HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
@@ -74,8 +72,17 @@ void Uart_Init(UART_HandleTypeDef *huart, uint8_t *Rxbuffer, uint16_t len, usart
         usart4_manager.uart_handle = huart;
         usart4_manager.rx_buffer = Rxbuffer;
         usart4_manager.rx_buffer_size = len;
-        // usart3_manager.call_back_fun = call_back_fun;
         Usart_Rx_Callback_Register(&usart4_manager, call_back_fun);
+        __HAL_UART_CLEAR_IDLEFLAG(huart);
+		__HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
+		HAL_UART_Receive_DMA(huart, Rxbuffer, len);
+    }
+	else if(huart->Instance == UART5)
+    {
+        usart5_manager.uart_handle = huart;
+        usart5_manager.rx_buffer = Rxbuffer;
+        usart5_manager.rx_buffer_size = len;
+        Usart_Rx_Callback_Register(&usart5_manager, call_back_fun);
         __HAL_UART_CLEAR_IDLEFLAG(huart);
 		__HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
 		HAL_UART_Receive_DMA(huart, Rxbuffer, len);
@@ -85,7 +92,6 @@ void Uart_Init(UART_HandleTypeDef *huart, uint8_t *Rxbuffer, uint16_t len, usart
         usart6_manager.uart_handle = huart;
         usart6_manager.rx_buffer = Rxbuffer;
         usart6_manager.rx_buffer_size = len;
-        // usart6_manager.call_back_fun = call_back_fun;
         Usart_Rx_Callback_Register(&usart6_manager, call_back_fun);
         __HAL_UART_CLEAR_IDLEFLAG(huart);
 		__HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);

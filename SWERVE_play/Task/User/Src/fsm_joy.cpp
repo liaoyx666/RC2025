@@ -72,10 +72,10 @@ void Air_Joy_Task(void *pvParameters)
 					/////////////////////////////////////////////////////////////////////////////
 					else if (_tool_Abs(air_joy.SWC - 1500) < 50)//人工装球
 					{
-						ctrl.chassis_ctrl = CHASSIS_OFF;//
+						ctrl.chassis_ctrl = CHASSIS_ON;//
 						
 						
-						ctrl.mode_ctrl = MODE_DRIBBLE;
+						ctrl.mode_ctrl = MODE_DEFEND;
 						
 						ctrl.spin_ctrl = SPIN_OUTSIDE;//旋转到外侧
 						
@@ -99,23 +99,7 @@ void Air_Joy_Task(void *pvParameters)
 					else//放球到发射机构
 					{
 						ctrl.mode_ctrl = MODE_LOAD;
-//						ctrl.spin_ctrl = SPIN_INSIDE;//旋转到内侧
-//						
-//						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)
-//						{
-//							last_SWD = air_joy.SWD;
-//							static uint8_t flag = 0;
-//							if (flag == 0)
-//							{
-//								ctrl.cylinder_ctrl = CYLINDER_RELEASE;//张开夹爪（放球）
-//								flag = 1;
-//							}
-//							else
-//							{
-//								ctrl.cylinder_ctrl = CYLINDER_KEEP;//关闭夹爪
-//								flag = 0;
-//							}
-//						}
+
 						
 						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)//
 						{
@@ -133,6 +117,9 @@ void Air_Joy_Task(void *pvParameters)
 				else if (_tool_Abs(air_joy.SWB - 2000) < 50)//射球模式
 				{
 					ctrl.chassis_ctrl = CHASSIS_ON;
+					ctrl.mode_ctrl = MODE_SHOOT;//使世界坐标为0
+					
+					
 					
 					if (_tool_Abs(air_joy.SWC - 1500) < 50)
 					{

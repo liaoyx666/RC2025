@@ -52,7 +52,7 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 		{
 			flag = 1;
 		}
-		
+		///////////////////////////////////////////////////////////////
 		//采样第一个点
 		if (flag == 1)
 		{
@@ -83,6 +83,7 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 			}
 		}
 		
+		/////////////////////////////////////////////////////////////////////////////////////
 		//采样第二个点
 		if (flag == 3)
 		{
@@ -122,7 +123,7 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 		
 	
 		
-		
+		/////////////////////////////////////////////////////////////////////////////////////////
 		if (flag == 5)
 		{
 			uint8_t status;
@@ -140,7 +141,7 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 			else
 			{
 				//失败
-				flag = 5;///////////////
+				flag = 5;//
 			}
 		}
 		
@@ -178,7 +179,7 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 
 
 #define GET_TIME_1 1000000
-#define GET_TIME_MAX 1600000
+#define GET_TIME_MAX 1500000
 
 /**
   * @brief 获取一个点的激光，position数据
@@ -195,12 +196,23 @@ uint8_t RePosition::GetPoint(SamplePoint *point, CONTROL_T *ctrl)
 	//获取当前时间
 	uint32_t current_time = Get_SystemTimer();
 	
+
+	
+	
 	//使车静止运动
 	ctrl->twist.linear.x = 0;
 	ctrl->twist.linear.y = 0;
 	
 	//记录开始时间并初始化time
 	if (flag == 0)
+	{
+		time = current_time;
+		start_time = current_time;
+		flag = 1;
+	}
+	
+	//防止上次flag未置0
+	if (current_time - start_time > GET_TIME_MAX + 10000)
 	{
 		time = current_time;
 		start_time = current_time;
@@ -228,7 +240,7 @@ uint8_t RePosition::GetPoint(SamplePoint *point, CONTROL_T *ctrl)
 		float yaw_error = GetYawError(target_yaw, RealPosData.world_yaw);
 		
 		//postion与激光数据相差过大
-		if ((pow(x - RealPosData.raw_x, 2) + pow(y - RealPosData.raw_y, 2)) > 6.f)
+		if ((pow(x - RealPosData.raw_x, 2) + pow(y - RealPosData.raw_y, 2)) > 3.f)
 		{
 			flag = 0;
 			return 0;
@@ -304,7 +316,7 @@ bool RePosition::CalcCalibrationData(void)
     
 	
     // 计算轴误差角度 (使用atan2结合dot_product和cross_product)
-    this->axis_error = atan2(cross_product, dot_product) * 180.0 / PI;
+    this->axis_error = atan2(cross_product, dot_product);// * 180.0 / PI;
     
 	
     if (is_nan(axis_error))
@@ -425,6 +437,19 @@ bool RePosition::CalcOffset(void)
 	
 	this->stable_point.offset_vector.x = cali_position_x - cali_laser_x;
 	this->stable_point.offset_vector.y = cali_position_y - cali_laser_y;
+	
+	if (CalcDistance(current_point.offset_vector, stable_point.offset_vector) > 0.15f)
+	{
+		return false;
+	}
+	
+	if (CalcDistance(last_point.offset_vector, stable_point.offset_vector) > 0.15f)
+	{
+		return false;
+	}
+	
+	
+	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	return true;
 }
@@ -437,17 +462,14 @@ float ss, cc;
 
 //应用校准数据
 bool RePosition::ApplyCaliYawData(void)
-{
-	//double temp_sin = RawPosData.sin_yaw_offset, temp_cos = RawPosData.cos_yaw_offset;
-	
+{	
 	RawPosData.sin_yaw_offset = this->sin_axis_error;
 	RawPosData.cos_yaw_offset = this->cos_axis_error;
 	
-	
-	RawPosData.yaw_offset = this->axis_error;//atan2(RawPosData.sin_yaw_offset, RawPosData.cos_yaw_offset) * 180.0 / PI;
+	RawPosData.yaw_offset = this->axis_error * 180.0 / PI;
 	
 	ss = asinf(RawPosData.sin_yaw_offset);//////
-	cc = acosf(RawPosData.cos_yaw_offset);////////
+	cc = acosf(RawPosData.cos_yaw_offset);//////
 	
 	return true;
 }

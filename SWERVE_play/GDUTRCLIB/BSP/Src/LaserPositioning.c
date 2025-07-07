@@ -99,8 +99,9 @@
 #define PI							3.14159265358979323846f			// 定义圆周率常量PI
 
 
-#define LaserModule_1_UartHandle &huart2		// 激光测距模块1串口句柄
-#define LaserModule_2_UartHandle &huart6		// 激光测距模块2串口句柄
+#define LaserModule_1_UartHandle &huart4		// 激光测距模块1串口句柄
+#define LaserModule_2_UartHandle &huart5		// 激光测距模块2串口句柄
+#define LaserModule_3_UartHandle &huart6		// 激光测距模块2串口句柄
 
 #define LaserModule1Address				0x00							// 激光测距模块1地址
 #define LaserModule1ReadAddress			(LaserModule1Address | 0x80)	// 激光测距模块1读地址
@@ -109,6 +110,10 @@
 #define LaserModule2Address				0x00							// 激光测距模块2地址
 #define LaserModule2ReadAddress			(LaserModule2Address | 0x80)	// 激光测距模块2读地址
 #define LaserModule2WriteAddress		LaserModule2Address 			// 激光测距模块2写地址
+
+#define LaserModule3Address				0x00							// 激光测距模块3地址
+#define LaserModule3ReadAddress			(LaserModule2Address | 0x80)	// 激光测距模块3读地址
+#define LaserModule3WriteAddress		LaserModule2Address 			// 激光测距模块3写地址
 
 int16_t FrontLaserDistanceOffset	= 0;			// 前激光安装距离偏移量，单位：mm
 int16_t RightLaserDistanceOffset	= 0;			// 右激光安装距离偏移量，单位：mm
@@ -141,6 +146,7 @@ void LaserPositioning(float Yaw, WorldXYCoordinatesTypedef* WorldXYCoordinatesPo
 	LaserModuleGroupState = 0;	// 激光测距模块状态重置
 	LaserModuleDataGroup.LaserModule1.MeasurementData.State = 0;	// 激光测距模块1状态重置
 	LaserModuleDataGroup.LaserModule2.MeasurementData.State = 0;	// 激光测距模块2状态重置
+	LaserModuleDataGroup.LaserModule3.MeasurementData.State = 0;	// 激光测距模块3状态重置
 
 	LaserModuleGroupState |= LaserModuleGroup_AnalysisModulesMeasurementResults(&LaserModuleDataGroup);			// 激光测距模块组读取测量结果
 
@@ -174,17 +180,26 @@ void LaserModuleGroup_Init(void)
 	LaserModuleDataGroup.LaserModule2.MeasurementData.Distance = 0;	// 激光测距模块2距离数据初始化
 	LaserModuleDataGroup.LaserModule2.MeasurementData.SignalQuality = 0;	// 激光测距模块2信号质量数据初始化
 	LaserModuleDataGroup.LaserModule2.MeasurementData.State = 0;	// 激光测距模块2状态数据初始化
+	
+	// 激光测距模块3初始化
+	LaserModuleDataGroup.LaserModule3.ConfigurationData.UartHandle = LaserModule_3_UartHandle;		// 设置激光测距模块3的串口句柄
+	LaserModuleDataGroup.LaserModule3.ConfigurationData.ReceiveQueue = Receive_LaserModuleData_3_Port;	// 设置激光测距模块3的串口DMA接收队列
+	LaserModuleDataGroup.LaserModule3.ConfigurationData.Address = LaserModule3Address;
+	LaserModuleDataGroup.LaserModule3.ConfigurationData.ReadAddress = LaserModule3ReadAddress;
+	LaserModuleDataGroup.LaserModule3.ConfigurationData.WriteAddress = LaserModule3WriteAddress;
+	LaserModuleDataGroup.LaserModule3.MeasurementData.Distance = 0;	// 激光测距模块3距离数据初始化
+	LaserModuleDataGroup.LaserModule3.MeasurementData.SignalQuality = 0;	// 激光测距模块3信号质量数据初始化
+	LaserModuleDataGroup.LaserModule3.MeasurementData.State = 0;	// 激光测距模块3状态数据初始化
 
 	//LaserModuleGroupState |= LaserModule_TurnOnTheLaserPointer(&LaserModuleDataGroup.LaserModule1);	// 打开激光测距模块1的激光器
 	//LaserModuleGroupState |= LaserModule_TurnOnTheLaserPointer(&LaserModuleDataGroup.LaserModule2);	// 打开激光测距模块2的激光器
 
 	//taskENTER_CRITICAL();
 
-	HAL_Delay(20);
+	HAL_Delay(3000);
+	LaserModuleGroupState |= LaserModule_StateContinuousAutomaticMeasurement(&LaserModuleDataGroup.LaserModule3);	// 激光测距模块3连续自动测量状态设置
 	LaserModuleGroupState |= LaserModule_StateContinuousAutomaticMeasurement(&LaserModuleDataGroup.LaserModule2);	// 激光测距模块2连续自动测量状态设置
-	HAL_Delay(30);
 	LaserModuleGroupState |= LaserModule_StateContinuousAutomaticMeasurement(&LaserModuleDataGroup.LaserModule1);	// 激光测距模块1连续自动测量状态设置
-	HAL_Delay(20);
 
 	//taskEXIT_CRITICAL();
 
@@ -242,6 +257,7 @@ static uint8_t LaserModuleGroup_AnalysisModulesMeasurementResults(LaserModuleDat
 
 	LaserModuleGroupState |= LaserModule_AnalysisModulesMeasurementResults(&LaserModuleDataGroup->LaserModule1);	// 激光测距模块1读取测量结果
 	LaserModuleGroupState |= LaserModule_AnalysisModulesMeasurementResults(&LaserModuleDataGroup->LaserModule2);	// 激光测距模块2读取测量结果
+	LaserModuleGroupState |= LaserModule_AnalysisModulesMeasurementResults(&LaserModuleDataGroup->LaserModule3);	// 激光测距模块3读取测量结果
 
 	return LaserModuleGroupState;			// 返回激光测距模块状态
 }
@@ -353,13 +369,37 @@ static uint8_t MyUART_Transmit_DMA(UART_HandleTypeDef* huart, const uint8_t* pDa
 }
 
 /**
- * @brief	    激光测距模块2串口DMA接收完毕回调函数
+ * @brief	    激光测距模块6串口DMA接收完毕回调函数
  * @param[in]	Receive_data 串口DMA接收缓存数组地址
  * @param[in]   data_len 串口DMA接收缓存数组最大长度
  * @return		uint32_t 回调函数发送数据至队列状态，1 为发送成功，0 为发送失败
  * @note		杨键翌师兄传的代码，我不清楚return值为什么是uint32_t类型
  */
 uint32_t LaserPositionin_UART6_RxCallback(uint8_t* buff, uint16_t len)
+{
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+	if (xQueueOverwriteFromISR(Receive_LaserModuleData_3_Port, buff, &xHigherPriorityTaskWoken) == pdPASS)
+	{
+		// 触发上下文切换（若需要）
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+		return 1;   // 发送成功
+	}
+	else
+	{
+		return 0;   // 队列发送失败
+	}
+	return 0;
+}
+
+/**
+ * @brief	    激光测距模块2串口DMA接收完毕回调函数
+ * @param[in]	Receive_data 串口DMA接收缓存数组地址
+ * @param[in]   data_len 串口DMA接收缓存数组最大长度
+ * @return		uint32_t 回调函数发送数据至队列状态，1 为发送成功，0 为发送失败
+ * @note		杨键翌师兄传的代码，我不清楚return值为什么是uint32_t类型
+ */
+uint32_t LaserPositionin_UART5_RxCallback(uint8_t* buff, uint16_t len)
 {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
@@ -383,7 +423,7 @@ uint32_t LaserPositionin_UART6_RxCallback(uint8_t* buff, uint16_t len)
  * @return		uint32_t 回调函数发送数据至队列状态，1 为发送成功，0 为发送失败
  * @note		杨键翌师兄传的代码，我不清楚return值为什么是uint32_t类型
  */
-uint32_t LaserPositionin_UART2_RxCallback(uint8_t* buff, uint16_t len)
+uint32_t LaserPositionin_UART4_RxCallback(uint8_t* buff, uint16_t len)
 {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 

@@ -80,7 +80,7 @@ void Launcher::FrictionControl(bool friction_ready, float shoot_speed)
 	{
         if(friction_ready)
         {
-            FrictionMotor[0].Out = shoot_speed ;
+            FrictionMotor[0].Out = shoot_speed;
             FrictionMotor[1].Out = -shoot_speed;
             FrictionMotor[2].Out = -shoot_speed;
         }

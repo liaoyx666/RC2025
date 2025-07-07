@@ -27,6 +27,7 @@ extern usart_manager_t usart2_manager;
 extern usart_manager_t usart3_manager;
 extern usart_manager_t usart6_manager;
 extern usart_manager_t usart4_manager;
+extern usart_manager_t usart5_manager;
 
 void Uart_Init(UART_HandleTypeDef *huart, uint8_t *Rxbuffer, uint16_t len, usart_call_back call_back_fun);
 void Usart_Rx_Callback_Register(usart_manager_t *manager, usart_call_back fun);

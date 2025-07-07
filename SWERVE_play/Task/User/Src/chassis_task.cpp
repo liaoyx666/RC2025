@@ -32,20 +32,20 @@ float yaw_angle = 0;
 
 //main
 
-uint8_t a5, a3;
+//uint8_t a5, a3;
 
 void Chassis_Task(void *pvParameters)
 {
     for(;;)
     {
-		a3 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3);
-		a5 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5);
+		//a3 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3);
+		//a5 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5);
 	
         if(xQueueReceive(Chassia_Port, &ctrl, 1) == pdPASS)
         {	
 			
 			
-			if (ctrl.mode_ctrl == MODE_DRIBBLE)
+			if (ctrl.mode_ctrl == MODE_DRIBBLE || ctrl.mode_ctrl == MODE_DEFEND)
 			{
 				Dribble_Ball(ctrl.cylinder_ctrl);//运球
 			}
@@ -73,7 +73,9 @@ void Chassis_Task(void *pvParameters)
 					}
 				}
 				else//手动yaw
-				{}
+				{
+					distance = 0;
+				}
 				////////////////////////////////////////		
             }
             else
@@ -85,7 +87,16 @@ void Chassis_Task(void *pvParameters)
             }
 			
 			reposition.LaserRePosition(&ctrl);
-			chassis.World_Coordinate(0, &ctrl.twist);//世界坐标
+			
+			
+			if (ctrl.mode_ctrl == MODE_DEFEND)
+			{
+				chassis.World_Coordinate(180, &ctrl.twist);//世界坐标
+			}
+			else
+			{
+				chassis.World_Coordinate(0, &ctrl.twist);//世界坐标
+			}
 			//chassis.World_Coordinate(-90, &ctrl.twist);//世界坐标
 			////////////////////////////////////////////////////
 			//俯仰
@@ -146,7 +157,7 @@ void Chassis_Task(void *pvParameters)
 			
 			/////////////////////////////////////////////////////
 			//摩擦带
-            if(ctrl.friction_ctrl == FRICTION_ON)
+            if(ctrl.friction_ctrl == FRICTION_ON && ctrl.mode_ctrl == MODE_SHOOT)
             {
 				shoot_speed = GetShootSpeed(distance, pitch_level);//获得速度
                 launch.FrictionControl(true,shoot_speed);
@@ -184,8 +195,11 @@ void Chassis_Task(void *pvParameters)
 			}
 
 			
-			//pitch_angle = 90;
-			
+
+			if (ctrl.mode_ctrl != MODE_SHOOT && ctrl.mode_ctrl != MODE_LOAD)
+			{
+				pitch_angle = 0;
+			}
 			
 			
 			//限位
@@ -199,6 +213,11 @@ void Chassis_Task(void *pvParameters)
 			}
 			else
 			{}
+				
+			//
+			//pitch_angle = 0;
+			//	
+				
 				
 				
 			chassis.Control(ctrl.twist);	
