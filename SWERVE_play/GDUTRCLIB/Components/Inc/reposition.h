@@ -8,59 +8,39 @@
 
 #ifdef __cplusplus
 
-typedef struct PointVector
-{
-	PointVector(double x, double y) : x(x), y(y) {};
-	double x;
-	double y;
-}PointVector;
 
-
-typedef struct SamplePoint
-{
-	SamplePoint() 
-        : laser_point(0, 0)
-        , position_point(0, 0)
-		, offset_vector(0, 0)
-        , yaw_error(0)  // 初始化 yaw_error
-    {}
-	PointVector laser_point;
-	PointVector position_point;
-	PointVector offset_vector;
-	double yaw_error;//采样时yaw与target_yaw的误差
-};
 
 
 class RePosition
 {
 public:
-	RePosition(float target_yaw) : 
-        axis_error(0),
-        cos_axis_error(1),
-        sin_axis_error(0)
-    {}
+	RePosition() : x_offset(0), y_offset(0), axis_error(0) {}
+		
+		
+	void GetLaserData(uint32_t* x, uint32_t* y1, uint32_t* y2);
 	void LaserRePosition(CONTROL_T *ctrl);
-	void GetLaserData(float* x, float* y);
-	void CaliLaserData(PointVector in_point, double *out_x, double *out_y, double sin_error, double cos_error);
+	double GetYawFromLaser(void);
+
+	void GetXYFromLaser(double *x, double *y);
+	void CaliLaserData(double in_x, double in_y, double *out_x, double *out_y, double sin_error, double cos_error);
+	void CaliPositionData(double in_x, double in_y, double *out_x, double *out_y, double sin_error, double cos_error);
+
 protected:
-		
-		
-		
-private:
-	float CalcDistance(PointVector point1, PointVector point2);
 	
-	uint8_t GetPoint(SamplePoint *point, CONTROL_T *ctrl);
-	bool CalcCalibrationData(void);
+	
+	
+private:
+	double CalcYawError(void);
 	bool CalcOffset(void);
-	void CaliPositionData(PointVector in_point, double *out_x, double *out_y, double sin_error, double cos_error);
-	bool ApplyCaliYawData(void);
-	bool ApplyCaliOffsetData(void);
+	bool ApplyYawError(void);
+	bool ApplyOffset(void);
+	uint8_t StabilzeRobot(CONTROL_T *ctrl);
 
-	float target_yaw;
+
+
+
 	double axis_error;
-	double cos_axis_error, sin_axis_error;
-
-	SamplePoint last_point, current_point, stable_point;
+	double x_offset, y_offset;
 };
 
 

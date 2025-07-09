@@ -20,7 +20,7 @@ bool shoot_ready = false;
 CONTROL_T ctrl;
 uint8_t pitch_level = 0;
 
-RePosition reposition(0);
+RePosition reposition;
 
 float pitch_angle = 0;
 bool spin_state = false;

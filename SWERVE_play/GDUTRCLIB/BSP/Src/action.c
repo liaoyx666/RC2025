@@ -239,7 +239,7 @@ void POS_Change(float X, float Y)
         uint8_t bytes[4];
     } floatUnion;
     // 起始标志
-    txBuffer[0] = 0x01;  
+    txBuffer[0] = 0x01;
     //从输入的X中取出四个字节
     floatUnion.f = X;
     txBuffer[1] = floatUnion.bytes[0];
