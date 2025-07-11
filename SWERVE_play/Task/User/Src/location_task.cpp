@@ -26,8 +26,7 @@ void Location_Task(void *pvParameters)
 		
 		
 		
-		
-		osDelay(1);
+		osDelay(5);
 	}
 }
 

@@ -2,15 +2,84 @@
 
 #define PI 3.1415926535897932384626
 
-bool is_nan(double x)
-{
-    return x != x; // NaN是唯一不满足x == x的值
+/**
+ * 检查一个double值是否为NaN
+ * @param x 要检查的值
+ * @return 如果是NaN返回true，否则返回false
+ */
+bool is_nan(double x) {
+    return x != x;
 }
+
+/**
+ * 计算数组的平均值，自动跳过NaN值
+ * @param arr 输入数组
+ * @param n 数组长度
+ * @return 有效数据的平均值，如果没有有效数据则返回0
+ */
+double calculate_mean(double *arr, uint8_t n) {
+    if (n == 0) return 0.0;
+    
+    double sum = 0.0;
+    uint8_t valid_count = 0;
+
+    for (uint8_t i = 0; i < n; i++) {
+        if (!is_nan(arr[i])) {
+            sum += arr[i];
+            valid_count++;
+        }
+    }
+    
+    return (valid_count > 0) ? (sum / valid_count) : 0.0;
+}
+
+/**
+ * 过滤掉偏离原始平均值超过阈值的数据点并计算新的平均值
+ * @param input 输入数组
+ * @param n 数组长度
+ * @param threshold 过滤阈值（绝对值）
+ * @return 过滤后的平均值，如果没有有效数据则返回0
+ */
+double filter_and_calculate_mean(double *input, uint8_t n, double threshold) {
+    if (n == 0) return 0.0;
+    
+    // 计算原始数据的有效统计量
+    double origin_sum = 0.0;
+    uint8_t origin_count = 0;
+    
+    for (uint8_t i = 0; i < n; i++) {
+        if (!is_nan(input[i])) {
+            origin_sum += input[i];
+            origin_count++;
+        }
+    }
+    
+    if (origin_count == 0) return 0.0;  // 全部为NaN的情况
+    
+    double origin_mean = origin_sum / origin_count;
+    threshold = fabs(threshold);  // 确保阈值为正
+    
+    // 过滤数据并计算新的统计量
+    double filtered_sum = 0.0;
+    uint8_t filtered_count = 0;
+    
+    for (uint8_t i = 0; i < n; i++) {
+        if (is_nan(input[i])) continue;  // 跳过NaN值
+        
+        if (fabs(input[i] - origin_mean) <= threshold) {
+            filtered_sum += input[i];
+            filtered_count++;
+        }
+    }
+    
+    return (filtered_count > 0) ? (filtered_sum / filtered_count) : 0.0;
+}
+
 
 
 ///////////////////////////////////////////////////////////////////////
 
-#define GET_TIME_1 800000
+#define GET_TIME_1 850000
 #define GET_TIME_MAX 1400000
 /**
   * @brief 让机器人稳定
@@ -48,7 +117,7 @@ uint8_t RePosition::StabilzeRobot(CONTROL_T *ctrl)
 	}	
 	
 	//等待pid锁yaw至车稳定
-	if (fabsf(RealPosData.world_yaw) > 0.30f)
+	if (fabsf(RealPosData.world_yaw) > 0.25f)
 	{
 		time = current_time;
 	}
@@ -163,7 +232,7 @@ double RePosition::CalcYawError(void)
 }
 
 //计算XY偏置
-bool RePosition::CalcOffset(void)
+bool RePosition::CalcOffset(double *offset_x, double *offset_y)
 {
 	double laser_x, laser_y;
 	double position_x, position_y;
@@ -174,23 +243,24 @@ bool RePosition::CalcOffset(void)
 	position_y = static_cast<double>(RealPosData.raw_y);
 	yaw_error = RealPosData.world_yaw;
 	
-	
 	if ((laser_x - position_x) * (laser_x - position_x) + (laser_y - position_y) * (laser_y - position_y) > 3 * 3) return false;
 	if (fabsf(RealPosData.world_yaw) > 0.5) return false;
 	
-	
 	CaliLaserData(laser_x, laser_y, &laser_x, &laser_y, sin(yaw_error), cos(yaw_error));
 	CaliPositionData(position_x, position_y, &position_x, &position_y, RawPosData.sin_yaw_offset, RawPosData.cos_yaw_offset);
-	
 	
 	if (is_nan(laser_x) || is_nan(laser_y) || is_nan(position_x) || is_nan(position_y))
 	{
 		return false;
 	}
 	
+	*offset_x = position_x - laser_x;
+	*offset_y = position_y - laser_y;
 	
-	this->x_offset = position_x - laser_x;
-	this->y_offset = position_y - laser_y;
+	if (*offset_x * *offset_x + *offset_y * *offset_y > 3 * 3)
+	{
+		return false;
+	}
 	
 	return true;
 }
@@ -198,7 +268,6 @@ bool RePosition::CalcOffset(void)
 
 bool RePosition::ApplyYawError(void)
 {	
-
 	RawPosData.yaw_offset = this->axis_error + RawPosData.yaw_offset;
 
 	RawPosData.sin_yaw_offset = sin(RawPosData.yaw_offset * PI / 180.0);
@@ -218,18 +287,29 @@ bool RePosition::ApplyOffset(void)
 }
 
 
+
+
+#define SAMPLE_TIME 10000
+
 void RePosition::LaserRePosition(CONTROL_T *ctrl)
 {
 	static uint8_t flag = 0;
+	static uint8_t yaw_total_num = 0;
+	static uint8_t offset_total_num = 0;
+	
+	
 	
 	if (ctrl->yaw_ctrl == YAW_LOCK_DIRECTION)//yaw锁定正方向模式下
 	{
-		//等待信号
+		//等待开始信号
 		if ((ctrl->reposition_ctrl == REPOSITION_ON) && (flag == 0))
 		{
 			flag = 1;
 		}
 	
+		
+		
+		//稳定机器人
 		if (flag == 1)
 		{
 			double y;
@@ -240,12 +320,12 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 			ctrl->twist.linear.y = 0;
 			
 			//太远yaw不准
-			if (fabs(y) > 0.5) flag = 0;
-			 
+			if (fabs(y) > 0.6) flag = 0;
+			
 			else
 			{
 				uint8_t state = StabilzeRobot(ctrl);
-				if (state == 2) 
+				if (state == 2)
 				{}
 				else if(state == 1)
 				{
@@ -260,58 +340,43 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 			}
 		}
 		
-		
-		static uint8_t total_num = 0;
-		static uint8_t real_num = 0;
-		static double sum_error = 0;
+		//////////////////////////////////////////////////////////////////////////////////////////////
 		
 		
+		//计算yaw偏移
 		if (flag == 2)
 		{
 			ctrl->twist.linear.x = 0;
 			ctrl->twist.linear.y = 0;
 			ctrl->twist.angular.z = 0;
 			
+			static double yaw_rror[10];
 			double error = CalcYawError();
 			
-			total_num++;
 			
-			
-			if (fabs(error) < 5.0)
+			if (yaw_total_num < 10)
 			{
-				real_num++;
-				sum_error += error;
-			}
-			
-			
-			if (total_num >= 10)
-			{
-				if (real_num > 0) 
+				if (fabs(error) < 5.0)
 				{
-					this->axis_error = sum_error / static_cast<double>(real_num);
-					total_num = 0;
-					real_num = 0;
-					sum_error = 0;
-					flag = 3;
-				}
-				else
-				{
-					this->axis_error = 0;
-					flag = 0;
+					yaw_rror[yaw_total_num];
+					yaw_total_num++;
 				}
 			}
-	
+			else
+			{
+				this->axis_error = filter_and_calculate_mean(yaw_rror, yaw_total_num, 0.5);
+				yaw_total_num = 0;
+				flag = 3;
+			}
 		}
 		else
 		{
-			total_num = 0;
-			real_num = 0;
-			sum_error = 0;
+			yaw_total_num = 0;
 		}
-	
+		///////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		
-		
+		//应用yaw偏移
 		if (flag == 3)
 		{
 			if(ApplyYawError())
@@ -321,7 +386,7 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 		}
 		
 
-	
+		//稳定机器人
 		if (flag == 4)
 		{
 			uint8_t state = StabilzeRobot(ctrl);
@@ -338,50 +403,107 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 				flag = 4;
 			}
 		}
+		////////////////////////////////////////////////////////////////////////////////////////
 		
-		
-		static uint8_t num = 0;
-		
+
+		//计算XY偏移
 		if (flag == 5)
 		{
 			ctrl->twist.linear.x = 0;
 			ctrl->twist.linear.y = 0;
 			ctrl->twist.angular.z = 0;
 
-			num++;
+			static double offset_x_arr[5], offset_y_arr[5];
+			double offset_x = 0, offset_y = 0;
 			
-			if (CalcOffset())
+			if (offset_total_num < 5)
 			{
-				flag = 6;
+				if (CalcOffset(&offset_x, &offset_y))
+				{
+					offset_x_arr[offset_total_num] = offset_x;
+					offset_y_arr[offset_total_num] = offset_y;
+					offset_total_num++;
+				}
 			}
-			
-			if (num >= 10)
+			else
 			{
-				flag = 4;
+				this->x_offset = filter_and_calculate_mean(offset_x_arr, offset_total_num, 0.015);
+				this->y_offset = filter_and_calculate_mean(offset_y_arr, offset_total_num, 0.015);
+				offset_total_num = 0;
+				flag = 6;
 			}
 		}
 		else
 		{
-			num = 0;
+			offset_total_num = 0;
 		}
+		/////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		
+		
+		
+		//应用XY偏移
 		if (flag == 6)
-		{
+		{			
 			if (ApplyOffset())
 			{
-				flag = 0;
+				flag = 7;
 			}
 			else
 			{
 				flag = 0;
 			}
 		}
-
+		
+		
+		//稳定机器人
+		if (flag == 7)
+		{
+			uint8_t state = StabilzeRobot(ctrl);
+			if (state == 2) 
+			{}
+			else if(state == 1)
+			{
+				//停止旋转
+				ctrl->twist.angular.z = 0;
+				flag = 8;
+			}
+			else
+			{
+				flag = 7;
+			}
+		}
+		
+		//测试校准结果
+		if (flag == 8)
+		{
+			ctrl->twist.linear.x = 0;
+			ctrl->twist.linear.y = 0;
+			ctrl->twist.angular.z = 0;
+		
+			double X, Y, x, y;
+			GetXYFromLaser(&X, &Y);
+			CaliLaserData(X, Y, &x, &y, sinf(RealPosData.world_yaw * PI / 180.f), cosf(RealPosData.world_yaw * PI / 180.f));
+	
+			
+			if ((x - RealPosData.world_x) * (x - RealPosData.world_x) + (y - RealPosData.world_y) * (y - RealPosData.world_y) > 0.015 * 0.015)
+			{				
+				flag = 4;
+			}
+			else
+			{
+				flag = 0;
+			}
+		}
+		
+		//保护
+		if (flag > 8)
+		{
+			flag = 0;
+		}
 	}
 	else
 	{
-
 		flag = 0;//退出校准
 	}
 }

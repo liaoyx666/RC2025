@@ -31,7 +31,7 @@ protected:
 	
 private:
 	double CalcYawError(void);
-	bool CalcOffset(void);
+	bool CalcOffset(double *offset_x, double *offset_y);
 	bool ApplyYawError(void);
 	bool ApplyOffset(void);
 	uint8_t StabilzeRobot(CONTROL_T *ctrl);

@@ -358,7 +358,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/CMSIS/Include</IncludePath>
             </VariousControls>
           </Aads>
           <LDads>
@@ -1616,6 +1616,16 @@
                 </FileArmAds>
               </FileOption>
             </File>
+            <File>
+              <FileName>atk_mw1278d.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GDUTRCLIB\Module\Src\atk_mw1278d.c</FilePath>
+            </File>
+            <File>
+              <FileName>atk_mw1278d_uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GDUTRCLIB\Module\Src\atk_mw1278d_uart.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2022,6 +2032,11 @@
               <FileName>location_task.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Task\User\Inc\location_task.h</FilePath>
+            </File>
+            <File>
+              <FileName>lora.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Task\User\Src\lora.c</FilePath>
             </File>
           </Files>
         </Group>
