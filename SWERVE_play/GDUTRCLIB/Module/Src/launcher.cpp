@@ -55,7 +55,7 @@ void Launcher::PitchControl(float pitch_angle)
     {
         Reset();
         PidPitchPos.PID_Mode_Init(0.1,0.1,true,false);
-        PidPitchPos.PID_Param_Init(15, 0, 0.2, 100, /*300*/900, 0.2);
+        PidPitchPos.PID_Param_Init(15, 0, 0.2, 100, /*300*/1700, 0.2);
     }
     else
     {
@@ -67,10 +67,10 @@ void Launcher::PitchControl(float pitch_angle)
         else{;}
 
         PidPitchPos.target = pitch_angle;
-        PidPitchPos.current = LauncherMotor[0].get_angle();
+        PidPitchPos.current = -LauncherMotor[0].get_angle();
         PidPitchSpd.target = PidPitchPos.Adjust();
-        PidPitchSpd.current = LauncherMotor[0].get_speed();
-        LauncherMotor[0].Out = PidPitchSpd.Adjust();
+        PidPitchSpd.current = -LauncherMotor[0].get_speed();
+        LauncherMotor[0].Out = -PidPitchSpd.Adjust();
     }
 }
 
@@ -144,19 +144,19 @@ void Launcher::PushControl(bool push_state)
 {
 	if(push_state)
 	{
-		PidPushSpd.target = 6000;
+		PidPushSpd.target = 10000;
 		PidPushSpd.current = LauncherMotor[2].get_speed();
 		LauncherMotor[2].Out = PidPushSpd.Adjust();
 	}
 	else
 	{
-		PidPushSpd.target = -5000;
+		PidPushSpd.target = -8000;
 		PidPushSpd.current = LauncherMotor[2].get_speed();
 		LauncherMotor[2].Out = PidPushSpd.Adjust();
 	}
 }
 
-#define PUSH_TIME_1 70000
+#define PUSH_TIME_1 94000
 
 void Launcher::PushBall(enum CONTROL_E state)
 {
@@ -166,16 +166,18 @@ void Launcher::PushBall(enum CONTROL_E state)
 	
 	if ((flag == 0) && (state == SHOOT_OFF))
 	{
-		LauncherMotor[2].Out = -10;
+		LauncherMotor[2].Out = -30;
 	}
+	
 	if (state == SHOOT_ON)
 	{
 		flag = 1;
 	}
+	
 	if (flag == 1)
 	{
 		PushControl(true);
-		if ((ABS(LauncherMotor[2].Out) >= 3000) && (time_flag == 0))
+		if ((ABS(LauncherMotor[2].Out) >= 5500) && (time_flag == 0))
 		{
 			start_time = Get_SystemTimer();
 			time_flag = 1;
@@ -186,10 +188,11 @@ void Launcher::PushBall(enum CONTROL_E state)
 			time_flag = 0;
 		}
 	}
+	
 	if (flag == 2)
 	{
 		PushControl(false);
-		if ((ABS(LauncherMotor[2].Out) >= 2300) && (time_flag == 0))
+		if ((ABS(LauncherMotor[2].Out) >= 5500) && (time_flag == 0))
 		{
 			start_time = Get_SystemTimer();
 			time_flag = 1;
@@ -208,28 +211,30 @@ void Launcher::PushBall(enum CONTROL_E state)
 #define LOAD_WAIT_TIME_1  4000000
 #define LOAD_WAIT_TIME_2  4000000
 #define LOAD_WAIT_TIME_3  100000
-#define LOAD_WAIT_TIME_4  900000
+#define LOAD_WAIT_TIME_4  1500000
 #define LOAD_WAIT_TIME_5  600000
 
 
-void Launcher::LoadBall(enum CONTROL_E state, float *pitch_angle, bool *spin_state)
+void Launcher::LoadBall(enum CONTROL_E state, float *pitch_angle, bool *spin_state, float *shoot_speed)
 {
 	static uint8_t flag = 0;
 	static bool spin = false;
 	static float pitch = 0;
 	static uint32_t start_time = 0;
 	static enum CylinderState cylinder = CYLINDER_SHRINK;
+	static float speed = 0;
 	
-
 	
 	if (flag == 0)
 	{
-		spin = false;
+		spin = *spin_state;
 		
 		if (state == LOAD_ON)
 		{
+			//收射球
 			start_time = Get_SystemTimer();
-			pitch = 420;
+			pitch = 0;
+			spin = false;
 			flag = 1;
 		}
 	}
@@ -237,12 +242,17 @@ void Launcher::LoadBall(enum CONTROL_E state, float *pitch_angle, bool *spin_sta
 	{
 		Holding_Cylinder_State(cylinder);
 		*pitch_angle = pitch;
+		*shoot_speed = speed;
+		*spin_state = spin;
 	}
 	
 	
+	
+	
+	//旋转
 	if (flag == 1)
 	{
-		if (LauncherMotor[0].get_angle() >= 180)
+		if (-LauncherMotor[0].get_angle() < 100)
 		{
 			start_time = Get_SystemTimer();
 			spin = true;
@@ -254,9 +264,11 @@ void Launcher::LoadBall(enum CONTROL_E state, float *pitch_angle, bool *spin_sta
 		}
 	}
 	
+	
+	//旋转到位
 	if (flag == 2)
 	{
-		if (LauncherMotor[1].get_angle() >= 450)
+		if (LauncherMotor[1].get_angle() > 450)
 		{
 			start_time = Get_SystemTimer();
 			flag = 3;
@@ -267,40 +279,47 @@ void Launcher::LoadBall(enum CONTROL_E state, float *pitch_angle, bool *spin_sta
 		}
 	}
 
+	
+	//放夹爪，摩擦带倒转
 	if (flag == 3)
 	{
 		if (Get_SystemTimer() - start_time >= LOAD_WAIT_TIME_3)
 		{
 			start_time = Get_SystemTimer();
-			pitch = 375;
+			pitch = 0;
+			speed = -3500;
 			cylinder = CYLINDER_STRETCH;
 			flag = 4;
 		}
 	}
 	
 	
+	
+	//收夹爪，摩擦带停
 	if (flag == 4)
 	{
 		if (Get_SystemTimer() - start_time >= LOAD_WAIT_TIME_4)
 		{
 			start_time = Get_SystemTimer();
+			speed = 0;
 			cylinder = CYLINDER_SHRINK;
 			flag = 5;
 		}
 	}
 	
 	
-	
+	//发射到中间
 	if (flag == 5)
 	{
 		if (Get_SystemTimer() - start_time >= LOAD_WAIT_TIME_5)
 		{
-			spin = false;
+			spin = true;
+			*pitch_angle = 600;
 			flag = 0;
 		}
 	}
 	
-	*spin_state = spin;
+	
 }
 
 

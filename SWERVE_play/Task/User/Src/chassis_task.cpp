@@ -15,7 +15,7 @@
 #include "reposition.h"
 
 Omni_Chassis chassis(0.152/2.f, 0.442f/2.f, 4, 2.f); //底盘直径0.442m，轮子半径0.152m，底盘加速度0.5m/s^2
-Launcher launch(450.f, 455.f, 2045.f);
+Launcher launch(1450.f, 455.f, 2045.f);
 bool shoot_ready = false;
 CONTROL_T ctrl;
 uint8_t pitch_level = 0;
@@ -27,6 +27,7 @@ bool spin_state = false;
 float shoot_speed = 0;
 float distance = 0;
 float yaw_angle = 0;
+bool friction_ready = false;
 
 
 
@@ -47,6 +48,8 @@ void Chassis_Task(void *pvParameters)
 			
 			if (ctrl.mode_ctrl == MODE_DRIBBLE || ctrl.mode_ctrl == MODE_DEFEND)
 			{
+				spin_state = false;
+				//pitch_angle = 0;
 				Dribble_Ball(ctrl.cylinder_ctrl);//运球
 			}
 			
@@ -100,106 +103,125 @@ void Chassis_Task(void *pvParameters)
 			//chassis.World_Coordinate(-90, &ctrl.twist);//世界坐标
 			////////////////////////////////////////////////////
 			//俯仰
-			if ((pitch_level == 0) && (distance > 2.5f) && (distance <= 3.3f))
+//			if ((pitch_level == 0) && (distance > 2.5f) && (distance <= 3.3f))
+//			{
+//				pitch_level = 1;
+//			}
+//			
+//			if ((pitch_level == 1) && (distance <= 2.0f))
+//			{
+//				pitch_level = 0;
+//			}
+//			
+//			if ((pitch_level == 1) && (distance > 3.3f))
+//			{
+//				pitch_level = 2;
+//			}
+//			
+//			if ((pitch_level == 2) && (distance <= 3.0f) && (distance > 2.0f))
+//			{
+//				pitch_level = 1;
+//			}
+//			
+//			
+//			if (distance < 2.0)
+//			{
+//				pitch_level = 0;
+//			}
+//			
+//			if ((distance > 2.5) && (distance < 3.0))
+//			{
+//				pitch_level = 1;
+//			}
+//			
+//			if (distance > 3.3)
+//			{
+//				pitch_level = 2;
+//			}
+//			
+//			
+//			
+//			
+//			
+//			if (pitch_level == 0)
+//			{
+//				pitch_angle = 0;
+//			}
+//			
+//			if (pitch_level == 1)
+//			{
+//				pitch_angle = 60;
+//			}
+//			
+//			if (pitch_level == 2)
+//			{
+//				pitch_angle = 90;
+//			}
+			
+			
+			
+			if (ctrl.mode_ctrl == MODE_SHOOT)
 			{
-				pitch_level = 1;
+				pitch_angle = 1450;
+				spin_state = true;
 			}
 			
-			if ((pitch_level == 1) && (distance <= 2.0f))
-			{
-				pitch_level = 0;
-			}
-			
-			if ((pitch_level == 1) && (distance > 3.3f))
-			{
-				pitch_level = 2;
-			}
-			
-			if ((pitch_level == 2) && (distance <= 3.0f) && (distance > 2.0f))
-			{
-				pitch_level = 1;
-			}
-			
-			
-			if (distance < 2.0)
-			{
-				pitch_level = 0;
-			}
-			
-			if ((distance > 2.5) && (distance < 3.0))
-			{
-				pitch_level = 1;
-			}
-			
-			if (distance > 3.3)
-			{
-				pitch_level = 2;
-			}
-			
-			
-			
-			
-			
-			if (pitch_level == 0)
-			{
-				pitch_angle = 0;
-			}
-			
-			if (pitch_level == 1)
-			{
-				pitch_angle = 60;
-			}
-			
-			if (pitch_level == 2)
-			{
-				pitch_angle = 90;
-			}
-			
+
 			/////////////////////////////////////////////////////
 			//摩擦带
             if(ctrl.friction_ctrl == FRICTION_ON && ctrl.mode_ctrl == MODE_SHOOT)
             {
-				shoot_speed = GetShootSpeed(distance, pitch_level);//获得速度
-                launch.FrictionControl(true,shoot_speed);
+				
+				if (-launch.LauncherMotor[0].get_angle() > 1400)
+				{
+					//shoot_speed = GetShootSpeed(distance, pitch_level);//获得速度
+					shoot_speed = 15000;
+					friction_ready = true;
+					//launch.FrictionControl(true,shoot_speed);
+				}
             }
             else
             {
-                launch.FrictionControl(false,0);
+				friction_ready = false;
+				shoot_speed = 0;
+                //launch.FrictionControl(false,0);
             }
 			/////////////////////////////////////////////////////
 			//旋转
-
+			
 			///////////////////////////////////////////////
 
 			
 			
 			if (ctrl.mode_ctrl == MODE_LOAD)//装球
 			{
-				launch.LoadBall(ctrl.load_ctrl, &pitch_angle, &spin_state);
+				friction_ready = true;
+				pitch_angle = 0;
+				launch.LoadBall(ctrl.load_ctrl, &pitch_angle, &spin_state, &shoot_speed);
 			}
 			
-			
-			
-			if (launch.LauncherMotor[1].get_angle() > 330)//防止机构干涉
+			//spin_state = false;
+			/////////////////////////////////////////////////////////////////////////////
+			if (launch.LauncherMotor[1].get_angle() < 330)//防止机构干涉
 			{
-				if (pitch_angle < 390)
+				if (pitch_angle > 600)
 				{
-					pitch_angle = 390;
+					pitch_angle = 600;
 				}
 			}
 			
 			
-			if (launch.LauncherMotor[0].get_angle() <= 180)//防止机构干涉
+			if (-launch.LauncherMotor[0].get_angle() > 700)//防止机构干涉
 			{
-				spin_state = false;
+				spin_state = true;
 			}
 
 			
 
-			if (ctrl.mode_ctrl != MODE_SHOOT && ctrl.mode_ctrl != MODE_LOAD)
-			{
-				pitch_angle = 0;
-			}
+//			if (ctrl.mode_ctrl != MODE_SHOOT && ctrl.mode_ctrl != MODE_LOAD)
+//			{
+//				pitch_angle = 0;
+//			}
 			
 			
 			//限位
@@ -207,20 +229,22 @@ void Chassis_Task(void *pvParameters)
 			{
 				pitch_angle = 0;
 			}
-			else if(pitch_angle > 450)
+			else if(pitch_angle > 1450)
 			{
-				pitch_angle = 450;
+				pitch_angle = 1450;
 			}
 			else
 			{}
-				
+			
 			//
 			//pitch_angle = 0;
 			//	
+			
+			//pitch_angle = pt;
+			//pitch_angle = 0;
 				
-				
-				
-			chassis.Control(ctrl.twist);	
+			//chassis.Control(ctrl.twist);//控制底盘
+			launch.FrictionControl(friction_ready,shoot_speed);//控制摩擦带
 			launch.PitchControl(pitch_angle);//控制俯仰
 			launch.SpinControl(spin_state);//控制旋转
 			//////////////////////////////////////////////////////
@@ -247,14 +271,14 @@ void PidParamInit(void)
     chassis.Pid_Mode_Init(2, 0.1f, 0.0f, false, true);
 	chassis.Pid_Mode_Init(3, 0.1f, 0.0f, false, true);
 	 
-    launch.Pid_Param_Init(0,12.0f, 0.015f, 0.0f, 16384.0f, 6000.f, 0);
+    launch.Pid_Param_Init(0,12.0f, 0.015f, 0.0f, 16384.0f, 7000.f, 0);
     launch.Pid_Mode_Init(0,0.1f, 0.0f, false, true);
 
     launch.Pid_Param_Init(1,12.0f, 0.015f, 0.0f, 16384.0f, 6000.f, 0);
     launch.Pid_Mode_Init(1,0.1f, 0.0f, false, true);
 	
 	
-	launch.Pid_Param_Init(2,2.4f, 0.015f, 0.0f, 16384.0f, 5000.f, 0);
+	launch.Pid_Param_Init(2,2.4f, 0.015f, 0.0f, 16384.0f, 6000.f, 0);
     launch.Pid_Mode_Init(2,0.1f, 0.0f, false, true);
 	
 	

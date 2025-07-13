@@ -141,9 +141,6 @@ uint8_t RePosition::StabilzeRobot(CONTROL_T *ctrl)
 }
 
 
-
-
-
 void RePosition::GetLaserData(uint32_t* x, uint32_t* y1, uint32_t* y2)
 {
     if (x != NULL) *x   = LaserModuleDataGroup.LaserModule1.MeasurementData.Distance;
@@ -296,6 +293,9 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 	static uint8_t flag = 0;
 	static uint8_t yaw_total_num = 0;
 	static uint8_t offset_total_num = 0;
+	static uint32_t start_time = Get_SystemTimer();
+	
+	uint32_t current_time = Get_SystemTimer();
 	
 	
 	
@@ -307,8 +307,7 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 			flag = 1;
 		}
 	
-		
-		
+
 		//稳定机器人
 		if (flag == 1)
 		{
@@ -356,10 +355,14 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 			
 			if (yaw_total_num < 10)
 			{
-				if (fabs(error) < 5.0)
+				if ((yaw_total_num == 0) || (current_time - start_time > SAMPLE_TIME))
 				{
-					yaw_rror[yaw_total_num];
-					yaw_total_num++;
+					start_time = current_time;
+					if (fabs(error) < 5.0)
+					{
+						yaw_rror[yaw_total_num] = error;
+						yaw_total_num++;
+					}
 				}
 			}
 			else
@@ -405,7 +408,6 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 		}
 		////////////////////////////////////////////////////////////////////////////////////////
 		
-
 		//计算XY偏移
 		if (flag == 5)
 		{
@@ -418,11 +420,14 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 			
 			if (offset_total_num < 5)
 			{
-				if (CalcOffset(&offset_x, &offset_y))
+				if ((offset_total_num == 0) || (current_time - start_time > SAMPLE_TIME))
 				{
-					offset_x_arr[offset_total_num] = offset_x;
-					offset_y_arr[offset_total_num] = offset_y;
-					offset_total_num++;
+					if (CalcOffset(&offset_x, &offset_y))
+					{
+						offset_x_arr[offset_total_num] = offset_x;
+						offset_y_arr[offset_total_num] = offset_y;
+						offset_total_num++;
+					}
 				}
 			}
 			else
@@ -438,9 +443,6 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 			offset_total_num = 0;
 		}
 		/////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		
-		
 		
 		//应用XY偏移
 		if (flag == 6)
@@ -479,7 +481,6 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 		{
 			ctrl->twist.linear.x = 0;
 			ctrl->twist.linear.y = 0;
-			ctrl->twist.angular.z = 0;
 		
 			double X, Y, x, y;
 			GetXYFromLaser(&X, &Y);
@@ -495,6 +496,8 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 				flag = 0;
 			}
 		}
+		
+		
 		
 		//保护
 		if (flag > 8)

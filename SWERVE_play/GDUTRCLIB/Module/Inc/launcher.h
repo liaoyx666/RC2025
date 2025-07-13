@@ -52,7 +52,7 @@ public:
 	void PushControl(bool push_state);
 	void PushBall(enum CONTROL_E state);
 	
-	void LoadBall(enum CONTROL_E state, float *pitch_angle, bool *spin_state);
+	void LoadBall(enum CONTROL_E state, float *pitch_angle, bool *spin_state, float *shoot_speed);
 	
 	//
     bool Pid_Param_Init(int num, float Kp, float Ki, float Kd, float Integral_Max, float OUT_Max, float DeadZone)
