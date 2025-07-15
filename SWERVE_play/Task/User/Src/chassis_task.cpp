@@ -30,6 +30,9 @@ float yaw_angle = 0;
 bool friction_ready = false;
 
 
+float sp = 0;
+
+
 
 //main
 
@@ -49,7 +52,7 @@ void Chassis_Task(void *pvParameters)
 			if (ctrl.mode_ctrl == MODE_DRIBBLE || ctrl.mode_ctrl == MODE_DEFEND)
 			{
 				spin_state = false;
-				//pitch_angle = 0;
+				pitch_angle = 600;
 				Dribble_Ball(ctrl.cylinder_ctrl);//运球
 			}
 			
@@ -100,6 +103,8 @@ void Chassis_Task(void *pvParameters)
 			{
 				chassis.World_Coordinate(0, &ctrl.twist);//世界坐标
 			}
+			
+			
 			//chassis.World_Coordinate(-90, &ctrl.twist);//世界坐标
 			////////////////////////////////////////////////////
 			//俯仰
@@ -165,13 +170,12 @@ void Chassis_Task(void *pvParameters)
 				pitch_angle = 1450;
 				spin_state = true;
 			}
-			
+
 
 			/////////////////////////////////////////////////////
 			//摩擦带
             if(ctrl.friction_ctrl == FRICTION_ON && ctrl.mode_ctrl == MODE_SHOOT)
             {
-				
 				if (-launch.LauncherMotor[0].get_angle() > 1400)
 				{
 					//shoot_speed = GetShootSpeed(distance, pitch_level);//获得速度
@@ -195,8 +199,12 @@ void Chassis_Task(void *pvParameters)
 			
 			if (ctrl.mode_ctrl == MODE_LOAD)//装球
 			{
+				if (pitch_angle > 600)
+				{
+					pitch_angle = 600;
+				}
+				
 				friction_ready = true;
-				pitch_angle = 0;
 				launch.LoadBall(ctrl.load_ctrl, &pitch_angle, &spin_state, &shoot_speed);
 			}
 			
@@ -242,8 +250,12 @@ void Chassis_Task(void *pvParameters)
 			
 			//pitch_angle = pt;
 			//pitch_angle = 0;
+			//pitch_angle = 1450;
+			//spin_state = true;
 				
-			//chassis.Control(ctrl.twist);//控制底盘
+			shoot_speed = sp;
+				
+			chassis.Control(ctrl.twist);//控制底盘
 			launch.FrictionControl(friction_ready,shoot_speed);//控制摩擦带
 			launch.PitchControl(pitch_angle);//控制俯仰
 			launch.SpinControl(spin_state);//控制旋转

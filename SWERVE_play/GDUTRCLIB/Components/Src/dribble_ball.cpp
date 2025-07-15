@@ -113,6 +113,14 @@ void Dribble_Ball(enum CONTROL_E state)
 //{
 //	Pushing_Cylinder_State(state);
 //}
+bool Read_Holding_Cylinder_State(void)
+{
+	return (bool)HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5);
+}
+
+
+
+
 
 
 void Hiting_Cylinder_State(enum CylinderState state)

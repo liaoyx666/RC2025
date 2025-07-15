@@ -28,6 +28,11 @@ void Shoot_Ball(enum CONTROL_E state);
 void Hiting_Cylinder_State(enum CylinderState state);
 void Holding_Cylinder_State(enum CylinderState state);
 //void Pushing_Cylinder_State(enum CylinderState state);
+bool Read_Holding_Cylinder_State(void);
+
+
+
+
 #ifdef __cplusplus
 }
 #endif

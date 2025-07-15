@@ -66,7 +66,7 @@ osThreadId_t CAN2_SendHandle;
 const osThreadAttr_t CAN2_Send_attributes = {
   .name = "CAN2_Send",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityLow2,
 };
 /* Definitions for user_debug */
 osThreadId_t user_debugHandle;
@@ -80,7 +80,7 @@ osThreadId_t Air_JoyHandle;
 const osThreadAttr_t Air_Joy_attributes = {
   .name = "Air_Joy",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityLow1,
 };
 /* Definitions for Location */
 osThreadId_t LocationHandle;
@@ -93,6 +93,13 @@ const osThreadAttr_t Location_attributes = {
 osThreadId_t LoraHandle;
 const osThreadAttr_t Lora_attributes = {
   .name = "Lora",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for WS2812B */
+osThreadId_t WS2812BHandle;
+const osThreadAttr_t WS2812B_attributes = {
+  .name = "WS2812B",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
@@ -109,6 +116,7 @@ extern void User_Debug_Task(void *argument);
 extern void Air_Joy_Task(void *argument);
 extern void Location_Task(void *argument);
 extern void Lora_Task(void *argument);
+extern void WS2812B_Task(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -159,6 +167,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of Lora */
   LoraHandle = osThreadNew(Lora_Task, NULL, &Lora_attributes);
+
+  /* creation of WS2812B */
+  WS2812BHandle = osThreadNew(WS2812B_Task, NULL, &WS2812B_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
 

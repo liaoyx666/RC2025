@@ -318,8 +318,6 @@ void Launcher::LoadBall(enum CONTROL_E state, float *pitch_angle, bool *spin_sta
 			flag = 0;
 		}
 	}
-	
-	
 }
 
 
