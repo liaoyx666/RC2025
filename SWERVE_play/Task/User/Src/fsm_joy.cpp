@@ -37,10 +37,10 @@ void Air_Joy_Task(void *pvParameters)
             //底盘控制命令
             if(_tool_Abs(air_joy.SWB - 1000) > 450)
             {
-                ctrl.twist.linear.x = -(air_joy.LEFT_Y - 1500)/500.0 * 3;
+                ctrl.twist.linear.x = -(air_joy.RIGHT_Y - 1500)/500.0 * 3;
                 ctrl.twist.linear.y = -(air_joy.LEFT_X - 1500)/500.0 * 3;
                 ctrl.twist.angular.z = (air_joy.RIGHT_X - 1500)/500.0 * 2;
-                ctrl.twist.angular.x = air_joy.RIGHT_Y;
+                //ctrl.twist.angular.x = air_joy.RIGHT_Y;
 				/*******************************************************************************/
 				if ((_tool_Abs(air_joy.SWB - 1500) < 50) || (_tool_Abs(air_joy.SWB - 2000) < 50))//运球、装球模式
 				{
