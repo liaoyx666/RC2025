@@ -15,7 +15,7 @@
 #include "path_tracing.h"
 
 Omni_Chassis chassis(0.152/2.f, 0.442f/2.f, 4, 2.5f); //底盘直径0.442m，轮子半径0.152m，底盘加速度0.5m/s^2
-Launcher launch(450.f, 455.f, 2045.f);
+Launcher launch(1450.f, 455.f, 2045.f);
 
 Path_Tracing path_tracing;
 
@@ -207,14 +207,15 @@ void Chassis_Task(void *pvParameters)
 			{
 				target_angle = 0;
 			}
-			else if(target_angle > 450)
+			else if(target_angle > 1450)
 			{
-				target_angle = 450;
+				target_angle = 1450;
 			}
 			else
 			{}
 			
-			target_angle = 0;
+			target_angle = 600;
+			spin_state = true;
 			
 			chassis.Control(ctrl.twist);	
 			launch.PitchControl(target_angle);//控制俯仰

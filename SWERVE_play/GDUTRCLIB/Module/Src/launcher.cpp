@@ -53,7 +53,7 @@ void Launcher::PitchControl(float pitch_angle)
     {
         Reset();
         PidPitchPos.PID_Mode_Init(0.1,0.1,true,false);
-        PidPitchPos.PID_Param_Init(15, 0, 0.2, 100, /*300*/900, 0.2);
+        PidPitchPos.PID_Param_Init(15, 0, 0.2, 100, /*300*/1700, 0.2);
     }
     else
     {
@@ -65,10 +65,10 @@ void Launcher::PitchControl(float pitch_angle)
         else{;}
 
         PidPitchPos.target = pitch_angle;
-        PidPitchPos.current = LauncherMotor[0].get_angle();
+        PidPitchPos.current = -LauncherMotor[0].get_angle();
         PidPitchSpd.target = PidPitchPos.Adjust();
-        PidPitchSpd.current = LauncherMotor[0].get_speed();
-        LauncherMotor[0].Out = PidPitchSpd.Adjust();
+        PidPitchSpd.current = -LauncherMotor[0].get_speed();
+        LauncherMotor[0].Out = -PidPitchSpd.Adjust();
     }
 }
 
