@@ -17,7 +17,7 @@ void Location_Task(void *pvParameters)
 		
 		LaserPositioning(NULL, NULL);
 		position.GetXYFromLaser(&XX, &YY);
-		position.CaliLaserData(XX, YY, &x, &y, sinf(RealPosData.world_yaw * 3.14159265f / 180.f), cosf(RealPosData.world_yaw * 3.14159265f / 180.f));
+		position.CaliLaserData(XX, YY, &x, &y, sinf(RealPosData.world_yaw * 3.14159265358979f / 180.f), cosf(RealPosData.world_yaw * 3.14159265358979f / 180.f));
 		
 		position.GetLaserData(&X, &Y1, &Y2);
 		//position.CaliLaserData(PointVector(X, Y), &XX, &YY, sinf(RealPosData.world_yaw * 3.14159265f / 180.f), cosf(RealPosData.world_yaw * 3.14159265f / 180.f));

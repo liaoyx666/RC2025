@@ -234,7 +234,7 @@ void Launcher::LoadBall(enum CONTROL_E state, float *pitch_angle, bool *spin_sta
 			//收射球
 			start_time = Get_SystemTimer();
 			pitch = 0;
-			spin = false;
+			//spin = false;
 			flag = 1;
 		}
 	}

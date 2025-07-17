@@ -7,7 +7,8 @@
  * @param x 要检查的值
  * @return 如果是NaN返回true，否则返回false
  */
-bool is_nan(double x) {
+bool is_nan(double x)
+{
     return x != x;
 }
 
@@ -17,14 +18,17 @@ bool is_nan(double x) {
  * @param n 数组长度
  * @return 有效数据的平均值，如果没有有效数据则返回0
  */
-double calculate_mean(double *arr, uint8_t n) {
+double calculate_mean(double *arr, uint8_t n)
+{
     if (n == 0) return 0.0;
-    
     double sum = 0.0;
+    
     uint8_t valid_count = 0;
 
-    for (uint8_t i = 0; i < n; i++) {
-        if (!is_nan(arr[i])) {
+    for (uint8_t i = 0; i < n; i++)
+	{
+        if (!is_nan(arr[i]))
+		{
             sum += arr[i];
             valid_count++;
         }
@@ -40,15 +44,18 @@ double calculate_mean(double *arr, uint8_t n) {
  * @param threshold 过滤阈值（绝对值）
  * @return 过滤后的平均值，如果没有有效数据则返回0
  */
-double filter_and_calculate_mean(double *input, uint8_t n, double threshold) {
+double filter_and_calculate_mean(double *input, uint8_t n, double threshold)
+{
     if (n == 0) return 0.0;
     
     // 计算原始数据的有效统计量
     double origin_sum = 0.0;
     uint8_t origin_count = 0;
     
-    for (uint8_t i = 0; i < n; i++) {
-        if (!is_nan(input[i])) {
+    for (uint8_t i = 0; i < n; i++)
+	{
+        if (!is_nan(input[i]))
+		{
             origin_sum += input[i];
             origin_count++;
         }
@@ -63,10 +70,12 @@ double filter_and_calculate_mean(double *input, uint8_t n, double threshold) {
     double filtered_sum = 0.0;
     uint8_t filtered_count = 0;
     
-    for (uint8_t i = 0; i < n; i++) {
+    for (uint8_t i = 0; i < n; i++)
+	{
         if (is_nan(input[i])) continue;  // 跳过NaN值
         
-        if (fabs(input[i] - origin_mean) <= threshold) {
+        if (fabs(input[i] - origin_mean) <= threshold)
+		{
             filtered_sum += input[i];
             filtered_count++;
         }
@@ -79,8 +88,8 @@ double filter_and_calculate_mean(double *input, uint8_t n, double threshold) {
 
 ///////////////////////////////////////////////////////////////////////
 
-#define GET_TIME_1 850000
-#define GET_TIME_MAX 1400000
+#define GET_TIME_1 800000 //稳定持续时间
+#define GET_TIME_MAX 1500000 //最大等待时间
 /**
   * @brief 让机器人稳定
   * @note 
@@ -88,10 +97,10 @@ double filter_and_calculate_mean(double *input, uint8_t n, double threshold) {
   * @retval 0 失败；1 成功；2 等待
   */
 uint8_t RePosition::StabilzeRobot(CONTROL_T *ctrl)
-{
+{ 
 	static uint8_t flag = 0;
 	static uint32_t time;
-	static uint32_t start_time;
+	static uint32_t start_time = Get_SystemTimer();
 	
 	//获取当前时间
 	uint32_t current_time = Get_SystemTimer();
@@ -109,12 +118,12 @@ uint8_t RePosition::StabilzeRobot(CONTROL_T *ctrl)
 	}
 	
 	//防止上次flag未置0
-	if (current_time - start_time > GET_TIME_MAX + 10000)
+	if (current_time - start_time > GET_TIME_MAX + 1000)
 	{
 		time = current_time;
 		start_time = current_time;
 		flag = 1;
-	}	
+	}
 	
 	//等待pid锁yaw至车稳定
 	if (fabsf(RealPosData.world_yaw) > 0.25f)
@@ -122,11 +131,12 @@ uint8_t RePosition::StabilzeRobot(CONTROL_T *ctrl)
 		time = current_time;
 	}
 	
-	//
+	//成功
 	if (current_time - time > GET_TIME_1)
 	{
 		//停止旋转
 		ctrl->twist.angular.z = 0;
+		flag = 0;
 		return 1;
 	}
 	
@@ -140,7 +150,7 @@ uint8_t RePosition::StabilzeRobot(CONTROL_T *ctrl)
 	return 2;
 }
 
-
+//获取三激光原始数据
 void RePosition::GetLaserData(uint32_t* x, uint32_t* y1, uint32_t* y2)
 {
     if (x != NULL) *x   = LaserModuleDataGroup.LaserModule1.MeasurementData.Distance;
@@ -150,7 +160,7 @@ void RePosition::GetLaserData(uint32_t* x, uint32_t* y1, uint32_t* y2)
 
 
 
-
+//两激光距离
 #define LASER_DISTANCE  695.0//mm
 
 //通过激光获得yaw
@@ -162,16 +172,14 @@ double RePosition::GetYawFromLaser(void)
 }
 
 
-
-
 //激光中心到position中心的距离
-#define LASER_CENTRE_ERROR_X 0.0922
-#define LASER_CENTRE_ERROR_Y -0.0456
+#define LASER_CENTRE_ERROR_X 0.0
+#define LASER_CENTRE_ERROR_Y 0.065
 
 
 //激光安装位置到两激光交点的距离
-#define LASER_INSTALL_ERROR_X -0.208
-#define LASER_INSTALL_ERROR_Y 0.6165
+#define LASER_INSTALL_ERROR_X 0.225
+#define LASER_INSTALL_ERROR_Y 0.028
 
 
 //y轴正方向为上，x轴正方向为左
@@ -182,8 +190,8 @@ void RePosition::CaliLaserData(double in_x, double in_y, double *out_x, double *
 	in_y += LASER_INSTALL_ERROR_Y;
 	
 	
-	in_x -= sin_error / cos_error * LASER_CENTRE_ERROR_Y;
-	in_y -= sin_error / cos_error * LASER_CENTRE_ERROR_X;
+	//in_x -= sin_error / cos_error * LASER_CENTRE_ERROR_Y;
+	//in_y -= sin_error / cos_error * LASER_CENTRE_ERROR_X;
 	
 	
 	//修正激光斜射的误差
@@ -202,10 +210,7 @@ void RePosition::CaliPositionData(double in_x, double in_y, double *out_x, doubl
 
 
 
-
-
-
-//通过激光获得XY
+//通过激光获得XY（m）
 void RePosition::GetXYFromLaser(double *x, double *y)
 {
 	uint32_t _x, _y1, _y2;
@@ -222,11 +227,12 @@ double RePosition::CalcYawError(void)
 	
 	laser_yaw = laser_yaw * 180.0 / PI;
 	
-	if (fabs(laser_yaw) > 8.0) return PI / 2.0;
+	if (fabs(laser_yaw) > 10.0) return PI / 2.0;
 	if (fabsf(RealPosData.world_yaw) > 0.5f) return PI / 2.0;
 	
 	return RealPosData.world_yaw - laser_yaw;
 }
+
 
 //计算XY偏置
 bool RePosition::CalcOffset(double *offset_x, double *offset_y)
@@ -235,15 +241,26 @@ bool RePosition::CalcOffset(double *offset_x, double *offset_y)
 	double position_x, position_y;
 	double yaw_error;
 	
+	//获得激光原始值
 	GetXYFromLaser(&laser_x, &laser_y);
+	
+	//获得position原始值
 	position_x = static_cast<double>(RealPosData.raw_x);
 	position_y = static_cast<double>(RealPosData.raw_y);
+	
+	//获得锁yaw误差
 	yaw_error = RealPosData.world_yaw;
 	
-	if ((laser_x - position_x) * (laser_x - position_x) + (laser_y - position_y) * (laser_y - position_y) > 3 * 3) return false;
+	//
+	if ((laser_x - position_x) * (laser_x - position_x) + (laser_y - position_y) * (laser_y - position_y) > 5 * 5) return false;
+	
+	//防止锁yaw不准
 	if (fabsf(RealPosData.world_yaw) > 0.5) return false;
 	
-	CaliLaserData(laser_x, laser_y, &laser_x, &laser_y, sin(yaw_error), cos(yaw_error));
+	//计算纠正后的激光坐标
+	CaliLaserData(laser_x, laser_y, &laser_x, &laser_y, sin(yaw_error * PI / 180.0), cos(yaw_error * PI / 180.0));
+	
+	//计算纠正后的position坐标
 	CaliPositionData(position_x, position_y, &position_x, &position_y, RawPosData.sin_yaw_offset, RawPosData.cos_yaw_offset);
 	
 	if (is_nan(laser_x) || is_nan(laser_y) || is_nan(position_x) || is_nan(position_y))
@@ -251,10 +268,12 @@ bool RePosition::CalcOffset(double *offset_x, double *offset_y)
 		return false;
 	}
 	
+	//计算偏差
 	*offset_x = position_x - laser_x;
 	*offset_y = position_y - laser_y;
 	
-	if (*offset_x * *offset_x + *offset_y * *offset_y > 3 * 3)
+	
+	if (*offset_x * *offset_x + *offset_y * *offset_y > 5 * 5)
 	{
 		return false;
 	}
@@ -263,8 +282,9 @@ bool RePosition::CalcOffset(double *offset_x, double *offset_y)
 }
 
 
+//应用yaw偏置
 bool RePosition::ApplyYawError(void)
-{	
+{
 	RawPosData.yaw_offset = this->axis_error + RawPosData.yaw_offset;
 
 	RawPosData.sin_yaw_offset = sin(RawPosData.yaw_offset * PI / 180.0);
@@ -274,7 +294,7 @@ bool RePosition::ApplyYawError(void)
 }
 
 
-
+//应用x，y偏置
 bool RePosition::ApplyOffset(void)
 {
 	RawPosData.x_offset = this->x_offset;
@@ -285,12 +305,14 @@ bool RePosition::ApplyOffset(void)
 
 
 
+//采样时间间隔
+#define SAMPLE_TIME 15000
 
-#define SAMPLE_TIME 10000
-
+//重定位实现
 void RePosition::LaserRePosition(CONTROL_T *ctrl)
 {
 	static uint8_t flag = 0;
+	
 	static uint8_t yaw_total_num = 0;
 	static uint8_t offset_total_num = 0;
 	static uint32_t start_time = Get_SystemTimer();
@@ -298,8 +320,8 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 	uint32_t current_time = Get_SystemTimer();
 	
 	
-	
-	if (ctrl->yaw_ctrl == YAW_LOCK_DIRECTION)//yaw锁定正方向模式下
+	//yaw锁定正方向模式下
+	if (ctrl->yaw_ctrl == YAW_LOCK_DIRECTION)
 	{
 		//等待开始信号
 		if ((ctrl->reposition_ctrl == REPOSITION_ON) && (flag == 0))
@@ -319,8 +341,7 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 			ctrl->twist.linear.y = 0;
 			
 			//太远yaw不准
-			if (fabs(y) > 0.6) flag = 0;
-			
+			if (fabs(y) > 1.0) flag = 0;
 			else
 			{
 				uint8_t state = StabilzeRobot(ctrl);
@@ -352,13 +373,18 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 			static double yaw_rror[10];
 			double error = CalcYawError();
 			
+			if (yaw_total_num == 0)
+			{
+				memset(yaw_rror, 0, sizeof(yaw_rror));
+			}
 			
+			//求10次平均值
 			if (yaw_total_num < 10)
 			{
 				if ((yaw_total_num == 0) || (current_time - start_time > SAMPLE_TIME))
 				{
 					start_time = current_time;
-					if (fabs(error) < 5.0)
+					if (fabs(error) < 8.0)
 					{
 						yaw_rror[yaw_total_num] = error;
 						yaw_total_num++;
@@ -367,7 +393,7 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 			}
 			else
 			{
-				this->axis_error = filter_and_calculate_mean(yaw_rror, yaw_total_num, 0.5);
+				this->axis_error = filter_and_calculate_mean(yaw_rror, yaw_total_num, 0.2);
 				yaw_total_num = 0;
 				flag = 3;
 			}
@@ -388,7 +414,7 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 			}
 		}
 		
-
+		
 		//稳定机器人
 		if (flag == 4)
 		{
@@ -418,10 +444,21 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 			static double offset_x_arr[5], offset_y_arr[5];
 			double offset_x = 0, offset_y = 0;
 			
+			
+			if (offset_total_num == 0)
+			{
+				memset(offset_x_arr, 0, sizeof(offset_x_arr));
+				memset(offset_y_arr, 0, sizeof(offset_y_arr));
+			}
+			
+			
+			//求5次平均值
 			if (offset_total_num < 5)
 			{
 				if ((offset_total_num == 0) || (current_time - start_time > SAMPLE_TIME))
 				{
+					start_time = current_time;
+					
 					if (CalcOffset(&offset_x, &offset_y))
 					{
 						offset_x_arr[offset_total_num] = offset_x;
@@ -432,8 +469,8 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 			}
 			else
 			{
-				this->x_offset = filter_and_calculate_mean(offset_x_arr, offset_total_num, 0.015);
-				this->y_offset = filter_and_calculate_mean(offset_y_arr, offset_total_num, 0.015);
+				this->x_offset = filter_and_calculate_mean(offset_x_arr, offset_total_num, 0.01);
+				this->y_offset = filter_and_calculate_mean(offset_y_arr, offset_total_num, 0.01);
 				offset_total_num = 0;
 				flag = 6;
 			}
@@ -476,6 +513,7 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 			}
 		}
 		
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//测试校准结果
 		if (flag == 8)
 		{
@@ -486,7 +524,7 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 			GetXYFromLaser(&X, &Y);
 			CaliLaserData(X, Y, &x, &y, sinf(RealPosData.world_yaw * PI / 180.f), cosf(RealPosData.world_yaw * PI / 180.f));
 	
-			
+			//激光坐标与position坐标差距
 			if ((x - RealPosData.world_x) * (x - RealPosData.world_x) + (y - RealPosData.world_y) * (y - RealPosData.world_y) > 0.015 * 0.015)
 			{				
 				flag = 4;
@@ -496,7 +534,6 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 				flag = 0;
 			}
 		}
-		
 		
 		
 		//保护

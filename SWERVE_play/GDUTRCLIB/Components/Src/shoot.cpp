@@ -6,18 +6,38 @@
 
 
 
-#define SAMPLE_NUM_1 4//采样点数
+#define SAMPLE_NUM_1 5//采样点数
+
+
+
 
 float cubic_spline_1[SAMPLE_NUM_1 - 1][4] = {
-{15595.000000f, 1476.372549f, 0.000000f, 13215.686275f},
+{15000.000000f, 4623.143074f, 0.000000f, -19252.229006f},
 
-{15996.000000f, 3062.254902f, 7929.411765f, -6075.843137f},
+{15330.000000f, 4315.357688f, -4216.238152f, 3731.045551f},
 
-{18750.000000f, 6434.784314f, -1184.352941f, 789.568627f},
+{16900.000000f, 2897.403699f, 1380.330174f, -750.275145f},
 
-};//三次样条插值法参数
+{18600.000000f, 3715.027514f, 254.917457f, -169.944971f},
 
-float sample_distance_1[SAMPLE_NUM_1] = {1.3, 1.5, 2.0, 2.5};//采样点距离
+};
+
+float sample_distance_1[SAMPLE_NUM_1] = {1.427, 1.5, 2.0, 2.5, 3.0};
+
+
+
+
+
+//float cubic_spline_1[SAMPLE_NUM_1 - 1][4] = {
+//{15595.000000f, 1476.372549f, 0.000000f, 13215.686275f},
+
+//{15996.000000f, 3062.254902f, 7929.411765f, -6075.843137f},
+
+//{18750.000000f, 6434.784314f, -1184.352941f, 789.568627f},
+
+//};//三次样条插值法参数
+
+//float sample_distance_1[SAMPLE_NUM_1] = {1.3, 1.5, 2.0, 2.5};//采样点距离
 
 
 
@@ -119,8 +139,8 @@ float GetShootSpeed(float distance, uint8_t pitch_level)
 
 
 
-#define HOOP_X -3.94762087f
-#define HOOP_Y 14.5146599f
+#define HOOP_X -3.60704947f
+#define HOOP_Y 14.1264868f
 
 //#define HOOP_X  10.6293278f // 篮筐的X坐标（单位：米）
 //#define HOOP_Y  3.77741861f // 篮筐的Y坐标（单位：米）
@@ -143,7 +163,15 @@ float GetHoopAngle(float robot_x, float robot_y, float *distance)
 	target_theta = target_theta * 180.f / PI;
 	
 	
+	
+	
+	
+	
 	*distance = sqrtf(delta_x * delta_x + delta_y * delta_y);
+	
+	
+	
+	
 	
 	
 	
@@ -156,6 +184,31 @@ float GetHoopAngle(float robot_x, float robot_y, float *distance)
 	{
 		target_theta -= 90.f;
 	}
+	
+	
+	
+	
+	target_theta += 180.0f;
+	
+	if (target_theta != target_theta)
+	{
+		return 0;
+	}
+	
+	
+	
+	while (target_theta > 180.0f)
+	{
+		target_theta -= 360.0f;
+	}
+	
+	while (target_theta < -180.0f)
+	{
+		target_theta += 360.0f;
+	}
+	
+	
+	
 	
 	return target_theta;
 }

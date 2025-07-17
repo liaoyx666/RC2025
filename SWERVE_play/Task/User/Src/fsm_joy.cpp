@@ -99,16 +99,12 @@ void Air_Joy_Task(void *pvParameters)
 					else//放球到发射机构
 					{
 						ctrl.mode_ctrl = MODE_LOAD;
-
 						
 						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)//
 						{
 							last_SWD = air_joy.SWD;//更新按键值
 							ctrl.load_ctrl = LOAD_ON;
 						}
-						
-						
-						
 						
 					}
 					/////////////////////////////////////////////////////////////////////////////
@@ -117,25 +113,32 @@ void Air_Joy_Task(void *pvParameters)
 				else if (_tool_Abs(air_joy.SWB - 2000) < 50)//射球模式
 				{
 					ctrl.chassis_ctrl = CHASSIS_ON;
-					ctrl.mode_ctrl = MODE_SHOOT;//使世界坐标为0
 					
-					
-					
+
 					if (_tool_Abs(air_joy.SWC - 1500) < 50)
 					{
 						ctrl.yaw_ctrl = YAW_HAND;
+						ctrl.mode_ctrl = MODE_SHOOT;//使世界坐标为0
+
+						
 					}
 					else if (_tool_Abs(air_joy.SWC - 1000) < 50)
 					{
 						ctrl.yaw_ctrl = YAW_LOCK_DIRECTION;
+						ctrl.mode_ctrl = MODE_REPOSITION;
+
+						
 					}
 					else if (_tool_Abs(air_joy.SWC - 2000) < 50)
 					{
 						ctrl.yaw_ctrl = YAW_LOCK_BASKET;
+						ctrl.mode_ctrl = MODE_SHOOT;//使世界坐标为0
+
 					}
 					else
 					{
 						ctrl.yaw_ctrl = YAW_HAND;
+						ctrl.mode_ctrl = MODE_SHOOT;//使世界坐标为0
 					}
 					
 					
@@ -148,12 +151,7 @@ void Air_Joy_Task(void *pvParameters)
 						}	
 					}
 					
-					
-					
-					
-					
-					
-					
+				
 					
 					
 					if ((ctrl.yaw_ctrl == YAW_HAND) || (ctrl.yaw_ctrl == YAW_LOCK_BASKET))
