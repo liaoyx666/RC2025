@@ -13,6 +13,8 @@
 #include "dribble_ball.h"
 #include "shoot.h"
 #include "reposition.h"
+#include "ws2812.h"
+
 
 Omni_Chassis chassis(0.152/2.f, 0.442f/2.f, 4, 2.f); //底盘直径0.442m，轮子半径0.152m，底盘加速度0.5m/s^2
 Launcher launch(1450.f, 455.f, 2045.f);
@@ -28,6 +30,12 @@ float shoot_speed = 0;
 float distance = 0;
 float yaw_angle = 0;
 bool friction_ready = false;
+
+
+
+Ws2812b_SIGNAL_T Ws2812b_signal = SIGNAL_NORMAL;
+
+
 
 
 float sp = 0;
@@ -101,7 +109,7 @@ void Chassis_Task(void *pvParameters)
 
 			
 			//重定位
-			reposition.LaserRePosition(&ctrl);
+			reposition.LaserRePosition(&ctrl, &Ws2812b_signal);
 			
 			
 			if (ctrl.mode_ctrl == MODE_DEFEND)
@@ -277,6 +285,8 @@ void Chassis_Task(void *pvParameters)
 			//CAN发送
 			chassis.Motor_Control();
             launch.LaunchMotorCtrl();
+				
+			xQueueSend(Send_WS2812_Port, &Ws2812b_signal, 0);
         }
         osDelay(1);
     }

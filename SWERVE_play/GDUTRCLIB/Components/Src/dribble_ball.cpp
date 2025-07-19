@@ -3,8 +3,8 @@
 
 //时间段
 #define DRIBBLE_TIME_1 20000//击球气缸伸长（开始）到夹球气缸伸长
-#define DRIBBLE_TIME_2 100000//夹球气缸伸长到击球气缸收缩
-#define DRIBBLE_TIME_3 400000//击球气缸收缩到夹球气缸收缩
+#define DRIBBLE_TIME_2 300000//夹球气缸伸长到击球气缸收缩
+#define DRIBBLE_TIME_3 250000//击球气缸收缩到夹球气缸收缩
 
 #define DRIBBLE_TIME_4 150000//夹球气缸收缩到结束（防止两次运球时间间隔过短）
 

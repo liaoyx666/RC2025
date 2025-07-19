@@ -23,7 +23,7 @@
 #define LaserPositionin_Port_SIZE 1
 
 
-
+#define Send_WS2812Port_SIZE 5
 
 //can数据帧类型定义
 #define USE_CAN1_STDID 1  //使用标准ID
@@ -51,10 +51,11 @@ extern xQueueHandle Broadcast_Port;
 extern QueueHandle_t Receive_LaserModuleData_1_Port;        // 激光测距模块1串口DMA接收队列
 extern QueueHandle_t Receive_LaserModuleData_2_Port;        // 激光测距模块2串口DMA接收队列
 extern QueueHandle_t Receive_LaserModuleData_3_Port;        // 激光测距模块3串口DMA接收队列
+	
+extern QueueHandle_t Send_WS2812_Port;
+	
+	
 
-	
-	
-	
 	
 extern uint8_t Uart3_Rx_Buff[ACTION_UART_SIZE];
 extern uint8_t Uart4_Rx_Buff[LaserPositionin_UART_SIZE];

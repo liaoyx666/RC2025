@@ -5,6 +5,7 @@
 #include <math.h>
 #include "chassis_task.h"
 #include "drive_tim.h"
+#include "ws2812.h"
 
 #ifdef __cplusplus
 
@@ -17,8 +18,8 @@ public:
 	RePosition() : x_offset(0), y_offset(0), axis_error(0) {}
 		
 		
-	void GetLaserData(uint32_t* x, uint32_t* y1, uint32_t* y2);
-	void LaserRePosition(CONTROL_T *ctrl);
+	bool GetLaserData(uint32_t* x, uint32_t* y1, uint32_t* y2);
+	void LaserRePosition(CONTROL_T *ctrl, Ws2812b_SIGNAL_T *signal);
 	double GetYawFromLaser(void);
 
 	void GetXYFromLaser(double *x, double *y);
@@ -34,7 +35,7 @@ private:
 	bool CalcOffset(double *offset_x, double *offset_y);
 	bool ApplyYawError(void);
 	bool ApplyOffset(void);
-	uint8_t StabilzeRobot(CONTROL_T *ctrl);
+	uint8_t StabilzeRobot(CONTROL_T *ctrl, Ws2812b_SIGNAL_T *signal);
 
 
 

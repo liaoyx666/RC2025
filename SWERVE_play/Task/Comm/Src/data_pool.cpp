@@ -8,6 +8,7 @@
  */
 #include "data_pool.h"
 #include "chassis_task.h"
+#include "ws2812.h"
 
 //定义队列
 QueueHandle_t Port;
@@ -22,7 +23,7 @@ QueueHandle_t Receive_LaserModuleData_1_Port;        // 激光测距模块1串�
 QueueHandle_t Receive_LaserModuleData_2_Port;        // 激光测距模块2串口DMA接收队列
 QueueHandle_t Receive_LaserModuleData_3_Port;        // 激光测距模块3串口DMA接收队列
 
-
+QueueHandle_t Send_WS2812_Port;
 
 
 //ROS串口接收缓存数组
@@ -51,4 +52,6 @@ void DataPool_Init(void)
 	Receive_LaserModuleData_1_Port = xQueueCreate(LaserPositionin_Port_SIZE, sizeof(Uart4_Rx_Buff));     // 激光测距模块1串口DMA接收队列
     Receive_LaserModuleData_2_Port = xQueueCreate(LaserPositionin_Port_SIZE, sizeof(Uart5_Rx_Buff));     // 激光测距模块2串口DMA接收队列
 	Receive_LaserModuleData_3_Port = xQueueCreate(LaserPositionin_Port_SIZE, sizeof(Uart6_Rx_Buff));     // 激光测距模块串口DMA接收队列
+	
+	Send_WS2812_Port = xQueueCreate(Send_WS2812Port_SIZE, sizeof(Ws2812b_SIGNAL_T));
 }

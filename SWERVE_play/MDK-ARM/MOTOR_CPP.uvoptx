@@ -283,12 +283,22 @@
         <Ww>
           <count>24</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Y1</ItemText>
+          <ItemText>Y2</ItemText>
         </Ww>
         <Ww>
           <count>25</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Y2</ItemText>
+          <ItemText>gWs2812bDat</ItemText>
+        </Ww>
+        <Ww>
+          <count>26</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>flag</ItemText>
+        </Ww>
+        <Ww>
+          <count>27</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Y1</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>

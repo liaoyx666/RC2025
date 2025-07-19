@@ -88,15 +88,15 @@ double filter_and_calculate_mean(double *input, uint8_t n, double threshold)
 
 ///////////////////////////////////////////////////////////////////////
 
-#define GET_TIME_1 800000 //稳定持续时间
-#define GET_TIME_MAX 1500000 //最大等待时间
+#define GET_TIME_1 1000000 //稳定持续时间
+#define GET_TIME_MAX 1600000 //最大等待时间
 /**
   * @brief 让机器人稳定
   * @note 
   * @param 
   * @retval 0 失败；1 成功；2 等待
   */
-uint8_t RePosition::StabilzeRobot(CONTROL_T *ctrl)
+uint8_t RePosition::StabilzeRobot(CONTROL_T *ctrl, Ws2812b_SIGNAL_T *signal)
 { 
 	static uint8_t flag = 0;
 	static uint32_t time;
@@ -144,24 +144,35 @@ uint8_t RePosition::StabilzeRobot(CONTROL_T *ctrl)
 	if (current_time - start_time > GET_TIME_MAX)
 	{
 		flag = 0;
+		WS2812B_Send_FAIL();////
 		return 0;
 	}
 	
 	return 2;
+	*signal = SIGNAL_WAIT;
 }
 
 //获取三激光原始数据
-void RePosition::GetLaserData(uint32_t* x, uint32_t* y1, uint32_t* y2)
+bool RePosition::GetLaserData(uint32_t* x, uint32_t* y1, uint32_t* y2)
 {
     if (x != NULL) *x   = LaserModuleDataGroup.LaserModule1.MeasurementData.Distance;
     if (y1 != NULL) *y1 = LaserModuleDataGroup.LaserModule2.MeasurementData.Distance;
     if (y2 != NULL) *y2 = LaserModuleDataGroup.LaserModule3.MeasurementData.Distance;
+	
+	if (*x == 0 || *y1 == 0 || *y2 == 0)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }
 
 
 
 //两激光距离
-#define LASER_DISTANCE  695.0//mm
+#define LASER_DISTANCE  689.0//mm
 
 //通过激光获得yaw
 double RePosition::GetYawFromLaser(void)
@@ -309,7 +320,7 @@ bool RePosition::ApplyOffset(void)
 #define SAMPLE_TIME 15000
 
 //重定位实现
-void RePosition::LaserRePosition(CONTROL_T *ctrl)
+void RePosition::LaserRePosition(CONTROL_T *ctrl, Ws2812b_SIGNAL_T *signal)
 {
 	static uint8_t flag = 0;
 	
@@ -323,227 +334,288 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl)
 	//yaw锁定正方向模式下
 	if (ctrl->yaw_ctrl == YAW_LOCK_DIRECTION)
 	{
-		//等待开始信号
-		if ((ctrl->reposition_ctrl == REPOSITION_ON) && (flag == 0))
+		uint32_t x, y1, y2;
+		if (GetLaserData(&x, &y1, &y2))
 		{
-			flag = 1;
-		}
-	
 
-		//稳定机器人
-		if (flag == 1)
-		{
-			double y;
-			GetXYFromLaser(NULL, &y);
+			if (flag == 0)
+			{
+				*signal = SIGNAL_NORMAL;
+			}
 			
-			//使车停止运动
-			ctrl->twist.linear.x = 0;
-			ctrl->twist.linear.y = 0;
 			
-			//太远yaw不准
-			if (fabs(y) > 1.0) flag = 0;
+			//等待开始信号
+			if ((ctrl->reposition_ctrl == REPOSITION_ON) && (flag == 0))
+			{
+				flag = 1;
+			}
+		
+
+			//稳定机器人
+			if (flag == 1)
+			{
+				double y;
+				GetXYFromLaser(NULL, &y);
+				
+				//使车停止运动
+				ctrl->twist.linear.x = 0;
+				ctrl->twist.linear.y = 0;
+				
+				//太远yaw不准
+				if (fabs(y) > 1.0) 
+				{
+					flag = 0;
+					WS2812B_Send_FAIL();////
+					
+				}
+				else
+				{
+					uint8_t state = StabilzeRobot(ctrl, signal);
+					if (state == 2)
+					{}
+					else if(state == 1)
+					{
+						//停止旋转
+						ctrl->twist.angular.z = 0;
+						flag = 2;
+					}
+					else
+					{
+						flag = 1;
+					}
+				}
+			}
+			
+			//////////////////////////////////////////////////////////////////////////////////////////////
+			
+			
+			//计算yaw偏移
+			if (flag == 2)
+			{
+				ctrl->twist.linear.x = 0;
+				ctrl->twist.linear.y = 0;
+				ctrl->twist.angular.z = 0;
+				
+				static double yaw_rror[10];
+				double error = CalcYawError();
+				
+				if (yaw_total_num == 0)
+				{
+					memset(yaw_rror, 0, sizeof(yaw_rror));
+				}
+				
+				//求10次平均值
+				if (yaw_total_num < 10)
+				{
+					if ((yaw_total_num == 0) || (current_time - start_time > SAMPLE_TIME))
+					{
+						start_time = current_time;
+						if (fabs(error) < 8.0)
+						{
+							yaw_rror[yaw_total_num] = error;
+							yaw_total_num++;
+						}
+						else
+						{
+							WS2812B_Send_FAIL();////
+						}
+					}
+				}
+				else
+				{
+					this->axis_error = filter_and_calculate_mean(yaw_rror, yaw_total_num, 0.2);
+					yaw_total_num = 0;
+					flag = 3;
+				}
+			}
 			else
 			{
-				uint8_t state = StabilzeRobot(ctrl);
+				yaw_total_num = 0;
+			}
+			///////////////////////////////////////////////////////////////////////////////////////////////////
+			
+			
+			//应用yaw偏移
+			if (flag == 3)
+			{
+				if(ApplyYawError())
+				{
+					flag = 4;
+					WS2812B_Send_SUCCESS();////
+				}
+				else
+				{
+					flag = 0;
+					WS2812B_Send_FAIL();////
+				}
+			}
+			
+			
+			//稳定机器人
+			if (flag == 4)
+			{
+				uint8_t state = StabilzeRobot(ctrl, signal);
 				if (state == 2)
 				{}
 				else if(state == 1)
 				{
 					//停止旋转
 					ctrl->twist.angular.z = 0;
-					flag = 2;
+					flag = 5;
 				}
 				else
 				{
-					flag = 1;
+					flag = 4;
 				}
 			}
-		}
-		
-		//////////////////////////////////////////////////////////////////////////////////////////////
-		
-		
-		//计算yaw偏移
-		if (flag == 2)
-		{
-			ctrl->twist.linear.x = 0;
-			ctrl->twist.linear.y = 0;
-			ctrl->twist.angular.z = 0;
+			////////////////////////////////////////////////////////////////////////////////////////
 			
-			static double yaw_rror[10];
-			double error = CalcYawError();
-			
-			if (yaw_total_num == 0)
+			//计算XY偏移
+			if (flag == 5)
 			{
-				memset(yaw_rror, 0, sizeof(yaw_rror));
-			}
-			
-			//求10次平均值
-			if (yaw_total_num < 10)
-			{
-				if ((yaw_total_num == 0) || (current_time - start_time > SAMPLE_TIME))
-				{
-					start_time = current_time;
-					if (fabs(error) < 8.0)
-					{
-						yaw_rror[yaw_total_num] = error;
-						yaw_total_num++;
-					}
-				}
-			}
-			else
-			{
-				this->axis_error = filter_and_calculate_mean(yaw_rror, yaw_total_num, 0.2);
-				yaw_total_num = 0;
-				flag = 3;
-			}
-		}
-		else
-		{
-			yaw_total_num = 0;
-		}
-		///////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		
-		//应用yaw偏移
-		if (flag == 3)
-		{
-			if(ApplyYawError())
-			{
-				flag = 4;
-			}
-		}
-		
-		
-		//稳定机器人
-		if (flag == 4)
-		{
-			uint8_t state = StabilzeRobot(ctrl);
-			if (state == 2) 
-			{}
-			else if(state == 1)
-			{
-				//停止旋转
+				ctrl->twist.linear.x = 0;
+				ctrl->twist.linear.y = 0;
 				ctrl->twist.angular.z = 0;
-				flag = 5;
-			}
-			else
-			{
-				flag = 4;
-			}
-		}
-		////////////////////////////////////////////////////////////////////////////////////////
-		
-		//计算XY偏移
-		if (flag == 5)
-		{
-			ctrl->twist.linear.x = 0;
-			ctrl->twist.linear.y = 0;
-			ctrl->twist.angular.z = 0;
 
-			static double offset_x_arr[5], offset_y_arr[5];
-			double offset_x = 0, offset_y = 0;
-			
-			
-			if (offset_total_num == 0)
-			{
-				memset(offset_x_arr, 0, sizeof(offset_x_arr));
-				memset(offset_y_arr, 0, sizeof(offset_y_arr));
-			}
-			
-			
-			//求5次平均值
-			if (offset_total_num < 5)
-			{
-				if ((offset_total_num == 0) || (current_time - start_time > SAMPLE_TIME))
+				static double offset_x_arr[5], offset_y_arr[5];
+				double offset_x = 0, offset_y = 0;
+				
+				
+				if (offset_total_num == 0)
 				{
-					start_time = current_time;
-					
-					if (CalcOffset(&offset_x, &offset_y))
+					memset(offset_x_arr, 0, sizeof(offset_x_arr));
+					memset(offset_y_arr, 0, sizeof(offset_y_arr));
+				}
+				
+				
+				//求5次平均值
+				if (offset_total_num < 5)
+				{
+					if ((offset_total_num == 0) || (current_time - start_time > SAMPLE_TIME))
 					{
-						offset_x_arr[offset_total_num] = offset_x;
-						offset_y_arr[offset_total_num] = offset_y;
-						offset_total_num++;
+						start_time = current_time;
+						
+						if (CalcOffset(&offset_x, &offset_y))
+						{
+							offset_x_arr[offset_total_num] = offset_x;
+							offset_y_arr[offset_total_num] = offset_y;
+							offset_total_num++;
+						}
+						else
+						{
+							WS2812B_Send_FAIL();////
+						}
 					}
+				}
+				else
+				{
+					this->x_offset = filter_and_calculate_mean(offset_x_arr, offset_total_num, 0.01);
+					this->y_offset = filter_and_calculate_mean(offset_y_arr, offset_total_num, 0.01);
+					offset_total_num = 0;
+					flag = 6;
 				}
 			}
 			else
 			{
-				this->x_offset = filter_and_calculate_mean(offset_x_arr, offset_total_num, 0.01);
-				this->y_offset = filter_and_calculate_mean(offset_y_arr, offset_total_num, 0.01);
 				offset_total_num = 0;
-				flag = 6;
+			}
+			/////////////////////////////////////////////////////////////////////////////////////////////////
+			
+			//应用XY偏移
+			if (flag == 6)
+			{			
+				if (ApplyOffset())
+				{
+					flag = 7;
+					WS2812B_Send_SUCCESS();////
+				}
+				else
+				{
+					flag = 0;
+					WS2812B_Send_FAIL();////
+				}
+			}
+			
+			
+			//稳定机器人
+			if (flag == 7)
+			{
+				uint8_t state = StabilzeRobot(ctrl, signal);
+				if (state == 2) 
+				{}
+				else if(state == 1)
+				{
+					//停止旋转
+					ctrl->twist.angular.z = 0;
+					flag = 8;
+				}
+				else
+				{
+					flag = 7;
+				}
+			}
+			
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//测试校准结果
+			if (flag == 8)
+			{
+				ctrl->twist.linear.x = 0;
+				ctrl->twist.linear.y = 0;
+			
+				double X, Y, x, y;
+				GetXYFromLaser(&X, &Y);
+				CaliLaserData(X, Y, &x, &y, sinf(RealPosData.world_yaw * PI / 180.f), cosf(RealPosData.world_yaw * PI / 180.f));
+		
+				//激光坐标与position坐标差距
+				if ((x - RealPosData.world_x) * (x - RealPosData.world_x) + (y - RealPosData.world_y) * (y - RealPosData.world_y) > 0.015 * 0.015)
+				{				
+					flag = 4;
+					WS2812B_Send_FAIL();////
+				}
+				else
+				{
+					flag = 0;
+					WS2812B_Send_SUCCESS();////
+				}
+			}
+			
+			
+			//保护
+			if (flag > 8)
+			{
+				flag = 0;
 			}
 		}
 		else
 		{
-			offset_total_num = 0;
-		}
-		/////////////////////////////////////////////////////////////////////////////////////////////////
-		
-		//应用XY偏移
-		if (flag == 6)
-		{			
-			if (ApplyOffset())
-			{
-				flag = 7;
-			}
-			else
-			{
-				flag = 0;
-			}
-		}
-		
-		
-		//稳定机器人
-		if (flag == 7)
-		{
-			uint8_t state = StabilzeRobot(ctrl);
-			if (state == 2) 
-			{}
-			else if(state == 1)
-			{
-				//停止旋转
-				ctrl->twist.angular.z = 0;
-				flag = 8;
-			}
-			else
-			{
-				flag = 7;
-			}
-		}
-		
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//测试校准结果
-		if (flag == 8)
-		{
-			ctrl->twist.linear.x = 0;
-			ctrl->twist.linear.y = 0;
-		
-			double X, Y, x, y;
-			GetXYFromLaser(&X, &Y);
-			CaliLaserData(X, Y, &x, &y, sinf(RealPosData.world_yaw * PI / 180.f), cosf(RealPosData.world_yaw * PI / 180.f));
-	
-			//激光坐标与position坐标差距
-			if ((x - RealPosData.world_x) * (x - RealPosData.world_x) + (y - RealPosData.world_y) * (y - RealPosData.world_y) > 0.015 * 0.015)
-			{				
-				flag = 4;
-			}
-			else
-			{
-				flag = 0;
-			}
-		}
-		
-		
-		//保护
-		if (flag > 8)
-		{
-			flag = 0;
+			WS2812B_Send_FAIL();////
 		}
 	}
 	else
 	{
+		*signal = SIGNAL_NORMAL;
+		flag = 0;//退出校准
+	}
+	
+	
+	
+	if (is_nan(static_cast<double>(RealPosData.world_x)) || is_nan(static_cast<double>(RealPosData.world_y)) || is_nan(static_cast<double>(RealPosData.world_yaw)))
+	{
+		WS2812B_Send_FAIL();////
+		flag = 0;//退出校准
+	}
+	
+	if (isinf(static_cast<float>(RealPosData.world_x)) || isinf(static_cast<float>(RealPosData.world_y)) || isinf(static_cast<float>(RealPosData.world_yaw)))
+	{
+		WS2812B_Send_FAIL();////
+		flag = 0;//退出校准
+	}
+	
+	
+	
+	if (RealPosData.world_x == 0 && RealPosData.world_y == 0 && RealPosData.world_yaw == 0)
+	{
+		WS2812B_Send_FAIL();////
 		flag = 0;//退出校准
 	}
 }
