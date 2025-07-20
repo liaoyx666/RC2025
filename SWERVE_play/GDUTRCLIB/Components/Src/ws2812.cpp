@@ -5,7 +5,12 @@
 #include "cmsis_os.h"
 #include "data_pool.h"
 #include "drive_tim.h"
+/*
+@brief 用于驱动led灯条
+@param 使用时需要将spi1配置为5mhz，使用主机发送即可
 
+
+*/
  
 //灯条显存SPI数据缓存
 uint8_t gWs2812bDat_SPI[WS2812B_AMOUNT * 24] = {0};  
@@ -77,7 +82,7 @@ void WS2812b_Set(uint16_t Ws2b812b_NUM, uint8_t r,uint8_t g,uint8_t b)
 
 
 #define TIME_INTERVAL 80000
-
+//利用 颜色来判断重定位是否完成
 void WS2812B_Task(void *argument)
 {	
 	static Ws2812b_SIGNAL_T signal;
