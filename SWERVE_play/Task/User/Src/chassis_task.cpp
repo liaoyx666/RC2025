@@ -215,7 +215,7 @@ void Chassis_Task(void *pvParameters)
 			{}
 			
 			target_angle = 600;
-			spin_state = true;
+			spin_state = false;
 			
 			chassis.Control(ctrl.twist);	
 			launch.PitchControl(target_angle);//控制俯仰

@@ -192,17 +192,17 @@ void Update_RawPosition(float value[5])
 
   //世界坐标
 	RealPosData.world_yaw = RawPosData.angle_Z;
-    //RealPosData.world_x =  RawPosData.Pos_X;
-	//RealPosData.world_y =  RawPosData.Pos_Y;
+    RealPosData.world_x =  RawPosData.Pos_X;
+	RealPosData.world_y =  RawPosData.Pos_Y;
 	RealPosData.speed_x = RawPosData.Speed_X;
 	RealPosData.speed_y = RawPosData.Speed_Y;
 	//加入安装误差
-	RawPosData.REAL_X += (RawPosData.DELTA_Pos_X);
-	RawPosData.REAL_Y += (RawPosData.DELTA_Pos_Y);
-	
+//	RawPosData.REAL_X += (RawPosData.DELTA_Pos_X);
+//	RawPosData.REAL_Y += (RawPosData.DELTA_Pos_Y);
+//	
   //解算安装误差
-	RealPosData.world_x = RawPosData.Pos_X + INSTALL_ERROR_X * cosf(RealPosData.world_yaw * PI / 180.f) - INSTALL_ERROR_Y * sinf(RealPosData.world_yaw * PI / 180.f);
-	RealPosData.world_y = RawPosData.Pos_Y + INSTALL_ERROR_X * sinf(RealPosData.world_yaw * PI / 180.f) + INSTALL_ERROR_Y * cosf(RealPosData.world_yaw * PI / 180.f);
+//	RealPosData.world_x = RawPosData.Pos_X + INSTALL_ERROR_X * cosf(RealPosData.world_yaw * PI / 180.f) - INSTALL_ERROR_Y * sinf(RealPosData.world_yaw * PI / 180.f);
+//	RealPosData.world_y = RawPosData.Pos_Y + INSTALL_ERROR_X * sinf(RealPosData.world_yaw * PI / 180.f) + INSTALL_ERROR_Y * cosf(RealPosData.world_yaw * PI / 180.f);
 }
 
 
