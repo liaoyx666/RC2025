@@ -16,7 +16,7 @@
 #include "ws2812.h"
 
 
-Omni_Chassis chassis(0.152/2.f, 0.442f/2.f, 4, 2.f); //底盘直径0.442m，轮子半径0.152m，底盘加速度0.5m/s^2
+Omni_Chassis chassis(0.152/2.f, 0.442f/2.f, 4, 3.f); //底盘直径0.442m，轮子半径0.152m，底盘加速度0.5m/s^2
 Launcher launch(1450.f, 455.f, 2045.f);
 bool shoot_ready = false;
 CONTROL_T ctrl;
@@ -275,7 +275,7 @@ void Chassis_Task(void *pvParameters)
 			//pitch_angle = 1450;
 			//spin_state = true;
 				
-			//shoot_speed = sp;
+			shoot_speed = sp;
 				
 			chassis.Control(ctrl.twist);//控制底盘
 			launch.FrictionControl(friction_ready,shoot_speed);//控制摩擦带

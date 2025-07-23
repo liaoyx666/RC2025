@@ -225,6 +225,7 @@ unsigned char serial_get_crc8_value(unsigned char *tem_array, unsigned char len)
 
 #include <stdarg.h>
 #include <string.h>
+#include <stdio.h>
 
 #define SEND_BUF_SIZE 100
 uint8_t Sendbuf[SEND_BUF_SIZE];

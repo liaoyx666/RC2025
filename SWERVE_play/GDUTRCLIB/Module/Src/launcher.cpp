@@ -144,13 +144,13 @@ void Launcher::PushControl(bool push_state)
 {
 	if(push_state)
 	{
-		PidPushSpd.target = 10000;
+		PidPushSpd.target = -10000;
 		PidPushSpd.current = LauncherMotor[2].get_speed();
 		LauncherMotor[2].Out = PidPushSpd.Adjust();
 	}
 	else
 	{
-		PidPushSpd.target = -8000;
+		PidPushSpd.target = 8000;
 		PidPushSpd.current = LauncherMotor[2].get_speed();
 		LauncherMotor[2].Out = PidPushSpd.Adjust();
 	}
