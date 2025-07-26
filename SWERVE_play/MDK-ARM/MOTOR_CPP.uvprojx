@@ -1785,14 +1785,14 @@
               <FilePath>..\GDUTRCLIB\Components\Inc\reposition.h</FilePath>
             </File>
             <File>
-              <FileName>atk_mw1278d.c</FileName>
+              <FileName>drive_atk_mw1278d.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\GDUTRCLIB\Module\Src\atk_mw1278d.c</FilePath>
+              <FilePath>..\GDUTRCLIB\Module\Src\drive_atk_mw1278d.c</FilePath>
             </File>
             <File>
-              <FileName>atk_mw1278d_uart.c</FileName>
+              <FileName>drive_atk_mw1278d_uart.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\GDUTRCLIB\Module\Src\atk_mw1278d_uart.c</FilePath>
+              <FilePath>..\GDUTRCLIB\Module\Src\drive_atk_mw1278d_uart.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -33,7 +33,7 @@ uint8_t Uart3_Rx_Buff[ACTION_UART_SIZE];
 uint8_t Uart4_Rx_Buff[LaserPositionin_UART_SIZE];
 uint8_t Uart5_Rx_Buff[LaserPositionin_UART_SIZE];
 uint8_t Uart6_Rx_Buff[LaserPositionin_UART_SIZE];
-
+uint8_t Uart2_Rx_Buff_for_lora[LORA_UART_SIZE];
 
 
 

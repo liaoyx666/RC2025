@@ -1,5 +1,5 @@
 #include "launcher.h"
-#include "chassis_task.h"
+//#include "chassis_task.h"
 #include "dribble_ball.h"
 #include "drive_tim.h"
 
@@ -156,53 +156,91 @@ void Launcher::PushControl(bool push_state)
 	}
 }
 
-#define PUSH_TIME_1 94000
+#define PUSH_TIME_1 95000
+#define FRICTION_TIME_1 450000
+#define FRICTION_TIME_2 500000
 
-void Launcher::PushBall(enum CONTROL_E state)
+
+
+void Launcher::PushBall(struct CONTROL_T *ctrl)
 {
-	static uint32_t start_time;
+	static uint32_t start_time = 0;
+	static uint32_t friction_start_time = 0;
 	static uint8_t flag = 0;
 	static uint8_t time_flag = 0;
+	static enum CONTROL_E friction = FRICTION_OFF;
 	
-	if ((flag == 0) && (state == SHOOT_OFF))
+	uint32_t current_time = Get_SystemTimer();
+	
+	
+	if (flag < 2)
 	{
-		LauncherMotor[2].Out = -30;
+		LauncherMotor[2].Out = -80;
 	}
-	
-	if (state == SHOOT_ON)
+
+
+	if ((flag == 0) && (ctrl->shoot_ctrl == SHOOT_ON))//开始
 	{
 		flag = 1;
 	}
+	else if ((flag != 0) && (ctrl->shoot_ctrl == SHOOT_ON))//撤回
+	{
+		friction = FRICTION_OFF;
+		flag = 3;
+	}
 	
-	if (flag == 1)
+	
+	
+	
+	if (flag == 0)
+	{
+		friction = FRICTION_OFF;
+	}
+	else if (flag == 1)
+	{
+		friction = FRICTION_ON;
+		friction_start_time = current_time;
+		flag = 2;
+	}
+	else if (flag == 2 && current_time - friction_start_time > FRICTION_TIME_1)
 	{
 		PushControl(true);
 		if ((ABS(LauncherMotor[2].Out) >= 5500) && (time_flag == 0))
 		{
-			start_time = Get_SystemTimer();
+			start_time = current_time;
 			time_flag = 1;
 		}
-		if (((Get_SystemTimer() - start_time) >=  PUSH_TIME_1) && (ABS(LauncherMotor[2].Out) >= 2700) && (time_flag == 1))
+		if (((current_time - start_time) >=  PUSH_TIME_1) && (ABS(LauncherMotor[2].Out) >= 2700) && (time_flag == 1))
 		{
-			flag = 2;
+			flag = 3;
+			friction_start_time = current_time;
 			time_flag = 0;
 		}
 	}
-	
-	if (flag == 2)
+	else if (flag == 3)
 	{
 		PushControl(false);
 		if ((ABS(LauncherMotor[2].Out) >= 5500) && (time_flag == 0))
 		{
-			start_time = Get_SystemTimer();
+			start_time = current_time;
 			time_flag = 1;
 		}
-		if (((Get_SystemTimer() - start_time) >=  PUSH_TIME_1) && (ABS(LauncherMotor[2].Out) >= 2700) && (time_flag == 1))
+		if (((current_time - start_time) >=  PUSH_TIME_1) && (ABS(LauncherMotor[2].Out) >= 2700) && (time_flag == 1))
 		{
 			flag = 0;
 			time_flag = 0;
 		}
 	}
+	
+	
+	
+	if (flag != 2 && friction == FRICTION_ON && current_time - friction_start_time > FRICTION_TIME_1)
+	{
+		friction = FRICTION_OFF;
+	}
+	
+
+	ctrl->friction_ctrl = friction;
 }
 
 
@@ -227,7 +265,7 @@ void Launcher::LoadBall(enum CONTROL_E state, float *pitch_angle, bool *spin_sta
 	
 	if (flag == 0)
 	{
-		spin = *spin_state;
+		spin = true;
 		
 		if (state == LOAD_ON)
 		{

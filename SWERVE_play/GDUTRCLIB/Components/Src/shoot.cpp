@@ -12,17 +12,17 @@
 
 
 float cubic_spline_1[SAMPLE_NUM_1 - 1][4] = {
-{15000.000000f, 4623.143074f, 0.000000f, -19252.229006f},
+{10508.000000f, 2322.571429f, 0.000000f, 645.714286f},
 
-{15330.000000f, 4315.357688f, -4216.238152f, 3731.045551f},
+{11750.000000f, 2806.857143f, 968.571429f, -764.571429f},
 
-{16900.000000f, 2897.403699f, 1380.330174f, -750.275145f},
+{13300.000000f, 3202.000000f, -178.285714f, 1548.571429f},
 
-{18600.000000f, 3715.027514f, 254.917457f, -169.944971f},
+{15050.000000f, 4185.142857f, 2144.571429f, -1429.714286f},
 
 };
 
-float sample_distance_1[SAMPLE_NUM_1] = {1.427, 1.5, 2.0, 2.5, 3.0};
+float sample_distance_1[SAMPLE_NUM_1] = {1.5, 2.0, 2.5, 3.0, 3.5};
 
 
 
@@ -139,8 +139,8 @@ float GetShootSpeed(float distance, uint8_t pitch_level)
 
 
 
-#define HOOP_X -3.44573641f
-#define HOOP_Y 14.1127119f
+#define HOOP_X -3.4395f   
+#define HOOP_Y 14.121f
 
 //#define HOOP_X  10.6293278f // 篮筐的X坐标（单位：米）
 //#define HOOP_Y  3.77741861f // 篮筐的Y坐标（单位：米）
@@ -162,18 +162,7 @@ float GetHoopAngle(float robot_x, float robot_y, float *distance)
 
 	target_theta = target_theta * 180.f / PI;
 	
-	
-	
-	
-	
-	
 	*distance = sqrtf(delta_x * delta_x + delta_y * delta_y);
-	
-	
-	
-	
-	
-	
 	
 	
 	if (target_theta <= -90.f)
@@ -185,16 +174,12 @@ float GetHoopAngle(float robot_x, float robot_y, float *distance)
 		target_theta -= 90.f;
 	}
 	
-	
-	
-	
 	target_theta += 180.0f;
 	
 	if (target_theta != target_theta)
 	{
 		return 0;
 	}
-	
 	
 	
 	while (target_theta > 180.0f)
@@ -207,14 +192,58 @@ float GetHoopAngle(float robot_x, float robot_y, float *distance)
 		target_theta += 360.0f;
 	}
 	
-	
-	
-	
 	return target_theta;
 }
 
 
+extern float valid_num1;
+extern float valid_num2;
+extern float valid_num3;
 
+
+float GetR1Angle(float robot_x, float robot_y, float *distance)
+{
+	float delta_x, delta_y, target_theta;
+	
+	delta_x = valid_num1 - robot_x;
+	delta_y = valid_num2 - robot_y;
+	
+    target_theta = atan2f(delta_y, delta_x); // 朝向R1的方向（弧度）
+
+	target_theta = target_theta * 180.f / PI;
+	
+	*distance = sqrtf(delta_x * delta_x + delta_y * delta_y);
+	
+	
+	if (target_theta <= -90.f)
+	{
+		target_theta += 270.f;
+	}
+	else
+	{
+		target_theta -= 90.f;
+	}
+	
+	target_theta += 180.0f;
+	
+	if (target_theta != target_theta)
+	{
+		return 0;
+	}
+	
+	
+	while (target_theta > 180.0f)
+	{
+		target_theta -= 360.0f;
+	}
+	
+	while (target_theta < -180.0f)
+	{
+		target_theta += 360.0f;
+	}
+	
+	return target_theta;
+}
 
 
 

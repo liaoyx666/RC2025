@@ -172,7 +172,8 @@ bool RePosition::GetLaserData(uint32_t* x, uint32_t* y1, uint32_t* y2)
 
 
 //两激光距离
-#define LASER_DISTANCE  689.0//mm
+#define LASER_DISTANCE  680.0//mm
+
 
 //通过激光获得yaw
 double RePosition::GetYawFromLaser(void)

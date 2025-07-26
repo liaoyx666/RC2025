@@ -47,16 +47,16 @@ void Uart_Init(UART_HandleTypeDef *huart, uint8_t *Rxbuffer, uint16_t len, usart
 		__HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
 		HAL_UART_Receive_DMA(huart, Rxbuffer, len);
     }
-//    else if(huart->Instance == USART2)
-//    {
-//        usart2_manager.uart_handle = huart;
-//        usart2_manager.rx_buffer = Rxbuffer;
-//        usart2_manager.rx_buffer_size = len;
-//        Usart_Rx_Callback_Register(&usart2_manager, call_back_fun);
-//        __HAL_UART_CLEAR_IDLEFLAG(huart);
-//		__HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
-//		HAL_UART_Receive_DMA(huart, Rxbuffer, len);
-//    }
+    else if(huart->Instance == USART2)
+    {
+        usart2_manager.uart_handle = huart;
+        usart2_manager.rx_buffer = Rxbuffer;
+        usart2_manager.rx_buffer_size = len;
+        Usart_Rx_Callback_Register(&usart2_manager, call_back_fun);
+        __HAL_UART_CLEAR_IDLEFLAG(huart);
+		__HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
+		HAL_UART_Receive_DMA(huart, Rxbuffer, len);
+    }
     else if(huart->Instance == USART3)
     {
         usart3_manager.uart_handle = huart;

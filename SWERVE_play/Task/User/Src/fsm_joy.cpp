@@ -114,26 +114,36 @@ void Air_Joy_Task(void *pvParameters)
 				{
 					ctrl.chassis_ctrl = CHASSIS_ON;
 					
-
+					
+					
+					if (_tool_Abs(air_joy.SWA - 2000) < 50)
+					{
+						ctrl.pass_ctrl = PASS_ON;
+					}
+					else
+					{
+						ctrl.pass_ctrl = PASS_OFF;
+					}
+					
+					
+					
+					
+					
+					
 					if (_tool_Abs(air_joy.SWC - 1500) < 50)
 					{
 						ctrl.yaw_ctrl = YAW_HAND;
 						ctrl.mode_ctrl = MODE_SHOOT;//使世界坐标为0
-
-						
 					}
 					else if (_tool_Abs(air_joy.SWC - 1000) < 50)
 					{
 						ctrl.yaw_ctrl = YAW_LOCK_DIRECTION;
 						ctrl.mode_ctrl = MODE_REPOSITION;
-
-						
 					}
 					else if (_tool_Abs(air_joy.SWC - 2000) < 50)
 					{
 						ctrl.yaw_ctrl = YAW_LOCK_BASKET;
 						ctrl.mode_ctrl = MODE_SHOOT;//使世界坐标为0
-
 					}
 					else
 					{
@@ -158,16 +168,7 @@ void Air_Joy_Task(void *pvParameters)
 					{
 						
 
-						if (_tool_Abs(air_joy.SWA - 2000) < 50)
-						{
-							//ctrl.chassis_ctrl = CHASSIS_ON;
-							ctrl.friction_ctrl = FRICTION_ON;
-						}
-						else
-						{
-							ctrl.friction_ctrl = FRICTION_OFF;
-							//ctrl.chassis_ctrl = CHASSIS_ON;
-						}
+
 						
 						
 					

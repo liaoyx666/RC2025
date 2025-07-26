@@ -1,6 +1,6 @@
 #include "location_task.h"
 #include "LaserPositioning.h"
-
+#include "drive_atk_mw1278d_uart.h"
 #include "reposition.h"
 
 
@@ -26,7 +26,16 @@ void Location_Task(void *pvParameters)
 		
 		
 		
-		osDelay(5);
+		
+		
+		atk_mw1278d_uart_printf("%f,%f,%d",31.5445f,23.56565f,556);
+		
+		
+		
+		
+		
+		
+		osDelay(50);
 	}
 }
 

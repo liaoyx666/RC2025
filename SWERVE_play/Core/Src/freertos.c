@@ -86,14 +86,7 @@ const osThreadAttr_t Air_Joy_attributes = {
 osThreadId_t LocationHandle;
 const osThreadAttr_t Location_attributes = {
   .name = "Location",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
-/* Definitions for Lora */
-osThreadId_t LoraHandle;
-const osThreadAttr_t Lora_attributes = {
-  .name = "Lora",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for WS2812B */
@@ -115,7 +108,6 @@ extern void CAN2_Send_Task(void *argument);
 extern void User_Debug_Task(void *argument);
 extern void Air_Joy_Task(void *argument);
 extern void Location_Task(void *argument);
-extern void Lora_Task(void *argument);
 extern void WS2812B_Task(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -164,9 +156,6 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of Location */
   LocationHandle = osThreadNew(Location_Task, NULL, &Location_attributes);
-
-  /* creation of Lora */
-  LoraHandle = osThreadNew(Lora_Task, NULL, &Lora_attributes);
 
   /* creation of WS2812B */
   WS2812BHandle = osThreadNew(WS2812B_Task, NULL, &WS2812B_attributes);

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __CHASSIS_TASK_H
+#define __CHASSIS_TASK_H
+
 
 #include "data_pool.h"
 #include "chassis_swerve.h"
@@ -44,12 +46,16 @@ typedef enum CONTROL_E
 	MODE_REPOSITION,
 	
 	REPOSITION_OFF,
-	REPOSITION_ON
+	REPOSITION_ON,
+	
+	PASS_ON,
+	PASS_OFF,
 	
 	////////////
 }CONTROL_E;
 
 void PidParamInit(void);
+
 typedef struct CONTROL_T
 {
     Robot_Twist_t twist;
@@ -63,7 +69,7 @@ typedef struct CONTROL_T
 	CONTROL_E yaw_ctrl;
 	CONTROL_E load_ctrl;
 	CONTROL_E reposition_ctrl;
-	
+	CONTROL_E pass_ctrl;
     uint8_t add_cnt=0;
 }CONTROL_T;
 
@@ -78,4 +84,7 @@ void Chassis_Task(void *pvParameters);
 
 extern Omni_Chassis chassis;
 extern Launcher launch;
+
+#endif
+
 #endif

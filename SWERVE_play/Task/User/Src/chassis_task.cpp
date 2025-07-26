@@ -31,16 +31,10 @@ float distance = 0;
 float yaw_angle = 0;
 bool friction_ready = false;
 
-
-
 Ws2812b_SIGNAL_T Ws2812b_signal = SIGNAL_NORMAL;
 
 
-
-
 float sp = 0;
-
-
 
 //main
 
@@ -64,15 +58,21 @@ void Chassis_Task(void *pvParameters)
 				Dribble_Ball(ctrl.cylinder_ctrl);//运球
 			}
 			
-			launch.PushBall(ctrl.shoot_ctrl);//推球
+			launch.PushBall(&ctrl);//推球
 			
 			///////////////////////////////////////////////////	
             //底盘控制、电机控制    
             if(ctrl.chassis_ctrl == CHASSIS_ON)
             {
-				
-				yaw_angle = GetHoopAngle(RealPosData.world_x, RealPosData.world_y, &distance);
-				
+				//yaw_angle = GetHoopAngle(RealPosData.world_x, RealPosData.world_y, &distance);
+				if (ctrl.pass_ctrl == PASS_ON)
+				{
+					yaw_angle = GetR1Angle(RealPosData.world_x, RealPosData.world_y, &distance);
+				}
+				else
+				{
+					yaw_angle = GetHoopAngle(RealPosData.world_x, RealPosData.world_y, &distance);
+				}
 				
 				
 				/////////////////////////////////////////
@@ -82,18 +82,16 @@ void Chassis_Task(void *pvParameters)
 				}
 				else if (ctrl.yaw_ctrl == YAW_LOCK_BASKET)//锁框
 				{
-					
-					
-					
-					if (distance >= 1.3f)
+
+					if (distance >= 1.f)
 					{
 						chassis.Yaw_Control(yaw_angle, &ctrl.twist);
-					}				
+					}
 					
 				}
 				else//手动yaw
 				{
-					//distance = 0;
+					
 				}
 				////////////////////////////////////////		
             }
@@ -110,6 +108,8 @@ void Chassis_Task(void *pvParameters)
 			
 			//重定位
 			reposition.LaserRePosition(&ctrl, &Ws2812b_signal);
+			
+			
 			
 			
 			if (ctrl.mode_ctrl == MODE_DEFEND)
@@ -196,7 +196,6 @@ void Chassis_Task(void *pvParameters)
 			}
 			
 			
-
 			/////////////////////////////////////////////////////
 			//摩擦带
             if(ctrl.friction_ctrl == FRICTION_ON && ctrl.mode_ctrl == MODE_SHOOT)
@@ -213,7 +212,7 @@ void Chassis_Task(void *pvParameters)
 				shoot_speed = 0;
             }
 			/////////////////////////////////////////////////////
-	
+			
 			
 			
 			if (ctrl.mode_ctrl == MODE_LOAD)//装球
@@ -230,7 +229,7 @@ void Chassis_Task(void *pvParameters)
 				launch.LoadBall(ctrl.load_ctrl, &pitch_angle, &spin_state, &shoot_speed);
 			}
 			
-
+			
 			/////////////////////////////////////////////////////////////////////////////
 			if (launch.LauncherMotor[1].get_angle() < 330)//防止机构干涉
 			{
@@ -247,13 +246,6 @@ void Chassis_Task(void *pvParameters)
 			}
 
 			
-
-//			if (ctrl.mode_ctrl != MODE_SHOOT && ctrl.mode_ctrl != MODE_LOAD)
-//			{
-//				pitch_angle = 0;
-//			}
-			
-			
 			//限位
 			if(pitch_angle < 0)
 			{
@@ -268,15 +260,15 @@ void Chassis_Task(void *pvParameters)
 			
 			//
 			//pitch_angle = 0;
-			//	
+			//
 			
 			//pitch_angle = pt;
 			//pitch_angle = 0;
 			//pitch_angle = 1450;
 			//spin_state = true;
 				
-			shoot_speed = sp;
-				
+			//shoot_speed = sp;///////////////////////
+			
 			chassis.Control(ctrl.twist);//控制底盘
 			launch.FrictionControl(friction_ready,shoot_speed);//控制摩擦带
 			launch.PitchControl(pitch_angle);//控制俯仰
@@ -286,6 +278,7 @@ void Chassis_Task(void *pvParameters)
 			chassis.Motor_Control();
             launch.LaunchMotorCtrl();
 				
+			//发送灯带信号
 			xQueueSend(Send_WS2812_Port, &Ws2812b_signal, 0);
         }
         osDelay(1);

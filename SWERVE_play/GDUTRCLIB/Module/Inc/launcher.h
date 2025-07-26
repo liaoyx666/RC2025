@@ -1,9 +1,11 @@
-#ifndef LAUNCHER_H
-#define LAUNCHER_H
+#ifndef __LAUNCHER_H
+#define __LAUNCHER_H
+
+
 #include "motor.h"
 #include "pid.h"
 #include "speed_plan.h"
-
+//#include "chassis_task.h"
 //#include "main.h"
 #include "drive_uart.h"
 
@@ -19,7 +21,8 @@ extern "C" {
 
 #ifdef __cplusplus
 }
-#endif
+
+
 
 class Launcher : public PidTimer
 {
@@ -50,7 +53,7 @@ public:
 	void SpinControl(bool spin_state);
 	
 	void PushControl(bool push_state);
-	void PushBall(enum CONTROL_E state);
+	void PushBall(struct CONTROL_T *ctrl);
 	
 	void LoadBall(enum CONTROL_E state, float *pitch_angle, bool *spin_state, float *shoot_speed);
 	
@@ -109,4 +112,10 @@ private:
     bool target_change=false;
 };
 
-#endif // LAUNCHER_H
+
+
+
+#endif
+
+#endif 
+// LAUNCHER_H

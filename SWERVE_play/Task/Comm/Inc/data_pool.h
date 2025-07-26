@@ -11,7 +11,7 @@
 #define ACTION_UART_SIZE 35
 
 #define LaserPositionin_UART_SIZE 15
-
+#define LORA_UART_SIZE 35
 //队列大小
 #define CAN1_TxPort_SIZE 8
 #define CAN2_TxPort_SIZE 8
@@ -56,7 +56,7 @@ extern QueueHandle_t Send_WS2812_Port;
 	
 	
 
-	
+extern uint8_t Uart2_Rx_Buff_for_lora[LORA_UART_SIZE];	
 extern uint8_t Uart3_Rx_Buff[ACTION_UART_SIZE];
 extern uint8_t Uart4_Rx_Buff[LaserPositionin_UART_SIZE];
 extern uint8_t Uart5_Rx_Buff[LaserPositionin_UART_SIZE];
