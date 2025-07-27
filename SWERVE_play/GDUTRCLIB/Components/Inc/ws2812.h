@@ -3,7 +3,7 @@
 
  
 #include <stdint.h>
- 
+ //根据spi频率的不同，需要更改编码0和编码1的字节大小
 //            编码 0 : 11100000
 #define CODE_0		0x30
 //            编码 1 : 11111000
@@ -11,7 +11,7 @@
 
 /*ws2812b灯珠数量*/
 #define WS2812B_AMOUNT		30
- 
+ //用于存放颜色的结构体
 typedef struct
 {
 	uint8_t R;
@@ -19,7 +19,7 @@ typedef struct
 	uint8_t B;
 } tWs2812bCache_TypeDef;
 
-
+//存放状态
 typedef enum
 {
 	SIGNAL_NORMAL,
