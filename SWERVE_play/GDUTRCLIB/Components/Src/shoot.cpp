@@ -12,13 +12,13 @@
 
 
 float cubic_spline_1[SAMPLE_NUM_1 - 1][4] = {
-{10508.000000f, 2322.571429f, 0.000000f, 645.714286f},
+{10505.000000f, 1510.178571f, 0.000000f, 879.285714f},
 
-{11750.000000f, 2806.857143f, 968.571429f, -764.571429f},
+{11370.000000f, 2169.642857f, 1318.928571f, -276.428571f},
 
-{13300.000000f, 3202.000000f, -178.285714f, 1548.571429f},
+{12750.000000f, 3281.250000f, 904.285714f, -133.571429f},
 
-{15050.000000f, 4185.142857f, 2144.571429f, -1429.714286f},
+{14600.000000f, 4085.357143f, 703.928571f, -469.285714f},
 
 };
 
@@ -139,8 +139,8 @@ float GetShootSpeed(float distance, uint8_t pitch_level)
 
 
 
-#define HOOP_X -3.4395f   
-#define HOOP_Y 14.121f
+#define HOOP_X -3.483f   
+#define HOOP_Y 14.14f
 
 //#define HOOP_X  10.6293278f // 篮筐的X坐标（单位：米）
 //#define HOOP_Y  3.77741861f // 篮筐的Y坐标（单位：米）
@@ -207,6 +207,14 @@ float GetR1Angle(float robot_x, float robot_y, float *distance)
 	
 	delta_x = valid_num1 - robot_x;
 	delta_y = valid_num2 - robot_y;
+	
+	
+	if (isnan(valid_num1) || isnan(valid_num2))
+	{
+		*distance = 0;
+		return 0;
+	}
+	
 	
     target_theta = atan2f(delta_y, delta_x); // 朝向R1的方向（弧度）
 

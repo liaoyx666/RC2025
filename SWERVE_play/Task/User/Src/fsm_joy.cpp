@@ -17,7 +17,8 @@
 void Air_Joy_Task(void *pvParameters)
 {
 	static uint16_t last_SWD = 1000;//上一次SWD按键值
-
+	static uint16_t last_SWA = 1000;//上一次SWA按键值
+	
     static CONTROL_T ctrl;
     for(;;)
     {
@@ -48,7 +49,7 @@ void Air_Joy_Task(void *pvParameters)
 					ctrl.chassis_ctrl = CHASSIS_ON;
 					ctrl.friction_ctrl = FRICTION_OFF;
 					/////////////////////////////////////////////////////////////////////////////
-					if (_tool_Abs(air_joy.SWC - 1000) < 50)//运球
+					if (_tool_Abs(air_joy.SWC - 1500) < 50)//运球
 					{
 						
 						ctrl.mode_ctrl = MODE_DRIBBLE;
@@ -61,6 +62,7 @@ void Air_Joy_Task(void *pvParameters)
 //							ctrl.twist.linear.y *= limit;
 //						}//限制底盘速度
 
+						
 						ctrl.spin_ctrl = SPIN_OUTSIDE;//旋转到外侧
 						
 						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)//SWD按键值改变，运球一次
@@ -70,14 +72,15 @@ void Air_Joy_Task(void *pvParameters)
 						}
 					}
 					/////////////////////////////////////////////////////////////////////////////
-					else if (_tool_Abs(air_joy.SWC - 1500) < 50)//人工装球
+					else if (_tool_Abs(air_joy.SWC - 1000) < 50)//人工装球
 					{
 						ctrl.chassis_ctrl = CHASSIS_ON;//
 						
-						
-						ctrl.mode_ctrl = MODE_DEFEND;
-						
+						//ctrl.mode_ctrl = MODE_DEFEND;
 						ctrl.spin_ctrl = SPIN_OUTSIDE;//旋转到外侧
+						ctrl.yaw_ctrl = YAW_LOCK_DIRECTION;//锁正方向
+						ctrl.mode_ctrl = MODE_REPOSITION;//重定位
+						
 						
 						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)
 						{
@@ -94,6 +97,13 @@ void Air_Joy_Task(void *pvParameters)
 								flag = 0;
 							}
 						}
+						
+						if (_tool_Abs(last_SWA - air_joy.SWA) > 800)
+						{
+							last_SWA = air_joy.SWA;//更新按键值
+							ctrl.reposition_ctrl = REPOSITION_ON;
+						}
+						
 					}
 					////////////////////////////////////////////////////////////////////////////
 					else//放球到发射机构
@@ -114,8 +124,6 @@ void Air_Joy_Task(void *pvParameters)
 				{
 					ctrl.chassis_ctrl = CHASSIS_ON;
 					
-					
-					
 					if (_tool_Abs(air_joy.SWA - 2000) < 50)
 					{
 						ctrl.pass_ctrl = PASS_ON;
@@ -126,10 +134,6 @@ void Air_Joy_Task(void *pvParameters)
 					}
 					
 					
-					
-					
-					
-					
 					if (_tool_Abs(air_joy.SWC - 1500) < 50)
 					{
 						ctrl.yaw_ctrl = YAW_HAND;
@@ -137,8 +141,9 @@ void Air_Joy_Task(void *pvParameters)
 					}
 					else if (_tool_Abs(air_joy.SWC - 1000) < 50)
 					{
-						ctrl.yaw_ctrl = YAW_LOCK_DIRECTION;
-						ctrl.mode_ctrl = MODE_REPOSITION;
+						ctrl.yaw_ctrl = YAW_HAND;
+						//ctrl.mode_ctrl = MODE_REPOSITION;
+						ctrl.mode_ctrl = MODE_SHOOT;
 					}
 					else if (_tool_Abs(air_joy.SWC - 2000) < 50)
 					{
@@ -152,38 +157,25 @@ void Air_Joy_Task(void *pvParameters)
 					}
 					
 					
-					if (ctrl.yaw_ctrl == YAW_LOCK_DIRECTION)
-					{
-						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)
-						{
-							last_SWD = air_joy.SWD;//更新按键值
-							ctrl.reposition_ctrl = REPOSITION_ON;
-						}	
-					}
-					
-				
-					
+//					if (ctrl.yaw_ctrl == YAW_LOCK_DIRECTION)
+//					{
+//						
+//						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)
+//						{
+//							last_SWD = air_joy.SWD;//更新按键值
+//							ctrl.reposition_ctrl = REPOSITION_ON;
+//						}	
+//						
+//					}
 					
 					if ((ctrl.yaw_ctrl == YAW_HAND) || (ctrl.yaw_ctrl == YAW_LOCK_BASKET))
 					{
-						
-
-
-						
-						
-					
 						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)
 						{
 							last_SWD = air_joy.SWD;//更新按键值
 							ctrl.shoot_ctrl = SHOOT_ON;
 						}	
-						
-						
 					}
-					
-					
-					
-					
 					
 					
 				}
@@ -203,6 +195,7 @@ void Air_Joy_Task(void *pvParameters)
 				ctrl.cylinder_ctrl = CYLINDER_KEEP;
 				
 				last_SWD = air_joy.SWD;//更新按键值
+				last_SWA = air_joy.SWA;//更新按键值
 			}
 			
             xQueueSend(Chassia_Port, &ctrl, 0);
@@ -211,9 +204,9 @@ void Air_Joy_Task(void *pvParameters)
 			ctrl.load_ctrl = LOAD_OFF;
 			ctrl.reposition_ctrl = REPOSITION_OFF;
 			
-			if (_tool_Abs(air_joy.SWC - 1000) < 50)
+			if (_tool_Abs(air_joy.SWC - 1500) < 50)
 			{
-				ctrl.cylinder_ctrl = CYLINDER_KEEP;
+				ctrl.cylinder_ctrl = CYLINDER_KEEP;//防止人工装球干扰运球模式
 			}
         }
         else

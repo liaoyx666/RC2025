@@ -223,6 +223,114 @@ void Update_RawPosition(float value[5])
 
 
 
+#define FRAME_HEAD_POSITION_0 0xfc  //包头
+#define FRAME_HEAD_POSITION_1 0xfb
+
+#define FRAME_TAIL_POSITION_0 0xfd  //包尾
+#define FRAME_TAIL_POSITION_1 0xfe
+
+
+
+//1:更新X，Y
+//2:更新X，Y，Yaw
+//3:更新X，Y，重置陀螺仪
+
+void Reposition_SendData(uint8_t id, float X, float Y, float Yaw)
+{
+	uint8_t txBuffer[20] = {0};
+
+	union
+	{
+        float f;
+        uint8_t bytes[4];
+    } floatUnion;
+	
+	switch(id)
+	{
+	case 1:
+		//数据长度
+		txBuffer[3] = 0x08;
+		break;
+	
+	case 2:
+		//数据长度
+		txBuffer[3] = 0x0c;
+		break;
+	
+	case 3:
+		//数据长度
+		txBuffer[3] = 0x08;
+		break;
+	
+	default:
+		return;
+	}
+	
+	//包头
+	txBuffer[0] = FRAME_HEAD_POSITION_0;
+	txBuffer[1] = FRAME_HEAD_POSITION_1;
+    txBuffer[2] = id;
+	
+	//3
+	
+	//数据
+	floatUnion.f = X;
+	txBuffer[4] = floatUnion.bytes[0];
+    txBuffer[5] = floatUnion.bytes[1];
+    txBuffer[6] = floatUnion.bytes[2];
+    txBuffer[7] = floatUnion.bytes[3];
+
+    floatUnion.f = Y;
+    txBuffer[8] = floatUnion.bytes[0];
+    txBuffer[9] = floatUnion.bytes[1];
+    txBuffer[10] = floatUnion.bytes[2];
+    txBuffer[11] = floatUnion.bytes[3];
+
+	switch(id)
+	{
+	case 1:
+		//CRC
+		txBuffer[12] = 0;
+		txBuffer[13] = 0;
+		//包尾
+		txBuffer[14] = FRAME_TAIL_POSITION_0;
+		txBuffer[15] = FRAME_TAIL_POSITION_1;
+	
+		HAL_UART_Transmit(&huart3, txBuffer, 16, HAL_MAX_DELAY);	
+		return;
+	
+	case 2:
+		floatUnion.f = Yaw;
+		txBuffer[12] = floatUnion.bytes[0];
+		txBuffer[13] = floatUnion.bytes[1];
+		txBuffer[14] = floatUnion.bytes[2];
+		txBuffer[15] = floatUnion.bytes[3];
+		
+		//CRC
+		txBuffer[16] = 0;
+		txBuffer[17] = 0;
+		//包尾
+		txBuffer[18] = FRAME_TAIL_POSITION_0;
+		txBuffer[19] = FRAME_TAIL_POSITION_1;
+	
+		HAL_UART_Transmit(&huart3, txBuffer, 20, HAL_MAX_DELAY);	
+		return;
+	
+	case 3:
+		//CRC
+		txBuffer[12] = 0;
+		txBuffer[13] = 0;
+		//包尾
+		txBuffer[14] = FRAME_TAIL_POSITION_0;
+		txBuffer[15] = FRAME_TAIL_POSITION_1;
+	
+		HAL_UART_Transmit(&huart3, txBuffer, 16, HAL_MAX_DELAY);	
+		return;
+	
+	default:
+		return;
+	}
+}
 
 
 

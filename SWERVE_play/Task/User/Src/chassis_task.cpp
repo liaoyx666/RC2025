@@ -14,6 +14,7 @@
 #include "shoot.h"
 #include "reposition.h"
 #include "ws2812.h"
+#include "BusServo.h"
 
 
 Omni_Chassis chassis(0.152/2.f, 0.442f/2.f, 4, 3.f); //底盘直径0.442m，轮子半径0.152m，底盘加速度0.5m/s^2
@@ -21,6 +22,7 @@ Launcher launch(1450.f, 455.f, 2045.f);
 bool shoot_ready = false;
 CONTROL_T ctrl;
 uint8_t pitch_level = 0;
+BusServo servo1(&huart1,GPIOA, GPIO_PIN_9,1), servo2(&huart1,GPIOA, GPIO_PIN_9,2);
 
 RePosition reposition;
 
@@ -42,6 +44,11 @@ float sp = 0;
 
 void Chassis_Task(void *pvParameters)
 {
+	servo1.load();
+	servo2.load();
+	
+	servo1.moveToAngle(0,100);
+	servo2.moveToAngle(0,100);
     for(;;)
     {
 		//a3 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3);
@@ -50,11 +57,18 @@ void Chassis_Task(void *pvParameters)
         if(xQueueReceive(Chassia_Port, &ctrl, 1) == pdPASS)
         {	
 			
-			
-			if (ctrl.mode_ctrl == MODE_DRIBBLE || ctrl.mode_ctrl == MODE_DEFEND)
+			if (ctrl.mode_ctrl == MODE_DRIBBLE || ctrl.mode_ctrl == MODE_DEFEND || ctrl.mode_ctrl == MODE_REPOSITION)
 			{
 				spin_state = false;
-				pitch_angle = 600;
+				if (ctrl.mode_ctrl == MODE_DRIBBLE)
+				{
+					pitch_angle = 600;
+				}
+				else
+				{
+					pitch_angle = 0;
+				}
+				
 				Dribble_Ball(ctrl.cylinder_ctrl);//运球
 			}
 			

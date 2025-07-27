@@ -88,7 +88,7 @@ double filter_and_calculate_mean(double *input, uint8_t n, double threshold)
 
 ///////////////////////////////////////////////////////////////////////
 
-#define GET_TIME_1 1000000 //稳定持续时间
+#define GET_TIME_1 1100000 //稳定持续时间
 #define GET_TIME_MAX 1600000 //最大等待时间
 /**
   * @brief 让机器人稳定
@@ -97,7 +97,7 @@ double filter_and_calculate_mean(double *input, uint8_t n, double threshold)
   * @retval 0 失败；1 成功；2 等待
   */
 uint8_t RePosition::StabilzeRobot(CONTROL_T *ctrl, Ws2812b_SIGNAL_T *signal)
-{ 
+{
 	static uint8_t flag = 0;
 	static uint32_t time;
 	static uint32_t start_time = Get_SystemTimer();
@@ -144,7 +144,7 @@ uint8_t RePosition::StabilzeRobot(CONTROL_T *ctrl, Ws2812b_SIGNAL_T *signal)
 	if (current_time - start_time > GET_TIME_MAX)
 	{
 		flag = 0;
-		WS2812B_Send_FAIL();////
+		WS2812B_Send_FAIL();////稳定失败
 		return 0;
 	}
 	
@@ -159,9 +159,9 @@ bool RePosition::GetLaserData(uint32_t* x, uint32_t* y1, uint32_t* y2)
     if (y1 != NULL) *y1 = LaserModuleDataGroup.LaserModule2.MeasurementData.Distance;
     if (y2 != NULL) *y2 = LaserModuleDataGroup.LaserModule3.MeasurementData.Distance;
 	
-	if (*x == 0 || *y1 == 0 || *y2 == 0)
+	if (*x < 100 || *y1 < 100 || *y2 < 100)
 	{
-		return false;
+		return false;//激光被遮挡
 	}
 	else
 	{
@@ -264,7 +264,10 @@ bool RePosition::CalcOffset(double *offset_x, double *offset_y)
 	yaw_error = RealPosData.world_yaw;
 	
 	//
-	if ((laser_x - position_x) * (laser_x - position_x) + (laser_y - position_y) * (laser_y - position_y) > 5 * 5) return false;
+	//if (fabs(laser_x) > 8 || fabs(laser_y) > 8 || fabs(laser_x) < 0.15 || fabs(laser_y) < 0.15) return false;
+	
+	//激光与position差距过大
+	if ((laser_x - position_x) * (laser_x - position_x) + (laser_y - position_y) * (laser_y - position_y) > 10 * 10) return false;
 	
 	//防止锁yaw不准
 	if (fabsf(RealPosData.world_yaw) > 0.5) return false;
@@ -275,6 +278,8 @@ bool RePosition::CalcOffset(double *offset_x, double *offset_y)
 	//计算纠正后的position坐标
 	CaliPositionData(position_x, position_y, &position_x, &position_y, RawPosData.sin_yaw_offset, RawPosData.cos_yaw_offset);
 	
+	
+	
 	if (is_nan(laser_x) || is_nan(laser_y) || is_nan(position_x) || is_nan(position_y))
 	{
 		return false;
@@ -283,7 +288,6 @@ bool RePosition::CalcOffset(double *offset_x, double *offset_y)
 	//计算偏差
 	*offset_x = position_x - laser_x;
 	*offset_y = position_y - laser_y;
-	
 	
 	if (*offset_x * *offset_x + *offset_y * *offset_y > 5 * 5)
 	{
@@ -316,7 +320,6 @@ bool RePosition::ApplyOffset(void)
 }
 
 
-
 //采样时间间隔
 #define SAMPLE_TIME 15000
 
@@ -324,7 +327,6 @@ bool RePosition::ApplyOffset(void)
 void RePosition::LaserRePosition(CONTROL_T *ctrl, Ws2812b_SIGNAL_T *signal)
 {
 	static uint8_t flag = 0;
-	
 	static uint8_t yaw_total_num = 0;
 	static uint8_t offset_total_num = 0;
 	static uint32_t start_time = Get_SystemTimer();
@@ -362,12 +364,11 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl, Ws2812b_SIGNAL_T *signal)
 				ctrl->twist.linear.x = 0;
 				ctrl->twist.linear.y = 0;
 				
-				//太远yaw不准
-				if (fabs(y) > 1.0) 
+				
+				if (fabs(y) > 1.5) 
 				{
 					flag = 0;
-					WS2812B_Send_FAIL();////
-					
+					WS2812B_Send_FAIL();//////太远yaw不准
 				}
 				else
 				{
@@ -386,10 +387,7 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl, Ws2812b_SIGNAL_T *signal)
 					}
 				}
 			}
-			
 			//////////////////////////////////////////////////////////////////////////////////////////////
-			
-			
 			//计算yaw偏移
 			if (flag == 2)
 			{
@@ -411,6 +409,8 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl, Ws2812b_SIGNAL_T *signal)
 					if ((yaw_total_num == 0) || (current_time - start_time > SAMPLE_TIME))
 					{
 						start_time = current_time;
+						
+						
 						if (fabs(error) < 8.0)
 						{
 							yaw_rror[yaw_total_num] = error;
@@ -418,7 +418,7 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl, Ws2812b_SIGNAL_T *signal)
 						}
 						else
 						{
-							WS2812B_Send_FAIL();////
+							WS2812B_Send_FAIL();//////误差过大
 						}
 					}
 				}
@@ -442,12 +442,12 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl, Ws2812b_SIGNAL_T *signal)
 				if(ApplyYawError())
 				{
 					flag = 4;
-					WS2812B_Send_SUCCESS();////
+					WS2812B_Send_SUCCESS();////校准yaw成功
 				}
 				else
 				{
 					flag = 0;
-					WS2812B_Send_FAIL();////
+					WS2812B_Send_FAIL();////校准yaw失败
 				}
 			}
 			
@@ -470,7 +470,6 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl, Ws2812b_SIGNAL_T *signal)
 				}
 			}
 			////////////////////////////////////////////////////////////////////////////////////////
-			
 			//计算XY偏移
 			if (flag == 5)
 			{
@@ -504,7 +503,7 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl, Ws2812b_SIGNAL_T *signal)
 						}
 						else
 						{
-							WS2812B_Send_FAIL();////
+							WS2812B_Send_FAIL();//////计算offset失败
 						}
 					}
 				}
@@ -555,7 +554,6 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl, Ws2812b_SIGNAL_T *signal)
 					flag = 7;
 				}
 			}
-			
 			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			//测试校准结果
 			if (flag == 8)
@@ -613,8 +611,7 @@ void RePosition::LaserRePosition(CONTROL_T *ctrl, Ws2812b_SIGNAL_T *signal)
 	}
 	
 	
-	
-	if (RealPosData.world_x == 0 && RealPosData.world_y == 0 && RealPosData.world_yaw == 0)
+	if (fabsf(RealPosData.world_x) < 0.01f && fabsf(RealPosData.world_y) < 0.01f && RealPosData.world_yaw == 0)
 	{
 		WS2812B_Send_FAIL();////
 		flag = 0;//退出校准

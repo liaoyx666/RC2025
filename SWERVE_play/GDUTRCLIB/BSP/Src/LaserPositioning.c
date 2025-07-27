@@ -142,7 +142,6 @@ void LaserPositioning(float Yaw, WorldXYCoordinatesTypedef* WorldXYCoordinatesPo
 {
 	uint8_t LaserModuleGroupState = 0;	// 激光测距模块状态变量
 
-
 	LaserModuleGroupState = 0;	// 激光测距模块状态重置
 	LaserModuleDataGroup.LaserModule1.MeasurementData.State = 0;	// 激光测距模块1状态重置
 	LaserModuleDataGroup.LaserModule2.MeasurementData.State = 0;	// 激光测距模块2状态重置
@@ -194,14 +193,11 @@ void LaserModuleGroup_Init(void)
 	//LaserModuleGroupState |= LaserModule_TurnOnTheLaserPointer(&LaserModuleDataGroup.LaserModule1);	// 打开激光测距模块1的激光器
 	//LaserModuleGroupState |= LaserModule_TurnOnTheLaserPointer(&LaserModuleDataGroup.LaserModule2);	// 打开激光测距模块2的激光器
 
-	//taskENTER_CRITICAL();
 
-	HAL_Delay(1000);
 	LaserModuleGroupState |= LaserModule_StateContinuousAutomaticMeasurement(&LaserModuleDataGroup.LaserModule3);	// 激光测距模块3连续自动测量状态设置
 	LaserModuleGroupState |= LaserModule_StateContinuousAutomaticMeasurement(&LaserModuleDataGroup.LaserModule2);	// 激光测距模块2连续自动测量状态设置
 	LaserModuleGroupState |= LaserModule_StateContinuousAutomaticMeasurement(&LaserModuleDataGroup.LaserModule1);	// 激光测距模块1连续自动测量状态设置
 
-	//taskEXIT_CRITICAL();
 
 }
 
