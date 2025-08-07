@@ -14,7 +14,7 @@
 #include "shoot.h"
 #include "path_tracing.h"
 
-Omni_Chassis chassis(0.152/2.f, 0.442f/2.f, 4, 2.5f); //底盘直径0.442m，轮子半径0.152m，底盘加速度0.5m/s^2
+Omni_Chassis chassis(0.152/2.f, 0.442f/2.f, 4, 3.5f); //底盘直径0.442m，轮子半径0.152m，底盘加速度0.5m/s^2
 Launcher launch(1450.f, 455.f, 2045.f);
 
 Path_Tracing path_tracing;
@@ -51,6 +51,7 @@ void Chassis_Task(void *pvParameters)
 			//distance -= 0.33;
 			
 			Dribble_Ball(ctrl.cylinder_ctrl);//运球
+			
 			//launch.PushBall(ctrl.shoot_ctrl);//推球
 			
 			///////////////////////////////////////////////////	
@@ -207,14 +208,14 @@ void Chassis_Task(void *pvParameters)
 			{
 				target_angle = 0;
 			}
-			else if(target_angle > 1450)
+			else if(target_angle > 750)
 			{
-				target_angle = 1450;
+				target_angle = 750;
 			}
 			else
 			{}
 			
-			target_angle = 600;
+			target_angle = 0;
 			spin_state = false;
 			
 			chassis.Control(ctrl.twist);	
@@ -234,31 +235,31 @@ void Chassis_Task(void *pvParameters)
 
 void PidParamInit(void)
 {   
-    chassis.Pid_Param_Init(0, 12.0f, 0.015f, 0.0f, 16384.0f, 16384.0f, 10); 
-    chassis.Pid_Param_Init(1, 12.0f, 0.015f, 0.0f, 16384.0f, 16384.0f, 10); 
-    chassis.Pid_Param_Init(2, 12.0f, 0.015f, 0.0f, 16384.0f, 16384.0f, 10); 
-	chassis.Pid_Param_Init(3, 12.0f, 0.015f, 0.0f, 16384.0f, 16384.0f, 10); 
+    chassis.Pid_Param_Init(0, 12.0f, 0.0f, 0.0f, 16384.0f, 16384.0f, 10); 
+    chassis.Pid_Param_Init(1, 12.0f, 0.0f, 0.0f, 16384.0f, 16384.0f, 10); 
+    chassis.Pid_Param_Init(2, 12.0f, 0.0f, 0.0f, 16384.0f, 16384.0f, 10); 
+	chassis.Pid_Param_Init(3, 12.0f, 0.0f, 0.0f, 16384.0f, 16384.0f, 10); 
 	
     chassis.Pid_Mode_Init(0, 0.1f, 0.0f, false, true);
     chassis.Pid_Mode_Init(1, 0.1f, 0.0f, false, true);
     chassis.Pid_Mode_Init(2, 0.1f, 0.0f, false, true);
 	chassis.Pid_Mode_Init(3, 0.1f, 0.0f, false, true);
 	 
-    launch.Pid_Param_Init(0,12.0f, 0.015f, 0.0f, 16384.0f, /*16384.0f*/6000.f, 0);
+    launch.Pid_Param_Init(0,12.0f, 0.0f, 0.0f, 6000.0f, /*16384.0f*/6000.f, 0);
     launch.Pid_Mode_Init(0,0.1f, 0.0f, false, true);
 
-    launch.Pid_Param_Init(1,12.0f, 0.015f, 0.0f, 16384.0f, /*16384.0f*/6000.f, 0);
+    launch.Pid_Param_Init(1,12.0f, 0.0f, 0.0f, 6000.0f, /*16384.0f*/6000.f, 0);
     launch.Pid_Mode_Init(1,0.1f, 0.0f, false, true);
 	
 	
-	launch.Pid_Param_Init(2,2.4f, 0.015f, 0.0f, 16384.0f, /*16384.0f*/5000.f, 0);
+	launch.Pid_Param_Init(2,2.4f, 0.0f, 0.0f, 6000.0f, /*16384.0f*/5000.f, 0);
     launch.Pid_Mode_Init(2,0.1f, 0.0f, false, true);
 	
 	path_tracing.Pid_Mode_Init_Path(2, 0, 0, false, false);
-	path_tracing.Pid_Param_Init_Path(2, 2.5f, 0.0f, 0.0f, 3.2f, 3.2f, 0.0f);
+	path_tracing.Pid_Param_Init_Path(2, 2.5f, 0.0f, 0.0f, 4.f, 4.f, 0.0f);
 	
 	path_tracing.Pid_Mode_Init_Path(1, 0, 0, false, false);//normal
-	path_tracing.Pid_Param_Init_Path(1, 2.5f, 0.0f, 0.0f, 2.f, 2.f, 0.0f);
+	path_tracing.Pid_Param_Init_Path(1, 2.5f, 0.0f, 0.0f, 4.f, 4.f, 0.0f);
 
 	
 	chassis.Pid_Param_Init_Yaw(0.13f, 0.0f, 0.0f, 2.0f, 2.5f, 30.0f);

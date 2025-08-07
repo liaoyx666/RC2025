@@ -22,8 +22,8 @@ RealPos RealPosData = {0};
 
 union
 {
-	uint8_t data[20];
-	float ActVal[5];
+	uint8_t data[24];
+	float ActVal[6];
 } posture;
 
 uint32_t Position_UART3_RxCallback(uint8_t *buf, uint16_t len)
@@ -85,7 +85,7 @@ uint32_t Position_UART3_RxCallback(uint8_t *buf, uint16_t len)
 			
 			case 3:
 			{
-				if (buf[i] == 0x14) 
+				if (buf[i] == 0x18) 
 				{
 					count++;
 				}
@@ -104,12 +104,12 @@ uint32_t Position_UART3_RxCallback(uint8_t *buf, uint16_t len)
 				uint8_t j;
 				
 				
-				if (i > len - 24)
+				if (i > len - 28)
 				{
 					break_flag = 0;
 				}
 				
-				for(j = 0; j < 20; j++)
+				for(j = 0; j < 24; j++)
 				{
 					posture.data[j] = buf[i];
 					i++;
@@ -180,11 +180,12 @@ void Update_RawPosition(float value[5])
 //	RawPosData.LAST_Pos_Y = RawPosData.Pos_Y;
 
 	//处理数据
-	RawPosData.Pos_X = value[0] / 1000.f; 
-	RawPosData.Pos_Y = value[1] / 1000.f; 
+	RawPosData.Pos_X = -value[0] / 1000.f; 
+	RawPosData.Pos_Y = -value[1] / 1000.f; 
 	RawPosData.angle_Z = value[2];
-	RawPosData.Speed_X = value[3] / 1000.f;
-	RawPosData.Speed_Y = value[4] / 1000.f;
+	//RawPosData.yaw_speed  = value[3];
+	RawPosData.Speed_X = value[4];
+	RawPosData.Speed_Y = value[5];
 
 //   //差分运算
 //	RawPosData.DELTA_Pos_X = RawPosData.Pos_X - RawPosData.LAST_Pos_X;

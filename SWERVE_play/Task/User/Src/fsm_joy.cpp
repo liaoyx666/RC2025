@@ -129,11 +129,16 @@ void Air_Joy_Task(void *pvParameters)
 							}
 						}
 					}
-					else
+					else//手动运球
 					{
 						ctrl.move_ctrl = MOVE_HAND;
-					
-					
+						ctrl.spin_ctrl = SPIN_OUTSIDE;//旋转到外侧
+						
+						if (_tool_Abs(last_SWD - air_joy.SWD) > 800)//SWD按键值改变，运球一次
+						{
+							last_SWD = air_joy.SWD;//更新按键值
+							ctrl.cylinder_ctrl = CYLINDER_DRIBBLE;
+						}
 					
 					
 					
@@ -229,7 +234,7 @@ void Air_Joy_Task(void *pvParameters)
 			ctrl.shoot_ctrl = SHOOT_OFF;
 			ctrl.path_ctrl = PATH_OFF;
 			
-			if (_tool_Abs(air_joy.SWC - 1000) < 50)
+			if (_tool_Abs(air_joy.SWC - 1000) < 50 || _tool_Abs(air_joy.SWC - 2000) < 50)
 			{
 				ctrl.cylinder_ctrl = CYLINDER_KEEP;
 			}
